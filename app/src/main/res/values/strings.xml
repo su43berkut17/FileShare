@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">FileShare</string>
+
+    <!-- Activity Welcome Screen -->
+    <string name="aws_pick_avatar">Pick an avatar:</string>
+    <string name="aws_username">Username:</string>
+    <string name="aws_input_username"></string>
+    <string name="aws_input_username_hint">Type a username</string>
+    <string name="aws_button_go">Go</string>
 </resources>
