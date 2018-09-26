@@ -1,5 +1,6 @@
 package com.yumesoftworks.fileshare.data;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
@@ -13,7 +14,7 @@ import java.util.List;
 public interface UserInfoDao {
 
     @Query("SELECT * FROM userInfo ORDER BY priority")
-    List<UserInfoEntry> loadAllTasks();
+    LiveData<List<UserInfoEntry>> loadUserInfo();
 
     @Insert
     void insertTask(UserInfoEntry userInfoEntry);
