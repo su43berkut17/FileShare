@@ -12,8 +12,7 @@ import java.util.List;
 
 @Dao
 public interface UserInfoDao {
-
-    @Query("SELECT * FROM userInfo ORDER BY priority")
+    @Query("SELECT * FROM userInfo" + " ORDER BY id")
     LiveData<List<UserInfoEntry>> loadUserInfo();
 
     @Insert
