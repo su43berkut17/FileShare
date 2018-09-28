@@ -7,4 +7,10 @@
     <string name="aws_input_username"></string>
     <string name="aws_input_username_hint">Type a username</string>
     <string name="aws_button_go">Go</string>
+
+    <!-- Activity Main menu -->
+    <string name="mm_send">Send Files</string>
+    <string name="mm_receive">Receive Files</string>
+    <string name="mm_send_des">Send Files</string>
+    <string name="mm_receive_des">Receive Files</string>
 </resources>
