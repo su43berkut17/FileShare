@@ -12,18 +12,18 @@
 
         <ImageView
             android:id="@+id/iv_item_file"
-            android:contentDescription="@string/fb_icon_description"
             android:layout_width="@dimen/file_icon_size"
             android:layout_height="@dimen/file_icon_size"
             android:layout_marginStart="@dimen/default_padding"
             android:layout_marginTop="@dimen/default_padding"
             android:layout_marginBottom="@dimen/default_padding"
+            android:contentDescription="@string/fb_icon_description"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/tv_item_file_name"
             app:layout_constraintHorizontal_chainStyle="spread"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/image_1" />
+            app:srcCompat="@drawable/avatar_6" />
 
         <TextView
             android:id="@+id/tv_item_file_name"

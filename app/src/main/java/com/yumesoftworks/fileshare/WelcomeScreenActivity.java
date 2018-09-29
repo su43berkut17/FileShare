@@ -9,9 +9,13 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.yumesoftworks.fileshare.data.AppDatabase;
+import com.yumesoftworks.fileshare.data.AvatarAndVersion;
+import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.recyclerAdapters.AvatarAdapter;
+import com.yumesoftworks.fileshare.utils.JsonAvatarParser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAdapter.ItemClickListener {
@@ -22,6 +26,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
     private RecyclerView rvAvatars;
     private AvatarAdapter mAvatarAdapter;
+    private AvatarAndVersion mAvatarAndVersion;
 
     private AppDatabase mDb;
 
@@ -39,9 +44,13 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         rvAvatars.setAdapter(mAvatarAdapter);
 
         //TODO: feed the adapter with the 8 standard icons
+        /*mListAvatars=new ArrayList<>();
+        for (int i=0;i<8;i++){
 
-
-        //we load the remote adapter list and add it is needed
+        }
+        mListAvatars.add();*/
+        JsonAvatarParser parser=new JsonAvatarParser(this);
+        parser.loadData();
 
         mDb=AppDatabase.getInstance(getApplicationContext());
         setupViewModel();

@@ -22,19 +22,19 @@
 
         <ImageView
             android:id="@+id/iv_mm_send"
-            android:contentDescription="@string/mm_send_des"
             android:layout_width="169dp"
             android:layout_height="142dp"
             android:layout_marginStart="@dimen/default_padding"
             android:layout_marginTop="@dimen/default_padding"
             android:layout_marginBottom="@dimen/default_padding"
+            android:contentDescription="@string/mm_send_des"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/tv_mm_send"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintHorizontal_chainStyle="spread"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/image_1" />
+            app:srcCompat="@drawable/avatar_1" />
 
         <TextView
             android:id="@+id/tv_mm_send"
@@ -68,19 +68,19 @@
 
         <ImageView
             android:id="@+id/iv_mm_receive"
-            android:contentDescription="@string/mm_receive_des"
             android:layout_width="169dp"
             android:layout_height="142dp"
             android:layout_marginStart="@dimen/default_padding"
             android:layout_marginTop="@dimen/default_padding"
             android:layout_marginBottom="@dimen/default_padding"
+            android:contentDescription="@string/mm_receive_des"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/tv_mm_receive"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintHorizontal_chainStyle="spread"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/image_1" />
+            app:srcCompat="@drawable/avatar_8" />
 
         <TextView
             android:id="@+id/tv_mm_receive"

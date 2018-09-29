@@ -8,11 +8,9 @@
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         tools:context=".WelcomeScreenActivity">
-
-
 
         <ImageView
             android:id="@+id/image_aws_logo"
@@ -23,7 +21,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@tools:sample/avatars[3]" />
+            tools:srcCompat="@drawable/logo_128" />
 
         <LinearLayout
             android:id="@+id/aws_layout_container"

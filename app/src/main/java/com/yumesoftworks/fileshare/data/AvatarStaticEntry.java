@@ -1,6 +1,9 @@
 package com.yumesoftworks.fileshare.data;
 
 public class AvatarStaticEntry {
+    public static final String TYPE_LOCAL="local";
+    public static final String TYPE_REMOTE="remote";
+
     private int id;
     private String type;
     private String path;
