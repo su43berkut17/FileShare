@@ -3,4 +3,7 @@
     <!-- default values -->
     <dimen name="default_padding">8dp</dimen>
     <dimen name="zero_padding">0dp</dimen>
+
+    <!-- Activity file browser -->
+    <dimen name="file_icon_size">80dp</dimen>
 </resources>

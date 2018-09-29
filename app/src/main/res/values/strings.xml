@@ -13,4 +13,8 @@
     <string name="mm_receive">Receive Files</string>
     <string name="mm_send_des">Send Files</string>
     <string name="mm_receive_des">Receive Files</string>
+
+    <!-- Activity file browser -->
+    <string name="fb_file_name_placeholder">testFile.jpg</string>
+    <string name="fb_icon_description">File icon</string>
 </resources>
