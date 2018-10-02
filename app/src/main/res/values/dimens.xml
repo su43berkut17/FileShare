@@ -6,4 +6,7 @@
 
     <!-- Activity file browser -->
     <dimen name="file_icon_size">80dp</dimen>
+
+    <!-- Activity welcome screen-->
+    <dimen name="avatar_size">60dp</dimen>
 </resources>

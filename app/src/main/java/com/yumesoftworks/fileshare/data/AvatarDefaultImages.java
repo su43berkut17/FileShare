@@ -12,7 +12,7 @@ public class AvatarDefaultImages {
         for (int i=0; i<8;i++){
             String path="avatar_"+Integer.toString(i+1);
 
-            mAvatarList.add(new AvatarStaticEntry(i,AvatarStaticEntry.TYPE_LOCAL,path));
+            mAvatarList.add(new AvatarStaticEntry(i,AvatarStaticEntry.TYPE_LOCAL,path,false));
         }
 
         return mAvatarList;

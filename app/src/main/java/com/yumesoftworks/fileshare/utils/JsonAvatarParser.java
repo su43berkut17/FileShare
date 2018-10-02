@@ -90,6 +90,7 @@ public class JsonAvatarParser {
                    AvatarStaticEntry avatar=new AvatarStaticEntry(j
                            ,AvatarStaticEntry.TYPE_REMOTE
                            ,jsonAvatarsArray.getJSONObject(j).getString("url")
+                           ,false
                     );
                    mAvatarList.add(avatar);
             }

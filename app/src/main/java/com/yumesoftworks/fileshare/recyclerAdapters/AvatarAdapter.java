@@ -3,11 +3,14 @@ package com.yumesoftworks.fileshare.recyclerAdapters;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.squareup.picasso.Picasso;
 import com.yumesoftworks.fileshare.R;
 import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
 
@@ -15,10 +18,12 @@ import java.util.List;
 
 public class AvatarAdapter extends RecyclerView.Adapter<AvatarAdapter.AvatarViewHolder> {
 
+    private static final String TAG="AvatarAdapter";
     final private ItemClickListener mItemCLickListener;
 
     private List<AvatarStaticEntry> mAvatarEntryList;
     private Context mContext;
+    private int mLastSelected =-1;
 
     public AvatarAdapter (Context context, ItemClickListener listener){
         mContext=context;
@@ -45,18 +50,18 @@ public class AvatarAdapter extends RecyclerView.Adapter<AvatarAdapter.AvatarView
         String type=avatarStaticEntry.getType();
 
         //Set values in view
-        //Todo: with picasso load the image in the view or with the drawable value
         if (type==AvatarStaticEntry.TYPE_LOCAL){
-
+            int imageUri = mContext.getResources().getIdentifier(path,"drawable",mContext.getPackageName());
+            Picasso.get().load(imageUri).into(avatarViewHolder.iv_avatar);
         }else{
-
+            Picasso.get().load(path).into(avatarViewHolder.iv_avatar);
         }
 
-        //hide the selected view
-        avatarViewHolder.iv_background_sel.setVisibility(View.INVISIBLE);
+        //set the selected view
+        //avatarViewHolder.iv_avatar.setSelected(avatarStaticEntry.getSelected());
+        avatarViewHolder.iv_background.setSelected(avatarStaticEntry.getSelected());
 
-        //holder.taskDescriptionView.setText(description);
-        //holder.updatedAtView.setText(updatedAt);
+        //avatarViewHolder.iv_background_sel.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -80,7 +85,17 @@ public class AvatarAdapter extends RecyclerView.Adapter<AvatarAdapter.AvatarView
 
     //public method to show the selection
     public void setSelectedAvatar(int selectedId){
-        //todo: we change the background to show it was selected
+        Log.i(TAG,"selected id is "+String.valueOf(selectedId)+" the formed id is "+String.valueOf(mLastSelected));
+
+        if (mLastSelected >=0){
+            //we unselect the former
+            mAvatarEntryList.get(mLastSelected).setSelected(false);
+            notifyItemChanged(mLastSelected);
+        }
+        mAvatarEntryList.get(selectedId).setSelected(true);
+        mLastSelected = selectedId;
+        notifyItemChanged(selectedId);
+        notifyDataSetChanged();
     }
 
     //public method to get the data from the selectedItem
@@ -98,8 +113,8 @@ public class AvatarAdapter extends RecyclerView.Adapter<AvatarAdapter.AvatarView
         //
         //TextView textView;
         ImageView iv_avatar;
-        ImageView iv_background;
-        ImageView iv_background_sel;
+        FrameLayout iv_background;
+        //ImageView iv_background_sel;
 
         public AvatarViewHolder(View itemView){
             super(itemView);
@@ -107,13 +122,13 @@ public class AvatarAdapter extends RecyclerView.Adapter<AvatarAdapter.AvatarView
             //textView=itemView.findViewById(R.id.textView);
             iv_avatar=itemView.findViewById(R.id.iv_avatar_icon);
             iv_background=itemView.findViewById(R.id.iv_avatar_background);
-            iv_background_sel=itemView.findViewById(R.id.iv_avatar_backgroundSel);
+            //iv_background_sel=itemView.findViewById(R.id.iv_avatar_backgroundSel);
             itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
-            mItemCLickListener.onItemClickListener(view.getId());
+            mItemCLickListener.onItemClickListener(getAdapterPosition());
         }
     }
 }

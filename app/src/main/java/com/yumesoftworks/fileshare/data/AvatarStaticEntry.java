@@ -7,11 +7,13 @@ public class AvatarStaticEntry {
     private int id;
     private String type;
     private String path;
+    private boolean selected;
 
-    public AvatarStaticEntry(int id, String type, String path){
+    public AvatarStaticEntry(int id, String type, String path, boolean selected){
         this.id=id;
         this.type=type;
         this.path=path;
+        this.selected=selected;
     }
 
     //getters and setters
@@ -37,5 +39,13 @@ public class AvatarStaticEntry {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public boolean getSelected(){
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 }
