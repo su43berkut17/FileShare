@@ -22,7 +22,13 @@ public class JsonAvatarParser {
     private Context context;
     private static final String TAG="JsonAvatarParser";
 
+    //interface
+    private OnLoadedAvatars mOnLoadedAvatars;
+
     public JsonAvatarParser(Context contextSent){
+        //initialize the interface
+        mOnLoadedAvatars=(OnLoadedAvatars) contextSent;
+
         context=contextSent;
         loadData();
     }
@@ -60,7 +66,8 @@ public class JsonAvatarParser {
             protected void onPostExecute(AvatarAndVersion avatarAndVersion) {
                 super.onPostExecute(avatarAndVersion);
 
-                //Todo: return via the interface
+                //return the results via the interface
+                mOnLoadedAvatars.LoadedRemoteAvatars(avatarAndVersion);
             }
         }.execute();
     }
@@ -101,5 +108,10 @@ public class JsonAvatarParser {
             e.printStackTrace();
             return null;
         }
+    }
+
+    //interface to main activity
+    public interface OnLoadedAvatars {
+        void LoadedRemoteAvatars(AvatarAndVersion retAvatarAndVersion);
     }
 }

@@ -7,9 +7,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.Button;
 
 import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.AvatarAndVersion;
+import com.yumesoftworks.fileshare.data.AvatarDefaultImages;
 import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.recyclerAdapters.AvatarAdapter;
@@ -18,16 +20,20 @@ import com.yumesoftworks.fileshare.utils.JsonAvatarParser;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAdapter.ItemClickListener {
+public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAdapter.ItemClickListener, JsonAvatarParser.OnLoadedAvatars {
     private static final String TAG=WelcomeScreenActivity.class.getSimpleName();
 
     //this member variable will let us know if this activity is opened as settings or the first time
     private boolean mIsThisSettings;
+    private int mSelectedAvatar;
 
+    //recycler view
     private RecyclerView rvAvatars;
     private AvatarAdapter mAvatarAdapter;
-    private AvatarAndVersion mAvatarAndVersion;
 
+    private Button buttonGo;
+
+    //database
     private AppDatabase mDb;
 
     @Override
@@ -43,14 +49,15 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         mAvatarAdapter=new AvatarAdapter(this,this);
         rvAvatars.setAdapter(mAvatarAdapter);
 
-        //TODO: feed the adapter with the 8 standard icons
-        /*mListAvatars=new ArrayList<>();
-        for (int i=0;i<8;i++){
+        //add the 8 standard avatars in the adapter
+        mAvatarAdapter.setAvatar(AvatarDefaultImages.getDefaultImages());
 
-        }
-        mListAvatars.add();*/
+        //load the remote avatars, we will use an interface once the avatars have loaded
         JsonAvatarParser parser=new JsonAvatarParser(this);
         parser.loadData();
+
+        //set the listener in the button
+        buttonGo=(Button)findViewById(R.id.button_go);
 
         mDb=AppDatabase.getInstance(getApplicationContext());
         setupViewModel();
@@ -71,6 +78,17 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     //listener of click in each avatar
     @Override
     public void onItemClickListener(int itemId) {
-        //TODO: highlight the selected icon
+        mSelectedAvatar=itemId;
+        mAvatarAdapter.setSelectedAvatar(itemId);
+    }
+
+    @Override
+    public void LoadedRemoteAvatars(AvatarAndVersion retAvatarAndVersion) {
+        //if it is not null we load the new views, otherwise we don't do anything
+        if (retAvatarAndVersion!=null){
+            List<AvatarStaticEntry> receivedAvatars=retAvatarAndVersion.getAvatarList();
+            receivedAvatars.addAll(AvatarDefaultImages.getDefaultImages());
+            mAvatarAdapter.setAvatar(receivedAvatars);
+        }
     }
 }

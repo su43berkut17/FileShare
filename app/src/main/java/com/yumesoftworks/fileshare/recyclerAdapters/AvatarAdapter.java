@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.yumesoftworks.fileshare.R;
 import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
@@ -39,12 +40,21 @@ public class AvatarAdapter extends RecyclerView.Adapter<AvatarAdapter.AvatarView
         // Determine the values of the wanted data
         AvatarStaticEntry avatarStaticEntry = mAvatarEntryList.get(i);
 
-        int id=avatarStaticEntry.getId();
+        //int id=avatarStaticEntry.getId();
         String path=avatarStaticEntry.getPath();
         String type=avatarStaticEntry.getType();
 
         //Set values in view
         //Todo: with picasso load the image in the view or with the drawable value
+        if (type==AvatarStaticEntry.TYPE_LOCAL){
+
+        }else{
+
+        }
+
+        //hide the selected view
+        avatarViewHolder.iv_background_sel.setVisibility(View.INVISIBLE);
+
         //holder.taskDescriptionView.setText(description);
         //holder.updatedAtView.setText(updatedAt);
     }
@@ -68,6 +78,16 @@ public class AvatarAdapter extends RecyclerView.Adapter<AvatarAdapter.AvatarView
         notifyDataSetChanged();
     }
 
+    //public method to show the selection
+    public void setSelectedAvatar(int selectedId){
+        //todo: we change the background to show it was selected
+    }
+
+    //public method to get the data from the selectedItem
+    public AvatarStaticEntry getSelected(int selId){
+        return mAvatarEntryList.get(selId);
+    }
+
     //interface
     public interface ItemClickListener{
         void onItemClickListener(int itemId);
@@ -77,17 +97,23 @@ public class AvatarAdapter extends RecyclerView.Adapter<AvatarAdapter.AvatarView
     class AvatarViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         //
         //TextView textView;
+        ImageView iv_avatar;
+        ImageView iv_background;
+        ImageView iv_background_sel;
 
         public AvatarViewHolder(View itemView){
             super(itemView);
 
             //textView=itemView.findViewById(R.id.textView);
+            iv_avatar=itemView.findViewById(R.id.iv_avatar_icon);
+            iv_background=itemView.findViewById(R.id.iv_avatar_background);
+            iv_background_sel=itemView.findViewById(R.id.iv_avatar_backgroundSel);
             itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
-            ///int elementId=
+            mItemCLickListener.onItemClickListener(view.getId());
         }
     }
 }
