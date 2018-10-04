@@ -14,15 +14,20 @@ public class WelcomeScreenViewModel extends AndroidViewModel {
     private static final String TAG=WelcomeScreenViewModel.class.getSimpleName();
 
     private LiveData<List<UserInfoEntry>> userInfo;
+    private AppDatabase database;
 
     public WelcomeScreenViewModel(Application application){
         super(application);
-        AppDatabase database=AppDatabase.getInstance(this.getApplication());
+        database=AppDatabase.getInstance(this.getApplication());
         Log.d(TAG,"retrieving tasks from view model");
         userInfo=database.userInfoDao().loadUserInfo();
     }
 
     public LiveData<List<UserInfoEntry>> getUserInfo(){
         return userInfo;
+    }
+
+    public void saveData(UserInfoEntry userInfoEntry){
+        database.userInfoDao().insertTask(userInfoEntry);
     }
 }
