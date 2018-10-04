@@ -7,6 +7,14 @@
     <string name="aws_input_username"></string>
     <string name="aws_input_username_hint">Type a username</string>
     <string name="aws_button_go">Go</string>
+    <string name="aws_button_cancel">Cancel</string>
+    <string name="aws_button_save">Save Changes</string>
+    <string name="aws_username_digits">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789</string>
+
+    <!-- Dialog Activity Welcome Screen -->
+    <string name="aws_dialog_title">Warning!</string>
+    <string name="aws_dialog_username">Please type a valid username</string>
+    <string name="aws_dialog_avatar">Please pick an avatar</string>
 
     <!-- Activity Main menu -->
     <string name="mm_send">Send Files</string>

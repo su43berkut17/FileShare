@@ -69,21 +69,39 @@
                 android:ems="10"
                 android:hint="@string/aws_input_username_hint"
                 android:inputType="text"
+                android:digits="@string/aws_username_digits"
                 android:text="@string/aws_input_username" />
-
         </LinearLayout>
 
-        <Button
-            android:id="@+id/button_go"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:text="@string/aws_button_go"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/default_padding"
+            android:layout_marginTop="@dimen/default_padding"
+            android:layout_marginEnd="@dimen/default_padding"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/aws_layout_container" />
+            app:layout_constraintTop_toBottomOf="@+id/aws_layout_container">
+
+            <Button
+                android:id="@+id/button_go"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/default_padding"
+                android:text="@string/aws_button_go"
+                android:contentDescription="@string/aws_button_go"
+                android:layout_gravity="center_horizontal"/>
+            <Button
+                android:id="@+id/button_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/default_padding"
+                android:text="@string/aws_button_cancel"
+                android:contentDescription="@string/aws_button_cancel"
+                android:layout_gravity="center_horizontal"/>
+        </LinearLayout>
 
     </android.support.constraint.ConstraintLayout>
 </ScrollView>
