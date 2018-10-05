@@ -13,19 +13,19 @@ public class UserInfoEntry {
     @PrimaryKey (autoGenerate = true)
     private int id;
     private String username;
-    private String pickedAvatar;
+    private int pickedAvatar;
     private int numberFilesTransferred;
     private int assetVersion;
 
     @Ignore
-    public UserInfoEntry(String username, String pickedAvatar, int numberFilesTransferred, int assetVersion){
+    public UserInfoEntry(String username, int pickedAvatar, int numberFilesTransferred, int assetVersion){
         this.username=username;
         this.pickedAvatar=pickedAvatar;
         this.numberFilesTransferred=numberFilesTransferred;
         this.assetVersion=assetVersion;
     }
 
-    public UserInfoEntry(int id,String username, String pickedAvatar, int numberFilesTransferred,int assetVersion){
+    public UserInfoEntry(int id, String username, int pickedAvatar, int numberFilesTransferred, int assetVersion){
         this.id=id;
         this.username=username;
         this.pickedAvatar=pickedAvatar;
@@ -48,10 +48,10 @@ public class UserInfoEntry {
         this.username = username;
     }
 
-    public String getPickedAvatar() {
+    public int getPickedAvatar() {
         return pickedAvatar;
     }
-    public void setPickedAvatar(String pickedAvatar) {
+    public void setPickedAvatar(int pickedAvatar) {
         this.pickedAvatar = pickedAvatar;
     }
 

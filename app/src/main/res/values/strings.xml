@@ -1,13 +1,16 @@
 <resources>
     <string name="app_name">FileShare</string>
 
+    <!-- General purpose -->
+    <string name="gen_button_ok">OK</string>
+    <string name="gen_button_cancel">Cancel</string>
+
     <!-- Activity Welcome Screen -->
     <string name="aws_pick_avatar">Pick an avatar:</string>
     <string name="aws_username">Username:</string>
     <string name="aws_input_username"></string>
     <string name="aws_input_username_hint">Type a username</string>
     <string name="aws_button_go">Go</string>
-    <string name="aws_button_cancel">Cancel</string>
     <string name="aws_button_save">Save Changes</string>
     <string name="aws_username_digits">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789</string>
 

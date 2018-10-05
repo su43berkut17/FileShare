@@ -22,17 +22,20 @@ import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.recyclerAdapters.AvatarAdapter;
 import com.yumesoftworks.fileshare.utils.JsonAvatarParser;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAdapter.ItemClickListener,
         JsonAvatarParser.OnLoadedAvatars,
         View.OnClickListener{
+
     private static final String TAG=WelcomeScreenActivity.class.getSimpleName();
+    private static final String NAME_ROTATION_AVATAR_STATE="savedAvatarId";
 
     //this member variable will let us know if this activity is opened as settings or the first time
     private boolean mIsThisSettings;
     private int mSelectedAvatar=-1;
+    private int mFilesTransferred=-1;
+    private int mVersion=-1;
 
     //recycler view
     private RecyclerView rvAvatars;
@@ -45,15 +48,23 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
     //database
     private AppDatabase mDb;
+    private WelcomeScreenViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome_screen);
 
-        //is this settings
-        Intent intent = getIntent();
-        mIsThisSettings = intent.getBooleanExtra("isThisSettings",false);
+        //rotation values
+        if (savedInstanceState==null){
+            //we load the avatar value from the intent or default value if the intent does not exist
+            //is this settings
+            Intent intent = getIntent();
+            mIsThisSettings = intent.getBooleanExtra("isThisSettings",false);
+        }else{
+            //we load it from the previous state
+            mSelectedAvatar=savedInstanceState.getInt(NAME_ROTATION_AVATAR_STATE);
+        }
 
         //initialize rv
         rvAvatars=findViewById(R.id.rv_aws_avatars);
@@ -88,13 +99,20 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        //we save the data to restore on rotation
+        outState.putInt(NAME_ROTATION_AVATAR_STATE,mSelectedAvatar);
+    }
+
     //view model
     private void setupViewModel(){
-        WelcomeScreenViewModel viewModel=ViewModelProviders.of(this).get(WelcomeScreenViewModel.class);
+        viewModel=ViewModelProviders.of(this).get(WelcomeScreenViewModel.class);
         viewModel.getUserInfo().observe(this, new Observer<List<UserInfoEntry>>() {
             @Override
             public void onChanged(@Nullable List<UserInfoEntry> userInfoEntries) {
-                //TODO: if there is data in the database we show it in the textviews and in the adapter if it is empty then we dont do anything
                 if (userInfoEntries.isEmpty()){
                     //we hide the cancel button
                     buttonCancel.setVisibility(View.GONE);
@@ -104,7 +122,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                         //this is settings so we feed the saved information to the UI
                         mAvatarAdapter.setSelectedAvatar(userInfoEntries.get(0).getId());
 
-                        //we change the cancel button text to save changes
+                        //we change the go button text to save changes
                         buttonGo.setText(R.string.aws_button_save);
                     }else{
                         //we open the main activity
@@ -137,7 +155,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                         alertDialogBuilder.setMessage(R.string.aws_dialog_username);
                     }
                     alertDialogBuilder.setTitle(R.string.aws_dialog_title);
-                    alertDialogBuilder.setPositiveButton("tok", new DialogInterface.OnClickListener() {
+                    alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
@@ -149,11 +167,11 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                 }else{
                     //we save the data and open the activity
                     //find a better way to save the data from the avatars
-                    //UserInfoEntry dataToSave=new UserInfoEntry(tvUsername.getText().toString(),"",0,1);
+                    UserInfoEntry dataToSave=new UserInfoEntry(tvUsername.getText().toString(),mSelectedAvatar,mFilesTransferred,mVersion);
 
                     //int id,String username, String pickedAvatar, int numberFilesTransferred,int assetVersion
                     //WelcomeScreenViewModel viewModel=ViewModelProviders.of(this).get(WelcomeScreenViewModel.class);
-                    //viewModel.saveData(dataToSave);
+                    viewModel.saveData(dataToSave);
 
                     //go to main activity
                     goMainActivity();
@@ -161,8 +179,8 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                 break;
 
             case R.id.button_cancel:
-                //return to activity
-
+                //return to former activity
+                super.onBackPressed();
                 break;
         }
     }
@@ -177,11 +195,16 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     @Override
     public void LoadedRemoteAvatars(AvatarAndVersion retAvatarAndVersion) {
         //if it is not null we load the new views, otherwise we don't do anything
-        if (retAvatarAndVersion!=null){
-            List<AvatarStaticEntry> receivedAvatars=AvatarDefaultImages.getDefaultImages();
+        if (retAvatarAndVersion!=null) {
+            List<AvatarStaticEntry> receivedAvatars = AvatarDefaultImages.getDefaultImages();
             receivedAvatars.addAll(retAvatarAndVersion.getAvatarList());
 
             mAvatarAdapter.setAvatar(receivedAvatars);
+        }
+
+        //set the selected avatar if it exists
+        if (mSelectedAvatar!=-1){
+            mAvatarAdapter.setSelectedAvatar(mSelectedAvatar);
         }
     }
 }
