@@ -3,6 +3,7 @@ package com.yumesoftworks.fileshare;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.yumesoftworks.fileshare.data.AppDatabase;
@@ -28,6 +29,22 @@ public class WelcomeScreenViewModel extends AndroidViewModel {
     }
 
     public void saveData(UserInfoEntry userInfoEntry){
-        database.userInfoDao().insertTask(userInfoEntry);
+        new saveDatabaseAsyncTask(database).execute(userInfoEntry);
+
+    }
+
+    private static class saveDatabaseAsyncTask extends AsyncTask<UserInfoEntry,Void,Void>{
+
+        private AppDatabase database;
+
+        saveDatabaseAsyncTask(AppDatabase recDatabase){
+            database=recDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(final UserInfoEntry... params) {
+            database.userInfoDao().insertTask(params[0]);
+            return null;
+        }
     }
 }

@@ -49,12 +49,15 @@ public class AvatarAdapter extends RecyclerView.Adapter<AvatarAdapter.AvatarView
         String path=avatarStaticEntry.getPath();
         String type=avatarStaticEntry.getType();
 
+
         //Set values in view
         if (type==AvatarStaticEntry.TYPE_LOCAL){
             int imageUri = mContext.getResources().getIdentifier(path,"drawable",mContext.getPackageName());
             Picasso.get().load(imageUri).into(avatarViewHolder.iv_avatar);
+            Log.d(TAG,"path "+path);
         }else{
             Picasso.get().load(path).into(avatarViewHolder.iv_avatar);
+            Log.d(TAG,"path "+path);
         }
 
         //set the selected view

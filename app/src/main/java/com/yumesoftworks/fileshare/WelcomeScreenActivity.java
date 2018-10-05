@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -30,11 +31,12 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
     private static final String TAG=WelcomeScreenActivity.class.getSimpleName();
     private static final String NAME_ROTATION_AVATAR_STATE="savedAvatarId";
+    public static final String EXTRA_SETTINGS_NAME="isThisSettings";
 
     //this member variable will let us know if this activity is opened as settings or the first time
     private boolean mIsThisSettings;
     private int mSelectedAvatar=-1;
-    private int mFilesTransferred=-1;
+    private int mFilesTransferred=0;
     private int mVersion=-1;
 
     //recycler view
@@ -60,7 +62,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
             //we load the avatar value from the intent or default value if the intent does not exist
             //is this settings
             Intent intent = getIntent();
-            mIsThisSettings = intent.getBooleanExtra("isThisSettings",false);
+            mIsThisSettings = intent.getBooleanExtra(EXTRA_SETTINGS_NAME,false);
         }else{
             //we load it from the previous state
             mSelectedAvatar=savedInstanceState.getInt(NAME_ROTATION_AVATAR_STATE);
@@ -92,10 +94,11 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         mDb=AppDatabase.getInstance(getApplicationContext());
         setupViewModel();
 
-        mIsThisSettings=true;
         //navigation bar settings
         if (mIsThisSettings==false) {
             getSupportActionBar().hide();
+        }else{
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
 
@@ -124,6 +127,12 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
                         //we change the go button text to save changes
                         buttonGo.setText(R.string.aws_button_save);
+
+                        //we set the loaded data to the ui
+                        mSelectedAvatar=userInfoEntries.get(0).getPickedAvatar();
+                        mVersion=userInfoEntries.get(0).getAssetVersion();
+                        mFilesTransferred=userInfoEntries.get(0).getNumberFilesTransferred();
+                        tvUsername.setText(userInfoEntries.get(0).getUsername());
                     }else{
                         //we open the main activity
                         goMainActivity();
@@ -166,11 +175,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
                 }else{
                     //we save the data and open the activity
-                    //find a better way to save the data from the avatars
                     UserInfoEntry dataToSave=new UserInfoEntry(tvUsername.getText().toString(),mSelectedAvatar,mFilesTransferred,mVersion);
-
-                    //int id,String username, String pickedAvatar, int numberFilesTransferred,int assetVersion
-                    //WelcomeScreenViewModel viewModel=ViewModelProviders.of(this).get(WelcomeScreenViewModel.class);
                     viewModel.saveData(dataToSave);
 
                     //go to main activity
@@ -196,6 +201,9 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     public void LoadedRemoteAvatars(AvatarAndVersion retAvatarAndVersion) {
         //if it is not null we load the new views, otherwise we don't do anything
         if (retAvatarAndVersion!=null) {
+            //we store the version
+            mVersion=retAvatarAndVersion.getVersion();
+
             List<AvatarStaticEntry> receivedAvatars = AvatarDefaultImages.getDefaultImages();
             receivedAvatars.addAll(retAvatarAndVersion.getAvatarList());
 
@@ -205,6 +213,18 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         //set the selected avatar if it exists
         if (mSelectedAvatar!=-1){
             mAvatarAdapter.setSelectedAvatar(mSelectedAvatar);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                super.onBackPressed();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 }

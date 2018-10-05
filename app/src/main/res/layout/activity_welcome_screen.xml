@@ -21,7 +21,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@drawable/logo_128" />
+            app:srcCompat="@drawable/logo_128" />
 
         <LinearLayout
             android:id="@+id/aws_layout_container"
