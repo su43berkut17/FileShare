@@ -123,7 +123,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                     //we go to the next activity if it is not settings
                     if (mIsThisSettings){
                         //this is settings so we feed the saved information to the UI
-                        mAvatarAdapter.setSelectedAvatar(userInfoEntries.get(0).getId());
+                        //mAvatarAdapter.setSelectedAvatar(userInfoEntries.get(0).getId());
 
                         //we change the go button text to save changes
                         buttonGo.setText(R.string.aws_button_save);

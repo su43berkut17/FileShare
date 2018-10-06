@@ -30,11 +30,9 @@ public class WelcomeScreenViewModel extends AndroidViewModel {
 
     public void saveData(UserInfoEntry userInfoEntry){
         new saveDatabaseAsyncTask(database).execute(userInfoEntry);
-
     }
 
     private static class saveDatabaseAsyncTask extends AsyncTask<UserInfoEntry,Void,Void>{
-
         private AppDatabase database;
 
         saveDatabaseAsyncTask(AppDatabase recDatabase){
@@ -43,6 +41,7 @@ public class WelcomeScreenViewModel extends AndroidViewModel {
 
         @Override
         protected Void doInBackground(final UserInfoEntry... params) {
+            database.userInfoDao().emptyTable();
             database.userInfoDao().insertTask(params[0]);
             return null;
         }

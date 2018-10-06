@@ -11,19 +11,19 @@ import android.arch.persistence.room.Update;
 import java.util.List;
 
 @Dao
-public interface UserInfoDao {
-    @Query("SELECT * FROM userInfo" + " ORDER BY id")
-    LiveData<List<UserInfoEntry>> loadUserInfo();
+public interface FileListDao {
+    @Query("SELECT * FROM FileList"+" ORDER BY id")
+    LiveData<List<FileListEntry>> loadFileList();
 
     @Insert
-    void insertTask(UserInfoEntry userInfoEntry);
+    void insertFile(FileListEntry fileListEntry);
 
-    @Update(onConflict = OnConflictStrategy.REPLACE)
-    void updateTask(UserInfoEntry userInfoEntry);
+    @Update (onConflict = OnConflictStrategy.REPLACE)
+    void updateFile(FileListEntry fileListEntry);
 
     @Delete
-    void deleteTask(UserInfoEntry userInfoEntry);
+    void deleteFile(FileListEntry fileListEntry);
 
-    @Query("DELETE FROM userInfo")
-    void emptyTable();
+    @Query("DELETE FROM FileList")
+    void clearFileList();
 }
