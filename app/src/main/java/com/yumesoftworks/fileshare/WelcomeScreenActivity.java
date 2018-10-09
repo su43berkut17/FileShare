@@ -66,6 +66,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         }else{
             //we load it from the previous state
             mSelectedAvatar=savedInstanceState.getInt(NAME_ROTATION_AVATAR_STATE);
+            mIsThisSettings = savedInstanceState.getBoolean(EXTRA_SETTINGS_NAME);
         }
 
         //initialize rv
@@ -108,6 +109,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
         //we save the data to restore on rotation
         outState.putInt(NAME_ROTATION_AVATAR_STATE,mSelectedAvatar);
+        outState.putBoolean(EXTRA_SETTINGS_NAME,mIsThisSettings);
     }
 
     //view model
