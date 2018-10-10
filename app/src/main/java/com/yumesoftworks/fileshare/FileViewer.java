@@ -4,9 +4,14 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.yumesoftworks.fileshare.data.FileListEntry;
+
+import java.util.List;
 
 public class FileViewer extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -17,6 +22,11 @@ public class FileViewer extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    //recycler view
+    private RecyclerView rvFileList;
+    private RecyclerView.Adapter rvAdapter;
+    private static List<FileListEntry> fileList;
 
     private OnFragmentInteractionListener mListener;
 
