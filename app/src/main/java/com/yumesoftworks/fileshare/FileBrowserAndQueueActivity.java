@@ -2,6 +2,7 @@ package com.yumesoftworks.fileshare;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -11,7 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 //this activity will change depending if it is a tablet view
-public class FileBrowserAndQueueActivity extends AppCompatActivity {
+public class FileBrowserAndQueueActivity extends AppCompatActivity implements FileViewer.OnFragmentInteractionListener{
     //2 panel
     private boolean mTwoPanel;
 
@@ -75,5 +76,10 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity {
             Intent intent=new Intent(this,MainMenuActivity.class);
             startActivity(intent);
         }
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 }
