@@ -31,4 +31,7 @@
     <!-- Activity file browser -->
     <string name="fb_file_name_placeholder">testFile.jpg</string>
     <string name="fb_icon_description">File icon</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
