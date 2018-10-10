@@ -1,18 +1,31 @@
 package com.yumesoftworks.fileshare;
 
 import android.content.Intent;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
-public class MainMenuActivity extends AppCompatActivity {
+public class MainMenuActivity extends AppCompatActivity implements View.OnClickListener{
+    //buttons
+    ConstraintLayout sendFilesButton;
+    ConstraintLayout receiveFilesButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
+
+        //we set the values of the constraint layouts
+        sendFilesButton=(ConstraintLayout)findViewById(R.id.mm_surf_sendFileArea);
+        receiveFilesButton=(ConstraintLayout)findViewById(R.id.mm_surf_receiveArea);
+
+        //we set the click listeners on the buttons
+        sendFilesButton.setOnClickListener(this);
+        receiveFilesButton.setOnClickListener(this);
     }
 
     @Override
@@ -35,6 +48,22 @@ public class MainMenuActivity extends AppCompatActivity {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.mm_surf_sendFileArea:
+                //we open the file explorer
+                Intent intent=new Intent(this,FileBrowserAndQueueActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.mm_surf_receiveArea:
+                //we open the master picker
+                break;
+            default:
+                break;
         }
     }
 }
