@@ -4,16 +4,18 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.yumesoftworks.fileshare.data.FileListEntry;
+import com.yumesoftworks.fileshare.recyclerAdapters.FileListAdapter;
 
 import java.util.List;
 
-public class FileViewer extends Fragment {
+public class FileViewer extends Fragment implements FileListAdapter.FileClickListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -25,7 +27,7 @@ public class FileViewer extends Fragment {
 
     //recycler view
     private RecyclerView rvFileList;
-    private RecyclerView.Adapter rvAdapter;
+    private FileListAdapter rvAdapter;
     private static List<FileListEntry> fileList;
 
     private OnFragmentInteractionListener mListener;
@@ -64,8 +66,21 @@ public class FileViewer extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_file_viewer, container, false);
+        //we check which view to inflate
+        View mainView = inflater.inflate(R.layout.fragment_file_viewer, container, false);
+
+        rvFileList=mainView.findViewById(R.id.rv_file_viewer);
+        rvFileList.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        if (fileList != null) {
+            rvAdapter = new FileListAdapter(getContext(),this);
+
+            //we set the adapter
+            rvFileList.setAdapter(rvAdapter);
+            rvAdapter.notifyDataSetChanged();
+        }
+
+        return mainView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -90,6 +105,11 @@ public class FileViewer extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onItemClickListener(int itemId) {
+        //TODO: what to do with this one yet to be decided
     }
 
     /**

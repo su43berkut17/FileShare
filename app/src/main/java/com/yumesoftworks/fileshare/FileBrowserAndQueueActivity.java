@@ -1,15 +1,22 @@
 package com.yumesoftworks.fileshare;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.yumesoftworks.fileshare.data.FileListEntry;
+
+import java.util.List;
 
 //this activity will change depending if it is a tablet view
 public class FileBrowserAndQueueActivity extends AppCompatActivity implements FileViewer.OnFragmentInteractionListener{
@@ -18,6 +25,9 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements Fi
 
     //fragment p[arts
     private FileViewer fragmentFileViewer;
+
+    //view model
+    private FileViewerViewModel fileViewerViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +55,19 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements Fi
         fragmentManager.beginTransaction()
                 .add(R.id.frag_afv_main, fragmentFileViewer)
                 .commit();
+
+        //we load the file list
+        fileViewerViewModel = ViewModelProviders.of(this).get(FileViewerViewModel.class);
+        fileViewerViewModel.getData().observe(this, fileViewerViewModelObserver);
     }
+
+    final Observer<List<FileListEntry>> fileViewerViewModelObserver=new Observer<List<FileListEntry>>() {
+        @Override
+        public void onChanged(@Nullable List<FileListEntry> fileListEntries) {
+            //we update the recyclerView Adapter
+
+        }
+    };
 
     private void askForFilePermission(){
         //we ask for permission before continuing
