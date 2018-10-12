@@ -59,13 +59,16 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements Fi
         //we load the file list
         fileViewerViewModel = ViewModelProviders.of(this).get(FileViewerViewModel.class);
         fileViewerViewModel.getData().observe(this, fileViewerViewModelObserver);
+
+        //refresh the data for the first time
+        fileViewerViewModel.refreshData(getFilesDir().getPath());
     }
 
     final Observer<List<FileListEntry>> fileViewerViewModelObserver=new Observer<List<FileListEntry>>() {
         @Override
         public void onChanged(@Nullable List<FileListEntry> fileListEntries) {
             //we update the recyclerView Adapter
-
+            fragmentFileViewer.updateFileRV(fileListEntries);
         }
     };
 

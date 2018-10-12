@@ -83,6 +83,12 @@ public class FileViewer extends Fragment implements FileListAdapter.FileClickLis
         return mainView;
     }
 
+    //update file viewer
+    public void updateFileRV(List<FileListEntry> fileListSent){
+        rvAdapter.setFileList(fileListSent);
+        rvAdapter.notifyDataSetChanged();
+    }
+
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
