@@ -72,13 +72,13 @@ public class FileViewer extends Fragment implements FileListAdapter.FileClickLis
         rvFileList=mainView.findViewById(R.id.rv_file_viewer);
         rvFileList.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        if (fileList != null) {
+        //if (fileList != null) {
             rvAdapter = new FileListAdapter(getContext(),this);
 
             //we set the adapter
             rvFileList.setAdapter(rvAdapter);
             rvAdapter.notifyDataSetChanged();
-        }
+        //}
 
         return mainView;
     }

@@ -13,6 +13,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.yumesoftworks.fileshare.data.FileListEntry;
 
@@ -20,6 +21,8 @@ import java.util.List;
 
 //this activity will change depending if it is a tablet view
 public class FileBrowserAndQueueActivity extends AppCompatActivity implements FileViewer.OnFragmentInteractionListener{
+    private static final String TAG="FileBaQActivity";
+
     //2 panel
     private boolean mTwoPanel;
 
@@ -61,6 +64,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements Fi
         fileViewerViewModel.getData().observe(this, fileViewerViewModelObserver);
 
         //refresh the data for the first time
+        Log.i("FBAC","we will load the route: "+getFilesDir().getPath());
         fileViewerViewModel.refreshData(getFilesDir().getPath());
     }
 
@@ -68,6 +72,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements Fi
         @Override
         public void onChanged(@Nullable List<FileListEntry> fileListEntries) {
             //we update the recyclerView Adapter
+            Log.d(TAG,"the file list entries lenght returned in lifecycle is "+fileListEntries.size());
             fragmentFileViewer.updateFileRV(fileListEntries);
         }
     };
