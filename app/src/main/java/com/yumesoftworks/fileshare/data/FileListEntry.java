@@ -12,19 +12,25 @@ public class FileListEntry {
     private String path;
     private String fileName;
     private int isTransferred;
+    private String parentFolder;
+    private int isSelected;
 
     @Ignore
-    public FileListEntry(String path, String fileName, int isTransferred){
+    public FileListEntry(String path, String fileName, int isTransferred, String parentFolder, int isSelected){
         this.path=path;
         this.fileName=fileName;
         this.isTransferred=isTransferred;
+        this.parentFolder=parentFolder;
+        this.isSelected=isSelected;
     }
 
-    public FileListEntry(int id, String path, String fileName, int isTransferred){
+    public FileListEntry(int id, String path, String fileName, int isTransferred, String parentFolder, int isSelected){
         this.id=id;
         this.path=path;
         this.fileName=fileName;
         this.isTransferred=isTransferred;
+        this.parentFolder=parentFolder;
+        this.isSelected=isSelected;
     }
 
     //getters and setters
@@ -54,5 +60,19 @@ public class FileListEntry {
     }
     public int getIsTransferred() {
         return isTransferred;
+    }
+
+    public void setParentFolder(String parentFolder) {
+        this.parentFolder = parentFolder;
+    }
+    public String getParentFolder() {
+        return parentFolder;
+    }
+
+    public void setIsSelected(int isSelected) {
+        this.isSelected = isSelected;
+    }
+    public int getIsSelected() {
+        return isSelected;
     }
 }

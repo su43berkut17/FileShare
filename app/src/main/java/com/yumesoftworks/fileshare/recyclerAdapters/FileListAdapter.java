@@ -46,6 +46,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
         //set values in view
         fileListViewHolder.tv_fileName.setText(fileListEntry.getFileName());
 
+        //
         //TODO: deal with image and MIME type first, maybe have icons for sound and image files
     }
 

@@ -9,7 +9,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-@Database(entities = {UserInfoEntry.class, FileListEntry.class},version = 3,exportSchema = false)
+@Database(entities = {UserInfoEntry.class, FileListEntry.class},version = 4,exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG=AppDatabase.class.getSimpleName();
     private static final Object LOCK=new Object();
@@ -22,7 +22,7 @@ public abstract class AppDatabase extends RoomDatabase {
                 Log.d(TAG,"Creating a new database");
                 sInstance= Room.databaseBuilder(context.getApplicationContext(),
                         AppDatabase.class, AppDatabase.DATABASE_NAME)
-                        .addMigrations(MIGRATION_1_2,MIGRATION_2_3)
+                        .addMigrations(MIGRATION_1_2,MIGRATION_2_3,MIGRATION_3_4)
                         .build();
             }
         }
@@ -47,6 +47,17 @@ public abstract class AppDatabase extends RoomDatabase {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("CREATE TABLE FileList (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, path TEXT, fileName TEXT, isTransferred INTEGER NOT NULL)");
+        }
+    };
+
+    static final Migration MIGRATION_3_4=new Migration(3,4) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            //delete old file entry table
+            database.execSQL("DROP TABLE FileList");
+
+            //create new table
+            database.execSQL("CREATE TABLE FileList (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, path TEXT, fileName TEXT, isTransferred INTEGER NOT NULL, parentFolder TEXT, isSelected INTEGER NOT NULL)");
         }
     };
 }
