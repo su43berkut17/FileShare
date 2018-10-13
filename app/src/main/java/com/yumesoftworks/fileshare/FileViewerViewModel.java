@@ -21,7 +21,7 @@ public class FileViewerViewModel extends AndroidViewModel {
         //data= we set the data read from the route
         //refreshData();
         ReadFileList s=new ReadFileList();
-        data=s.loadList("");
+        data=s.loadList("",this.getApplication().getApplicationContext());
     }
 
     public LiveData<List<FileListEntry>> getData(){
@@ -30,6 +30,6 @@ public class FileViewerViewModel extends AndroidViewModel {
 
     public void refreshData(String path){
         ReadFileList s=new ReadFileList();
-        data=s.loadList(path);
+        data=s.loadList(path,this.getApplication().getApplicationContext());
     }
 }

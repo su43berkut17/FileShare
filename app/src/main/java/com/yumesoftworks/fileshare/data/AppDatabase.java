@@ -57,7 +57,7 @@ public abstract class AppDatabase extends RoomDatabase {
             database.execSQL("DROP TABLE FileList");
 
             //create new table
-            database.execSQL("CREATE TABLE FileList (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, path TEXT, fileName TEXT, isTransferred INTEGER NOT NULL, parentFolder TEXT, isSelected INTEGER NOT NULL)");
+            database.execSQL("CREATE TABLE FileList (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, path TEXT, fileName TEXT, isTransferred INTEGER NOT NULL, parentFolder TEXT, isSelected INTEGER NOT NULL, mimeType TEXT)");
         }
     };
 }

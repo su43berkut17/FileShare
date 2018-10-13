@@ -14,23 +14,26 @@ public class FileListEntry {
     private int isTransferred;
     private String parentFolder;
     private int isSelected;
+    private String mimeType;
 
     @Ignore
-    public FileListEntry(String path, String fileName, int isTransferred, String parentFolder, int isSelected){
+    public FileListEntry(String path, String fileName, int isTransferred, String parentFolder, int isSelected, String mimeType){
         this.path=path;
         this.fileName=fileName;
         this.isTransferred=isTransferred;
         this.parentFolder=parentFolder;
         this.isSelected=isSelected;
+        this.mimeType=mimeType;
     }
 
-    public FileListEntry(int id, String path, String fileName, int isTransferred, String parentFolder, int isSelected){
+    public FileListEntry(int id, String path, String fileName, int isTransferred, String parentFolder, int isSelected, String mimeType){
         this.id=id;
         this.path=path;
         this.fileName=fileName;
         this.isTransferred=isTransferred;
         this.parentFolder=parentFolder;
         this.isSelected=isSelected;
+        this.mimeType=mimeType;
     }
 
     //getters and setters
@@ -74,5 +77,12 @@ public class FileListEntry {
     }
     public int getIsSelected() {
         return isSelected;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+    public String getMimeType() {
+        return mimeType;
     }
 }

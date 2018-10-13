@@ -1,6 +1,8 @@
 package com.yumesoftworks.fileshare.recyclerAdapters;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -15,6 +17,7 @@ import com.squareup.picasso.Picasso;
 import com.yumesoftworks.fileshare.R;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 
+import java.io.File;
 import java.util.List;
 
 public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileListViewHolder> {
@@ -46,8 +49,19 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
         //set values in view
         fileListViewHolder.tv_fileName.setText(fileListEntry.getFileName());
 
-        //
-        //TODO: deal with image and MIME type first, maybe have icons for sound and image files
+        Log.d(TAG,"mime type is "+fileListEntry.getMimeType());
+        Log.d(TAG,"the path is "+fileListEntry.getPath());
+        if (fileListEntry.getMimeType()!=null) {
+            if (fileListEntry.getMimeType().startsWith("image")) {
+
+                Uri uri=Uri.fromFile(new File(fileListEntry.getPath()));
+                //we load it in picasso
+                //Picasso.get().load(fileListEntry.getPath()).into(fileListViewHolder.iv_icon);
+                Picasso.get().load(uri).into(fileListViewHolder.iv_icon);
+            } else {
+                //TODO: check other types
+            }
+        }
     }
 
     @Override
@@ -84,6 +98,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
 
             //itemView.setOnClickListener(this);
             cv_selected.setOnClickListener(this);
+            itemView.setOnClickListener(this);
         }
 
         @Override
