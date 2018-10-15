@@ -26,7 +26,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements Fi
     //2 panel
     private boolean mTwoPanel;
 
-    //fragment p[arts
+    //fragment parts
     private FileViewer fragmentFileViewer;
 
     //view model

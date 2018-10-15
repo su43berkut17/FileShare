@@ -15,18 +15,21 @@ public class FileListEntry {
     private String parentFolder;
     private int isSelected;
     private String mimeType;
+    @Ignore
+    private Boolean isDirectory;
 
     @Ignore
-    public FileListEntry(String path, String fileName, int isTransferred, String parentFolder, int isSelected, String mimeType){
+    public FileListEntry(String path, String fileName, int isTransferred, String parentFolder, int isSelected, String mimeType, Boolean isDirectory){
         this.path=path;
         this.fileName=fileName;
         this.isTransferred=isTransferred;
         this.parentFolder=parentFolder;
         this.isSelected=isSelected;
         this.mimeType=mimeType;
+        this.isDirectory=isDirectory;
     }
 
-    public FileListEntry(int id, String path, String fileName, int isTransferred, String parentFolder, int isSelected, String mimeType){
+    public FileListEntry(int id, String path, String fileName, int isTransferred, String parentFolder, int isSelected, String mimeType, Boolean isDirectory){
         this.id=id;
         this.path=path;
         this.fileName=fileName;
@@ -34,6 +37,7 @@ public class FileListEntry {
         this.parentFolder=parentFolder;
         this.isSelected=isSelected;
         this.mimeType=mimeType;
+        this.isDirectory=isDirectory;
     }
 
     //getters and setters
@@ -84,5 +88,12 @@ public class FileListEntry {
     }
     public String getMimeType() {
         return mimeType;
+    }
+
+    public void setDirectory(Boolean directory) {
+        isDirectory = directory;
+    }
+    public Boolean getDirectory() {
+        return isDirectory;
     }
 }

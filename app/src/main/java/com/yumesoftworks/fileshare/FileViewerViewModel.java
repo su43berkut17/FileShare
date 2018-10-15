@@ -18,10 +18,9 @@ public class FileViewerViewModel extends AndroidViewModel {
     public FileViewerViewModel(Application application){
         super(application);
 
-        //data= we set the data read from the route
-        //refreshData();
-        ReadFileList s=new ReadFileList();
-        data=s.loadList("",this.getApplication().getApplicationContext());
+        //we set the data to be read
+        ReadFileList readFileList=new ReadFileList();
+        data=readFileList.loadList("",this.getApplication().getApplicationContext());
     }
 
     public LiveData<List<FileListEntry>> getData(){

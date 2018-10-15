@@ -51,17 +51,27 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
 
         Log.d(TAG,"mime type is "+fileListEntry.getMimeType());
         Log.d(TAG,"the path is "+fileListEntry.getPath());
-        if (fileListEntry.getMimeType()!=null) {
-            if (fileListEntry.getMimeType().startsWith("image")) {
 
-                Uri uri=Uri.fromFile(new File(fileListEntry.getPath()));
-                //we load it in picasso
-                //Picasso.get().load(fileListEntry.getPath()).into(fileListViewHolder.iv_icon);
-                Picasso.get().load(uri).into(fileListViewHolder.iv_icon);
-            } else {
-                //TODO: check other types
+        //we check if it is a directory
+        if (fileListEntry.getDirectory()){
+            //it is a directory
+
+        }else{
+            //it is a file
+            if (fileListEntry.getMimeType()!=null) {
+                if (fileListEntry.getMimeType().startsWith("image")) {
+
+                    Uri uri=Uri.fromFile(new File(fileListEntry.getPath()));
+                    //we load it in picasso
+                    //Picasso.get().load(fileListEntry.getPath()).into(fileListViewHolder.iv_icon);
+                    Picasso.get().load(uri).into(fileListViewHolder.iv_icon);
+                } else {
+                    //TODO: check other types and change the icon
+
+                }
             }
         }
+
     }
 
     @Override

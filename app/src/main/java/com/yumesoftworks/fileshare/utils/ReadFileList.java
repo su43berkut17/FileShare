@@ -37,12 +37,12 @@ public class ReadFileList {
         List<FileListEntry> fileList=new ArrayList<>();
 
         for (int i=0;i<list.length;i++){
-            //File temp=new File(list[i]);
             File temp=list[i];
 
             String name=temp.getName();
             String absPath=temp.getAbsolutePath();
             String parentPath=temp.getParent();
+            Boolean isDirectory=temp.isDirectory();
 
             //we get the mime type
             Uri uri = Uri.fromFile(temp);
@@ -52,7 +52,7 @@ public class ReadFileList {
             String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
                     fileExtension.toLowerCase());
 
-            FileListEntry fileEntry=new FileListEntry(absPath,name,0,parentPath,0, mimeType);
+            FileListEntry fileEntry=new FileListEntry(absPath,name,0,parentPath,0, mimeType, isDirectory);
 
             fileList.add(fileEntry);
             LiveDataFileList.postValue(fileList);
