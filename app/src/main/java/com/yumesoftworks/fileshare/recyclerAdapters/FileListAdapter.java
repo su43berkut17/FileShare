@@ -22,14 +22,14 @@ import java.util.List;
 
 public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileListViewHolder> {
     private static final String TAG="FileListAdapter";
-    final private FileClickListener mItemCLickListener;
+    final private FileClickListener mFileClickListener;
 
     private List<FileListEntry> mFileList;
     private Context mContext;
 
     public FileListAdapter (Context context, FileClickListener listener){
         mContext=context;
-        mItemCLickListener=listener;
+        mFileClickListener=listener;
     }
 
     @NonNull
@@ -55,7 +55,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
         //we check if it is a directory
         if (fileListEntry.getDirectory()){
             //it is a directory
-
+            fileListViewHolder.cv_selected.setVisibility(View.INVISIBLE);
         }else{
             //it is a file
             if (fileListEntry.getMimeType()!=null) {
@@ -93,6 +93,11 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
         notifyDataSetChanged();
     }
 
+    //public method to get adapter item
+    public FileListEntry getFileItem(int itemId){
+        return mFileList.get(itemId);
+    }
+
     //ViewHolder
     class FileListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView iv_icon;
@@ -106,14 +111,13 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
             tv_fileName=itemView.findViewById(R.id.tv_item_file_name);
             cv_selected=itemView.findViewById(R.id.cb_item_file);
 
-            //itemView.setOnClickListener(this);
             cv_selected.setOnClickListener(this);
             itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
-            mItemCLickListener.onItemClickListener(getAdapterPosition());
+            mFileClickListener.onItemClickListener(getAdapterPosition());
         }
     }
 

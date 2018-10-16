@@ -25,19 +25,25 @@ public class ReadFileList {
     public MutableLiveData<List<FileListEntry>> loadList(String path, Context context){
         mContext=context;
 
-        path=Environment.getExternalStorageDirectory().getPath();
-        path="/storage/emulated/0/Download";
+        //path=Environment.getExternalStorageDirectory().getPath();
+        //path="/storage/emulated/0/Download";
         File file=new File(path);
         Log.i(TAG,"we load the path: "+path);
         File[] list = file.listFiles();
 
         Log.i(TAG, "the number of files in the array is "+String.valueOf(list.length));
+        //TODO: fix what happens if there are no files
 
         MutableLiveData<List<FileListEntry>> LiveDataFileList=new MutableLiveData<>();
         List<FileListEntry> fileList=new ArrayList<>();
 
-        for (int i=0;i<list.length;i++){
-            File temp=list[i];
+        for (int j=0;j<list.length+1;j++){
+            File temp;
+            if (j==0){
+                temp = new File(new File(list[0].getParent()).getParent());
+            }else {
+                temp = list[j-1];
+            }
 
             String name=temp.getName();
             String absPath=temp.getAbsolutePath();
@@ -55,8 +61,10 @@ public class ReadFileList {
             FileListEntry fileEntry=new FileListEntry(absPath,name,0,parentPath,0, mimeType, isDirectory);
 
             fileList.add(fileEntry);
-            LiveDataFileList.postValue(fileList);
+            //LiveDataFileList.postValue(fileList);
         }
+
+        LiveDataFileList.setValue(fileList);
 
         return LiveDataFileList;
     }

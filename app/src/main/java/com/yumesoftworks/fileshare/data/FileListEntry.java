@@ -29,7 +29,7 @@ public class FileListEntry {
         this.isDirectory=isDirectory;
     }
 
-    public FileListEntry(int id, String path, String fileName, int isTransferred, String parentFolder, int isSelected, String mimeType, Boolean isDirectory){
+    public FileListEntry(int id, String path, String fileName, int isTransferred, String parentFolder, int isSelected, String mimeType){
         this.id=id;
         this.path=path;
         this.fileName=fileName;
@@ -37,7 +37,7 @@ public class FileListEntry {
         this.parentFolder=parentFolder;
         this.isSelected=isSelected;
         this.mimeType=mimeType;
-        this.isDirectory=isDirectory;
+        //this.isDirectory=isDirectory;
     }
 
     //getters and setters

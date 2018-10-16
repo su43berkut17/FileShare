@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -20,7 +21,7 @@ import com.yumesoftworks.fileshare.data.FileListEntry;
 import java.util.List;
 
 //this activity will change depending if it is a tablet view
-public class FileBrowserAndQueueActivity extends AppCompatActivity implements FileViewer.OnFragmentInteractionListener{
+public class FileBrowserAndQueueActivity extends AppCompatActivity implements FileViewer.OnFragmentFileInteractionListener{
     private static final String TAG="FileBaQActivity";
 
     //2 panel
@@ -65,14 +66,15 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements Fi
 
         //refresh the data for the first time
         Log.i("FBAC","we will load the route: "+getFilesDir().getPath());
-        fileViewerViewModel.refreshData(getFilesDir().getPath());
+        //fileViewerViewModel.refreshData(getFilesDir().getPath());
+        //fileViewerViewModel.refreshData(Environment.getExternalStorageDirectory().getPath());
     }
 
     final Observer<List<FileListEntry>> fileViewerViewModelObserver=new Observer<List<FileListEntry>>() {
         @Override
         public void onChanged(@Nullable List<FileListEntry> fileListEntries) {
             //we update the recyclerView Adapter
-            Log.d(TAG,"the file list entries lenght returned in lifecycle is "+fileListEntries.size());
+            Log.d(TAG,"ON CHANGED, the file list entries lenght returned in lifecycle is "+fileListEntries.size());
             fragmentFileViewer.updateFileRV(fileListEntries);
         }
     };
@@ -109,7 +111,19 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements Fi
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
+    public void onFragmentFileInteraction(FileListEntry fileListEntry) {
+        //check if it is a directory
+        if (fileListEntry.getDirectory()){
+            //it is directory, we navigate to the new route
+            Log.d(TAG,"the path to open is "+fileListEntry.getPath());
+            fileViewerViewModel.refreshData(fileListEntry.getPath());
+
+            //fileViewerViewModel.notify();
+
+            //fragmentFileViewer.updateFileRV(fileViewerViewModel.getData().getValue());
+        }else{
+            //it is a file, depending on the checkbutton we decide if we save it or delete it
+        }
 
     }
 }
