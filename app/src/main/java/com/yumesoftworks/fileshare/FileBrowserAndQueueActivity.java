@@ -117,13 +117,15 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements Fi
             //it is directory, we navigate to the new route
             Log.d(TAG,"the path to open is "+fileListEntry.getPath());
             fileViewerViewModel.refreshData(fileListEntry.getPath());
-
-            //fileViewerViewModel.notify();
-
-            //fragmentFileViewer.updateFileRV(fileViewerViewModel.getData().getValue());
         }else{
-            //it is a file, depending on the checkbutton we decide if we save it or delete it
+            //we check if it has been selected or not
+            if (fileListEntry.getIsSelected()==0){
+                //it is not selected so we delete it
+                fileViewerViewModel.deleteFile(fileListEntry);
+            }else{
+                //it is selected so we save it
+                fileViewerViewModel.saveFile(fileListEntry);
+            }
         }
-
     }
 }

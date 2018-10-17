@@ -106,13 +106,13 @@ public class FileViewer extends Fragment implements FileListAdapter.FileClickLis
         mListener = null;
     }
 
-    //methods from the adapter
+    //interfaces from the adapter
     @Override
     public void onItemClickListener(int itemId) {
         onButtonPressed(rvAdapter.getFileItem(itemId));
     }
 
-    //method that is implemented from the adapter
+    //method that takes value from the adapter implementation and sends it to the activity via an interface
     public void onButtonPressed(FileListEntry fileListEntry) {
         if (mListener != null) {
             mListener.onFragmentFileInteraction(fileListEntry);

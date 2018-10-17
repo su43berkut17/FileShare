@@ -117,6 +117,17 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
 
         @Override
         public void onClick(View view) {
+            //we change the value of selected items
+            if (mFileList.get(getAdapterPosition()).getIsSelected()==0){
+                //we activate the checkbox
+                mFileList.get(getAdapterPosition()).setIsSelected(1);
+                cv_selected.setChecked(true);
+            }else{
+                //we deactivate the checkbox and values
+                mFileList.get(getAdapterPosition()).setIsSelected(0);
+                cv_selected.setChecked(false);
+            }
+
             mFileClickListener.onItemClickListener(getAdapterPosition());
         }
     }
