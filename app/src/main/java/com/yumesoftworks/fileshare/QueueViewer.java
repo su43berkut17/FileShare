@@ -18,7 +18,7 @@ import java.util.List;
 public class QueueViewer extends Fragment {
 
     //recycler view
-    private RecyclerView rvFileList;
+    private RecyclerView rvFileQueue;
     private FileListAdapter rvAdapter;
     private static List<FileListEntry> fileList;
 
@@ -29,22 +29,26 @@ public class QueueViewer extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         //we check which view to inflate
-        View queueView = inflater.inflate(R.layout.fragment_file_viewer, container, false);
+        View queueView = inflater.inflate(R.layout.fragment_queue_viewer, container, false);
 
-        rvFileList=queueView.findViewById(R.id.rv_file_viewer);
-        rvFileList.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvFileQueue=queueView.findViewById(R.id.rv_file_queue);
+        rvFileQueue.setLayoutManager(new LinearLayoutManager(getContext()));
 
         //if (fileList != null) {
         //TODO: queue list adapter
             //rvAdapter = new FileListAdapter(getContext(),this);
 
             //we set the adapter
-            rvFileList.setAdapter(rvAdapter);
+            rvFileQueue.setAdapter(rvAdapter);
             rvAdapter.notifyDataSetChanged();
         //}
 
         return queueView;
     }
 
-
+    //update queue viewer
+    public void updateQueue(List<FileListEntry> fileListEntry){
+        rvAdapter.setFileList(fileListEntry);
+        rvAdapter.notifyDataSetChanged();
+    }
 }
