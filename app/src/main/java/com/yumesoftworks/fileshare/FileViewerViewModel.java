@@ -24,10 +24,10 @@ public class FileViewerViewModel extends AndroidViewModel {
         database=AppDatabase.getInstance(this.getApplication());
 
         Log.d(TAG,"File Viewer View Model main constructor");
+
         //we set the data to be read
         ReadFileList readFileList=new ReadFileList();
         data=readFileList.loadList("/storage/emulated/0/Download",this.getApplication().getApplicationContext());
-        //data=new MutableLiveData<List<FileListEntry>>();
     }
 
     public MutableLiveData<List<FileListEntry>> getData(){
