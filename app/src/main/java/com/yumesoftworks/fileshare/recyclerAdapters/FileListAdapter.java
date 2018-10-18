@@ -58,6 +58,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
             fileListViewHolder.cv_selected.setVisibility(View.INVISIBLE);
         }else{
             //it is a file
+            fileListViewHolder.cv_selected.setVisibility(View.VISIBLE);
             if (fileListEntry.getMimeType()!=null) {
                 if (fileListEntry.getMimeType().startsWith("image")) {
 
@@ -89,6 +90,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
 
     //public method to update adapter
     public void setFileList(List<FileListEntry> FileListData){
+        Log.d(TAG,"settling new file list on the adapter");
         mFileList=FileListData;
         notifyDataSetChanged();
     }

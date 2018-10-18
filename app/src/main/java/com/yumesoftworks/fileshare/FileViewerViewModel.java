@@ -40,7 +40,12 @@ public class FileViewerViewModel extends AndroidViewModel {
         ReadFileList s=new ReadFileList();
         //data=s.loadList(path,this.getApplication().getApplicationContext());
         //data.setValue(s.loadList(path,this.getApplication().getApplicationContext()).getValue());
-        data.postValue(s.loadList(path,this.getApplication().getApplicationContext()).getValue());
+
+        try{
+            data.postValue(s.loadList(path, this.getApplication().getApplicationContext()).getValue());
+        }catch (Exception e){
+            Log.d(TAG,"error null");
+        }
        // data.postValue(getData().getValue());
         //data=s.loadList("/storage/emulated/0",this.getApplication().getApplicationContext());
         //Log.d(TAG,"new data is updated, the length is "+data.getValue());

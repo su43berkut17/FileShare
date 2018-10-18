@@ -29,47 +29,54 @@ public class ReadFileList {
         Log.i(TAG,"we load the path: "+path);
         File[] list = file.listFiles();
 
-        Log.i(TAG, "the number of files in the array is "+String.valueOf(list.length));
+        if (list!=null) {
+            Log.i(TAG, "the list of files is " + file.listFiles());
+            Log.i(TAG, "the number of files in the array is " + String.valueOf(list.length));
 
-        MutableLiveData<List<FileListEntry>> LiveDataFileList=new MutableLiveData<>();
-        List<FileListEntry> fileList=new ArrayList<>();
+            MutableLiveData<List<FileListEntry>> LiveDataFileList = new MutableLiveData<>();
+            List<FileListEntry> fileList = new ArrayList<>();
 
-        //we add the 1st level if it is not the upper level
-        File upperLevel=new File(path);
-        upperLevel=new File(upperLevel.getParent());
+            //we add the 1st level if it is not the upper level
+            File upperLevel = new File(path);
+            upperLevel = new File(upperLevel.getParent());
 
-        //we add the item
-        if (upperLevel != null) {
-            FileListEntry parentEntry = new FileListEntry(upperLevel.getAbsolutePath(),
-                    ".." ,
-                    0,
-                    upperLevel.getParent(),
-                    0,
-                    null,
-                    true);
+            //we add the item
+            if (upperLevel != null) {
+                FileListEntry parentEntry = new FileListEntry(upperLevel.getAbsolutePath(),
+                        "..",
+                        0,
+                        upperLevel.getParent(),
+                        0,
+                        null,
+                        true);
+
+                fileList.add(parentEntry);
+            }
+
+            for (int i = 0; i < list.length; i++) {
+                String name = list[i].getName();
+                String absPath = list[i].getAbsolutePath();
+                String parentPath = list[i].getParent();
+                Boolean isDirectory = list[i].isDirectory();
+
+                //we get the mime type
+                Uri uri = Uri.fromFile(list[i]);
+
+                String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+                        .toString());
+                String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                        fileExtension.toLowerCase());
+
+                FileListEntry fileEntry = new FileListEntry(absPath, name, 0, parentPath, 0, mimeType, isDirectory);
+
+                fileList.add(fileEntry);
+            }
+
+            LiveDataFileList.setValue(fileList);
+
+            return LiveDataFileList;
+        }else{
+            return null;
         }
-
-        for (int i=0;i<list.length;i++){
-            String name=list[i].getName();
-            String absPath=list[i].getAbsolutePath();
-            String parentPath=list[i].getParent();
-            Boolean isDirectory=list[i].isDirectory();
-
-            //we get the mime type
-            Uri uri = Uri.fromFile(list[i]);
-
-            String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
-                    .toString());
-            String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                    fileExtension.toLowerCase());
-
-            FileListEntry fileEntry=new FileListEntry(absPath,name,0,parentPath,0, mimeType, isDirectory);
-
-            fileList.add(fileEntry);
-        }
-
-        LiveDataFileList.setValue(fileList);
-
-        return LiveDataFileList;
     }
 }
