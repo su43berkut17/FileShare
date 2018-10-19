@@ -12,14 +12,15 @@ import android.view.ViewGroup;
 
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.recyclerAdapters.FileListAdapter;
+import com.yumesoftworks.fileshare.recyclerAdapters.QueueListAdapter;
 
 import java.util.List;
 
-public class QueueViewer extends Fragment {
+public class QueueViewer extends Fragment implements QueueListAdapter.QueueClickListener{
 
     //recycler view
     private RecyclerView rvFileQueue;
-    private FileListAdapter rvAdapter;
+    private QueueListAdapter rvAdapter;
     private static List<FileListEntry> fileList;
 
     public QueueViewer(){
@@ -36,7 +37,7 @@ public class QueueViewer extends Fragment {
 
         //if (fileList != null) {
         //TODO: queue list adapter
-            //rvAdapter = new FileListAdapter(getContext(),this);
+            rvAdapter = new QueueListAdapter(getContext(),this);
 
             //we set the adapter
             rvFileQueue.setAdapter(rvAdapter);
@@ -50,5 +51,10 @@ public class QueueViewer extends Fragment {
     public void updateQueue(List<FileListEntry> fileListEntry){
         rvAdapter.setFileList(fileListEntry);
         rvAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onQueueClickListener(int itemId) {
+
     }
 }
