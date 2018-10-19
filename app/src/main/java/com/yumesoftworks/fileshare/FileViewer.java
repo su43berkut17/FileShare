@@ -1,6 +1,7 @@
 package com.yumesoftworks.fileshare;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,13 +10,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.recyclerAdapters.FileListAdapter;
 
 import java.util.List;
 
-public class FileViewer extends Fragment implements FileListAdapter.FileClickListener{
+public class FileViewer extends Fragment implements
+        FileListAdapter.FileClickListener,
+        View.OnClickListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -30,7 +34,12 @@ public class FileViewer extends Fragment implements FileListAdapter.FileClickLis
     private FileListAdapter rvAdapter;
     private static List<FileListEntry> fileList;
 
+    //ui
+    private Button btnQueue;
+
+    //interfaces
     private OnFragmentFileInteractionListener mListener;
+    private OnButtonGoToQueueInterface mQueueButton;
 
     public FileViewer() {
         // Required empty public constructor
@@ -69,6 +78,7 @@ public class FileViewer extends Fragment implements FileListAdapter.FileClickLis
         //we check which view to inflate
         View mainView = inflater.inflate(R.layout.fragment_file_viewer, container, false);
 
+        btnQueue=mainView.findViewById(R.id.bt_ffv_review_queue);
         rvFileList=mainView.findViewById(R.id.rv_file_viewer);
         rvFileList.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -79,6 +89,9 @@ public class FileViewer extends Fragment implements FileListAdapter.FileClickLis
             rvFileList.setAdapter(rvAdapter);
             rvAdapter.notifyDataSetChanged();
         //}
+
+        //listeners button queue
+        btnQueue.setOnClickListener(this);
 
         return mainView;
     }
@@ -94,6 +107,7 @@ public class FileViewer extends Fragment implements FileListAdapter.FileClickLis
         super.onAttach(context);
         if (context instanceof OnFragmentFileInteractionListener) {
             mListener = (OnFragmentFileInteractionListener) context;
+            mQueueButton=(OnButtonGoToQueueInterface) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -104,6 +118,20 @@ public class FileViewer extends Fragment implements FileListAdapter.FileClickLis
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        mQueueButton=null;
+    }
+
+    //clicks
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.bt_ffv_review_queue:
+                //we go to see the queue via the interface to the main activity
+                mQueueButton.onButtonQueueInteraction();
+                break;
+            default:
+                break;
+        }
     }
 
     //interfaces from the adapter
@@ -123,5 +151,9 @@ public class FileViewer extends Fragment implements FileListAdapter.FileClickLis
     //click on file browser item
     public interface OnFragmentFileInteractionListener {
         void onFragmentFileInteraction(FileListEntry fileItemSelected);
+    }
+
+    public interface OnButtonGoToQueueInterface{
+        void onButtonQueueInteraction();
     }
 }

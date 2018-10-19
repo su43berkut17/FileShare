@@ -21,7 +21,9 @@ import com.yumesoftworks.fileshare.data.FileListEntry;
 import java.util.List;
 
 //this activity will change depending if it is a tablet view
-public class FileBrowserAndQueueActivity extends AppCompatActivity implements FileViewer.OnFragmentFileInteractionListener{
+public class FileBrowserAndQueueActivity extends AppCompatActivity implements
+        FileViewer.OnFragmentFileInteractionListener,
+        FileViewer.OnButtonGoToQueueInterface{
     private static final String TAG="FileBaQActivity";
 
     //2 panel
@@ -29,6 +31,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements Fi
 
     //fragment parts
     private FileViewer fragmentFileViewer;
+    private QueueViewer fragmentQueueViewer;
+    private FragmentManager fragmentManager;
 
     //view model
     private FileViewerViewModel fileViewerViewModel;
@@ -47,9 +51,10 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements Fi
 
     private void initializeVariables(){
         //fragment stuff
-        FragmentManager fragmentManager=getSupportFragmentManager();
+        fragmentManager=getSupportFragmentManager();
 
         fragmentFileViewer=new FileViewer();
+        fragmentQueueViewer=new QueueViewer();
 
         //we load the files
         loadFragments(fragmentManager);
@@ -127,5 +132,15 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements Fi
                 fileViewerViewModel.saveFile(fileListEntry);
             }
         }
+    }
+
+    @Override
+    public void onButtonQueueInteraction() {
+        //we open the queue if it is single panel
+        fragmentManager.beginTransaction()
+                .replace(R.id.frag_afv_main, fragmentQueueViewer)
+                .commit();
+
+        //it should load automatically from the lifecycle
     }
 }
