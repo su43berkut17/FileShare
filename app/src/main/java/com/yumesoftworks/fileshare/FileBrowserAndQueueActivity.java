@@ -72,7 +72,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
         //we load the database file list for the observer for the file list
         queueViewerViewModel = ViewModelProviders.of(this).get(QueueViewerViewModel.class);
-        queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
+
 
         //refresh the data for the first time
         Log.i("FBAC","we will load the route: "+getFilesDir().getPath());
@@ -156,5 +156,6 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                 .commit();
 
         //it should load automatically from the lifecycle
+        queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
     }
 }

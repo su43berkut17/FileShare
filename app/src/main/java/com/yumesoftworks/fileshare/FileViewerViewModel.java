@@ -92,4 +92,21 @@ public class FileViewerViewModel extends AndroidViewModel {
             return null;
         }
     }
+
+    public void deleteTable(){
+        new deleteTableDatabaseAsyncTask(database).execute();
+    }
+
+    private static class deleteTableDatabaseAsyncTask extends AsyncTask<Void, Void, Void>{
+        private AppDatabase database;
+
+        deleteTableDatabaseAsyncTask(AppDatabase recDatabase){database = recDatabase;}
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            //we drop the table
+            database.fileListDao().clearFileList();
+            return null;
+        }
+    }
 }

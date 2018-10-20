@@ -1,5 +1,6 @@
 package com.yumesoftworks.fileshare;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +15,9 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
     ConstraintLayout sendFilesButton;
     ConstraintLayout receiveFilesButton;
 
+    //view model
+    private FileViewerViewModel fileViewerViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,6 +30,10 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         //we set the click listeners on the buttons
         sendFilesButton.setOnClickListener(this);
         receiveFilesButton.setOnClickListener(this);
+
+        //we empty the stored database
+        fileViewerViewModel= ViewModelProviders.of(this).get(FileViewerViewModel.class);
+        fileViewerViewModel.deleteTable();
     }
 
     @Override
