@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -24,6 +24,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainMenuActivity" />
-        <activity android:name=".FileBrowserAndQueueActivity"></activity>
+        <activity android:name=".FileBrowserAndQueueActivity" />
+        <activity android:name=".SenderPickDestinationActivity" />
+        <activity android:name=".ReceiverPickDestinationActivity"></activity>
     </application>
+
 </manifest>
