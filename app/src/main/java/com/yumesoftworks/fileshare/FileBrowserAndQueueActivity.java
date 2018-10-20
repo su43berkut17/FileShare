@@ -36,6 +36,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
     //view model
     private FileViewerViewModel fileViewerViewModel;
+    private QueueViewerViewModel queueViewerViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,18 +70,31 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         fileViewerViewModel = ViewModelProviders.of(this).get(FileViewerViewModel.class);
         fileViewerViewModel.getData().observe(this, fileViewerViewModelObserver);
 
+        //we load the database file list for the observer for the file list
+        queueViewerViewModel = ViewModelProviders.of(this).get(QueueViewerViewModel.class);
+        queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
+
         //refresh the data for the first time
         Log.i("FBAC","we will load the route: "+getFilesDir().getPath());
         //fileViewerViewModel.refreshData(getFilesDir().getPath());
         //fileViewerViewModel.refreshData(Environment.getExternalStorageDirectory().getPath());
     }
 
+    //observer for the file browser
     final Observer<List<FileListEntry>> fileViewerViewModelObserver=new Observer<List<FileListEntry>>() {
         @Override
         public void onChanged(@Nullable List<FileListEntry> fileListEntries) {
             //we update the recyclerView Adapter
             Log.d(TAG,"ON CHANGED, the file list entries lenght returned in lifecycle is "+fileListEntries.size());
             fragmentFileViewer.updateFileRV(fileListEntries);
+        }
+    };
+
+    //observer for the queue viewer
+    final Observer<List<FileListEntry>> queueViewerViewModelObserver=new Observer<List<FileListEntry>>() {
+        @Override
+        public void onChanged(@Nullable List<FileListEntry> fileListEntries) {
+            fragmentQueueViewer.updateQueue(fileListEntries);
         }
     };
 

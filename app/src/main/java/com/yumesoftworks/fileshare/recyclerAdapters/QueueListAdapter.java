@@ -48,30 +48,21 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
         //set values in view
         queueListViewHolder.tv_fileName.setText(fileListEntry.getFileName());
 
-        /*Log.d(TAG,"mime type is "+fileListEntry.getMimeType());
+        Log.d(TAG,"mime type is "+fileListEntry.getMimeType());
         Log.d(TAG,"the path is "+fileListEntry.getPath());
 
-        //we check if it is a directory
-        if (fileListEntry.getDirectory()){
-            //it is a directory
-            fileListViewHolder.cv_selected.setVisibility(View.INVISIBLE);
-        }else{
-            //it is a file
-            fileListViewHolder.cv_selected.setVisibility(View.VISIBLE);
+        //we check the mime type for the icon
             if (fileListEntry.getMimeType()!=null) {
                 if (fileListEntry.getMimeType().startsWith("image")) {
 
-                    Uri uri=Uri.fromFile(new File(fileListEntry.getPath()));
+                    Uri uri = Uri.fromFile(new File(fileListEntry.getPath()));
                     //we load it in picasso
                     //Picasso.get().load(fileListEntry.getPath()).into(fileListViewHolder.iv_icon);
-                    Picasso.get().load(uri).into(fileListViewHolder.iv_icon);
+                    Picasso.get().load(uri).into(queueListViewHolder.iv_icon);
                 } else {
                     //TODO: check other types and change the icon
-
                 }
-            }
-        }*/
-
+           }
     }
 
     @Override
