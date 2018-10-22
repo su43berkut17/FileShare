@@ -5,7 +5,7 @@ import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
 @Entity (tableName = "FileList")
-public class FileListEntry {
+public class FileListEntry implements Comparable<FileListEntry>{
 
     @PrimaryKey(autoGenerate = true)
     private int id;
@@ -95,5 +95,11 @@ public class FileListEntry {
     }
     public Boolean getDirectory() {
         return isDirectory;
+    }
+
+    //comparator
+    @Override
+    public int compareTo(FileListEntry entry) {
+        return this.fileName.compareTo(entry.getName());
     }
 }

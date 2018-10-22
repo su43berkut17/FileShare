@@ -12,6 +12,7 @@ import com.yumesoftworks.fileshare.data.FileListEntry;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ReadFileList {
@@ -34,7 +35,12 @@ public class ReadFileList {
             Log.i(TAG, "the number of files in the array is " + String.valueOf(list.length));
 
             MutableLiveData<List<FileListEntry>> LiveDataFileList = new MutableLiveData<>();
+
+            //Final file list
             List<FileListEntry> fileList = new ArrayList<>();
+
+            //temporary file List
+            List<FileListEntry> tempFileList=new ArrayList<>();
 
             //we add the 1st level if it is not the upper level
             File upperLevel = new File(path);
@@ -53,6 +59,7 @@ public class ReadFileList {
                 fileList.add(parentEntry);
             }
 
+            //we add the directories only
             for (int i = 0; i < list.length; i++) {
                 String name = list[i].getName();
                 String absPath = list[i].getAbsolutePath();
@@ -69,8 +76,19 @@ public class ReadFileList {
 
                 FileListEntry fileEntry = new FileListEntry(absPath, name, 0, parentPath, 0, mimeType, isDirectory);
 
-                fileList.add(fileEntry);
+                if (isDirectory) {
+                    fileList.add(fileEntry);
+                }else{
+                    tempFileList.add(fileEntry);
+                }
             }
+
+            //sort both arrays
+            Collections.sort(fileList);
+            Collections.sort(tempFileList);
+
+            //merge the arrays
+            fileList.addAll(tempFileList);
 
             LiveDataFileList.setValue(fileList);
 
