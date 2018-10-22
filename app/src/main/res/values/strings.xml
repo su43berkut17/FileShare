@@ -37,6 +37,10 @@
     <string name="fq_iv_delete_description">Remove from queue</string>
     <string name="fb_button_send_files">Send Files to...</string>
 
+    <!--Activity pick user to send -->
+    <string name="pu_avatar_description">User avatar</string>
+    <string name="pu_username_description">Username</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
