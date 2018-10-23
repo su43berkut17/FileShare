@@ -35,7 +35,7 @@
 
     <!-- Activity file queue -->
     <string name="fq_iv_delete_description">Remove from queue</string>
-    <string name="fb_button_send_files">Send Files to...</string>
+    <string name="fb_button_send_files">Send Files&#x8230;</string>
 
     <!--Activity pick user to send -->
     <string name="pu_avatar_description">User avatar</string>

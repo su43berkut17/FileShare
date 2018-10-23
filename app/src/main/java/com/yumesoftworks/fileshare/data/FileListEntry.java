@@ -100,6 +100,6 @@ public class FileListEntry implements Comparable<FileListEntry>{
     //comparator
     @Override
     public int compareTo(FileListEntry entry) {
-        return this.fileName.compareTo(entry.getName());
+        return this.fileName.compareTo(entry.getFileName());
     }
 }
