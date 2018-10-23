@@ -40,6 +40,7 @@
     <!--Activity pick user to send -->
     <string name="pu_avatar_description">User avatar</string>
     <string name="pu_username_description">Username</string>
+    <string name="pu_instructions">Tap the user who will receive the files</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

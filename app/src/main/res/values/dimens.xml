@@ -4,6 +4,7 @@
     <dimen name="default_padding">8dp</dimen>
     <dimen name="medium_padding">4dp</dimen>
     <dimen name="zero_padding">0dp</dimen>
+    <dimen name="medium_text">18sp</dimen>
 
     <!-- Activity file browser -->
     <dimen name="file_icon_size">80dp</dimen>
