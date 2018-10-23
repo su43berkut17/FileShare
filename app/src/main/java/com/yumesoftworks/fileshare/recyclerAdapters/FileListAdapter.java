@@ -56,23 +56,31 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
         if (fileListEntry.getDirectory()){
             //it is a directory
             fileListViewHolder.cv_selected.setVisibility(View.INVISIBLE);
+            int imageUri = mContext.getResources().getIdentifier("icon_folder_128","drawable",mContext.getPackageName());
+            Picasso.get().load(imageUri).into(fileListViewHolder.iv_icon);
         }else{
             //it is a file
             fileListViewHolder.cv_selected.setVisibility(View.VISIBLE);
             if (fileListEntry.getMimeType()!=null) {
                 if (fileListEntry.getMimeType().startsWith("image")) {
-
                     Uri uri=Uri.fromFile(new File(fileListEntry.getPath()));
-                    //we load it in picasso
-                    //Picasso.get().load(fileListEntry.getPath()).into(fileListViewHolder.iv_icon);
-                    Picasso.get().load(uri).into(fileListViewHolder.iv_icon);
-                } else {
-                    //TODO: check other types and change the icon
-
+                    int tempUri = mContext.getResources().getIdentifier("icon_image_128","drawable",mContext.getPackageName());
+                    Picasso.get()
+                            .load(uri)
+                            .placeholder(tempUri)
+                            .into(fileListViewHolder.iv_icon);
+                } else if (fileListEntry.getMimeType().startsWith("video")){
+                    int tempUri = mContext.getResources().getIdentifier("icon_video_128","drawable",mContext.getPackageName());
+                    Picasso.get().load(tempUri).into(fileListViewHolder.iv_icon);
+                }else if (fileListEntry.getMimeType().startsWith("audio")){
+                    int tempUri = mContext.getResources().getIdentifier("icon_music_128","drawable",mContext.getPackageName());
+                    Picasso.get().load(tempUri).into(fileListViewHolder.iv_icon);
+                }else {
+                    int tempUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
+                    Picasso.get().load(tempUri).into(fileListViewHolder.iv_icon);
                 }
             }
         }
-
     }
 
     @Override
