@@ -51,7 +51,8 @@
                 app:layout_constraintHorizontal_chainStyle="spread"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/avatar_6" />
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/icon_file_128" />
 
             <TextView
                 android:id="@+id/tv_item_file_name_queue"

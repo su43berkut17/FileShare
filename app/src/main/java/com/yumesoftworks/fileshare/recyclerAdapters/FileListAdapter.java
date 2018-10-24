@@ -52,6 +52,9 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
         Log.d(TAG,"mime type is "+fileListEntry.getMimeType());
         Log.d(TAG,"the path is "+fileListEntry.getPath());
 
+        //placeholder uri
+        int placeholderUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
+
         //we check if it is a directory
         if (fileListEntry.getDirectory()){
             //it is a directory
@@ -71,13 +74,22 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
                             .into(fileListViewHolder.iv_icon);
                 } else if (fileListEntry.getMimeType().startsWith("video")){
                     int tempUri = mContext.getResources().getIdentifier("icon_video_128","drawable",mContext.getPackageName());
-                    Picasso.get().load(tempUri).into(fileListViewHolder.iv_icon);
+                    Picasso.get()
+                            .load(tempUri)
+                            .placeholder(placeholderUri)
+                            .into(fileListViewHolder.iv_icon);
                 }else if (fileListEntry.getMimeType().startsWith("audio")){
                     int tempUri = mContext.getResources().getIdentifier("icon_music_128","drawable",mContext.getPackageName());
-                    Picasso.get().load(tempUri).into(fileListViewHolder.iv_icon);
+                    Picasso.get()
+                            .load(tempUri)
+                            .placeholder(placeholderUri)
+                            .into(fileListViewHolder.iv_icon);
                 }else {
                     int tempUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
-                    Picasso.get().load(tempUri).into(fileListViewHolder.iv_icon);
+                    Picasso.get()
+                            .load(tempUri)
+                            .placeholder(placeholderUri)
+                            .into(fileListViewHolder.iv_icon);
                 }
             }
         }
