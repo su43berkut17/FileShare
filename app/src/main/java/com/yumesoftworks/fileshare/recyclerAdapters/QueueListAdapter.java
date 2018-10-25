@@ -51,18 +51,38 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
         Log.d(TAG,"mime type is "+fileListEntry.getMimeType());
         Log.d(TAG,"the path is "+fileListEntry.getPath());
 
-        //we check the mime type for the icon
-            if (fileListEntry.getMimeType()!=null) {
-                if (fileListEntry.getMimeType().startsWith("image")) {
+        //placeholder uri
+        int placeholderUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
 
-                    Uri uri = Uri.fromFile(new File(fileListEntry.getPath()));
-                    //we load it in picasso
-                    //Picasso.get().load(fileListEntry.getPath()).into(fileListViewHolder.iv_icon);
-                    Picasso.get().load(uri).into(queueListViewHolder.iv_icon);
-                } else {
-                    //TODO: check other types and change the icon
-                }
-           }
+        //it is a file
+        if (fileListEntry.getMimeType()!=null) {
+            if (fileListEntry.getMimeType().startsWith("image")) {
+                Uri uri=Uri.fromFile(new File(fileListEntry.getPath()));
+                int tempUri = mContext.getResources().getIdentifier("icon_image_128","drawable",mContext.getPackageName());
+                Picasso.get()
+                        .load(uri)
+                        .placeholder(tempUri)
+                        .into(queueListViewHolder.iv_icon);
+            } else if (fileListEntry.getMimeType().startsWith("video")){
+                int tempUri = mContext.getResources().getIdentifier("icon_video_128","drawable",mContext.getPackageName());
+                Picasso.get()
+                        .load(tempUri)
+                        .placeholder(placeholderUri)
+                        .into(queueListViewHolder.iv_icon);
+            }else if (fileListEntry.getMimeType().startsWith("audio")){
+                int tempUri = mContext.getResources().getIdentifier("icon_music_128","drawable",mContext.getPackageName());
+                Picasso.get()
+                        .load(tempUri)
+                        .placeholder(placeholderUri)
+                        .into(queueListViewHolder.iv_icon);
+            }else {
+                int tempUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
+                Picasso.get()
+                        .load(tempUri)
+                        .placeholder(placeholderUri)
+                        .into(queueListViewHolder.iv_icon);
+            }
+        }
     }
 
     @Override
