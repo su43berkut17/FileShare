@@ -3,6 +3,7 @@ package com.yumesoftworks.fileshare.recyclerAdapters;
 import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -47,6 +48,7 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
 
         //set values in view
         queueListViewHolder.tv_fileName.setText(fileListEntry.getFileName());
+        queueListViewHolder.fileContents=fileListEntry;
 
         Log.d(TAG,"mime type is "+fileListEntry.getMimeType());
         Log.d(TAG,"the path is "+fileListEntry.getPath());
@@ -110,16 +112,30 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
         return mFileList.get(itemId);
     }
 
+    //methods for deleting and undoing delete items
+    public void removeItem(int position) {
+        mFileList.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    public void restoreItem(FileListEntry item, int position) {
+        mFileList.add(position, item);
+        notifyItemInserted(position);
+    }
+
     //ViewHolder
     class QueueListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView iv_icon;
         TextView tv_fileName;
+        ConstraintLayout view_foreground;
+        FileListEntry fileContents;
 
         public QueueListViewHolder(View itemView){
             super(itemView);
 
             iv_icon=itemView.findViewById(R.id.iv_item_file_queue);
             tv_fileName=itemView.findViewById(R.id.tv_item_file_name_queue);
+            view_foreground=itemView.findViewById(R.id.v_item_file_queue_foreground);
 
             itemView.setOnClickListener(this);
         }

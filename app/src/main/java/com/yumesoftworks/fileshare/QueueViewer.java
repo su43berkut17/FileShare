@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,10 +14,11 @@ import android.widget.Button;
 
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.recyclerAdapters.QueueListAdapter;
+import com.yumesoftworks.fileshare.recyclerAdapters.QueueListRecyclerViewItemHelper;
 
 import java.util.List;
 
-public class QueueViewer extends Fragment implements QueueListAdapter.QueueClickListener{
+public class QueueViewer extends Fragment implements QueueListAdapter.QueueClickListener, QueueListRecyclerViewItemHelper.RecyclerViewItemTouchHelperListener{
 
     //recycler view
     private RecyclerView rvFileQueue;
@@ -45,6 +47,10 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
             //we set the adapter
             rvFileQueue.setAdapter(rvAdapter);
             rvAdapter.notifyDataSetChanged();
+
+            //we set the recycler view ite touch helper
+            ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new QueueListRecyclerViewItemHelper(0, ItemTouchHelper.LEFT, this);
+            new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(rvFileQueue);
         //}
 
         return queueView;
@@ -59,6 +65,20 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
 
     @Override
     public void onQueueClickListener(int itemId) {
+
+    }
+
+    @Override
+    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
+        // remove the item from recycler view
+
+        //rvAdapter.removeItem(viewHolder.getAdapterPosition());
+        FileListEntry entryToDelete = rvAdapter.getFileItem(position);
+
+        //remove it from the database
+        //TODO: send it to the main activity via an interface
+
+        //send update to database
 
     }
 }
