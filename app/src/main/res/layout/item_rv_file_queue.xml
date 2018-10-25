@@ -23,21 +23,21 @@
                 android:id="@+id/iv_item_delete_queue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
                 android:contentDescription="@string/fq_iv_delete_description"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@android:drawable/ic_menu_delete" />
 
         </android.support.constraint.ConstraintLayout>
 
         <android.support.constraint.ConstraintLayout
+            android:id="@+id/v_item_file_queue_foreground"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/v_item_file_queue_foreground"
             android:background="@color/colorCardWhite">
 
             <ImageView
@@ -48,12 +48,12 @@
                 android:layout_marginTop="@dimen/default_padding"
                 android:layout_marginBottom="@dimen/default_padding"
                 android:contentDescription="@string/fb_icon_description"
+                android:scaleType="fitCenter"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/tv_item_file_name_queue"
                 app:layout_constraintHorizontal_chainStyle="spread"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:scaleType="fitCenter"
                 app:srcCompat="@drawable/icon_file_128" />
 
             <TextView
@@ -70,5 +70,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
         </android.support.constraint.ConstraintLayout>
+
+
     </FrameLayout>
 </android.support.v7.widget.CardView>

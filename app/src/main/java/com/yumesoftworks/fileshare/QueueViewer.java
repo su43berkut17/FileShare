@@ -59,7 +59,7 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
             rvAdapter.notifyDataSetChanged();
 
             //we set the recycler view ite touch helper
-            ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new QueueListRecyclerViewItemHelper(0, ItemTouchHelper.LEFT, this);
+            ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new QueueListRecyclerViewItemHelper(0, ItemTouchHelper.RIGHT, this);
             new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(rvFileQueue);
         //}
 
@@ -87,15 +87,13 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
         // remove the item from recycler view
+        rvAdapter.removeItem(position);
 
         //rvAdapter.removeItem(viewHolder.getAdapterPosition());
         FileListEntry entryToDelete = rvAdapter.getFileItem(position);
 
         //remove it from the database
         mQueueClickListener.onItemSwiped(entryToDelete);
-
-        //send update to database
-
     }
 
     //interface to activity

@@ -150,7 +150,6 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
             }else{
                 //we deactivate the checkbox and values
                 mFileList.get(getAdapterPosition()).setIsSelected(0);
-
             }
 
             mQueueClickListener.onQueueClickListener(getAdapterPosition());
