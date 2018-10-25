@@ -25,7 +25,8 @@ import java.util.List;
 //this activity will change depending if it is a tablet view
 public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         FileViewer.OnFragmentFileInteractionListener,
-        FileViewer.OnButtonGoToQueueInterface{
+        FileViewer.OnButtonGoToQueueInterface,
+        QueueViewer.QueueFragmentClickListener{
     private static final String TAG="FileBaQActivity";
 
     //2 panel
@@ -159,5 +160,11 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
         //it should load automatically from the lifecycle
         queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
+    }
+
+    @Override
+    public void onItemSwiped(FileListEntry file) {
+        //we delete it from the database
+        fileViewerViewModel.deleteFile(file);
     }
 }

@@ -1,5 +1,6 @@
 package com.yumesoftworks.fileshare;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -25,10 +26,19 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
     private QueueListAdapter rvAdapter;
     private static List<FileListEntry> fileList;
 
+    private QueueFragmentClickListener mQueueClickListener;
+
     //button
     private Button btnSendFiles;
 
     public QueueViewer(){
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        mQueueClickListener=(QueueFragmentClickListener) context;
     }
 
     @Nullable
@@ -56,6 +66,13 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
         return queueView;
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+
+        mQueueClickListener=null;
+    }
+
     //update queue viewer
     public void updateQueue(List<FileListEntry> fileListEntry){
         fileList=fileListEntry;
@@ -65,7 +82,6 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
 
     @Override
     public void onQueueClickListener(int itemId) {
-
     }
 
     @Override
@@ -76,9 +92,14 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
         FileListEntry entryToDelete = rvAdapter.getFileItem(position);
 
         //remove it from the database
-        //TODO: send it to the main activity via an interface
+        mQueueClickListener.onItemSwiped(entryToDelete);
 
         //send update to database
 
+    }
+
+    //interface to activity
+    public interface QueueFragmentClickListener{
+        void onItemSwiped(FileListEntry file);
     }
 }
