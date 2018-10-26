@@ -19,7 +19,9 @@ import com.yumesoftworks.fileshare.recyclerAdapters.QueueListRecyclerViewItemHel
 
 import java.util.List;
 
-public class QueueViewer extends Fragment implements QueueListAdapter.QueueClickListener, QueueListRecyclerViewItemHelper.RecyclerViewItemTouchHelperListener{
+public class QueueViewer extends Fragment implements QueueListAdapter.QueueClickListener
+        , QueueListRecyclerViewItemHelper.RecyclerViewItemTouchHelperListener
+        ,View.OnClickListener{
 
     //recycler view
     private RecyclerView rvFileQueue;
@@ -63,6 +65,8 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
             new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(rvFileQueue);
         //}
 
+        btnSendFiles.setOnClickListener(this);
+
         return queueView;
     }
 
@@ -88,6 +92,7 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
         // remove the item from recycler view
         rvAdapter.removeItem(position);
+        rvAdapter.notifyItemRemoved(position);
 
         //rvAdapter.removeItem(viewHolder.getAdapterPosition());
         FileListEntry entryToDelete = rvAdapter.getFileItem(position);
@@ -96,8 +101,18 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
         mQueueClickListener.onItemSwiped(entryToDelete);
     }
 
+    //on click interface
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.bt_fqv_send_files:
+                mQueueClickListener.onButtonSendClicked();
+        }
+    }
+
     //interface to activity
     public interface QueueFragmentClickListener{
         void onItemSwiped(FileListEntry file);
+        void onButtonSendClicked();
     }
 }

@@ -41,6 +41,9 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private FileViewerViewModel fileViewerViewModel;
     private QueueViewerViewModel queueViewerViewModel;
 
+    //for deletion in the queue viewer
+    private boolean mIsNotDeletion;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,7 +79,6 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         //we load the database file list for the observer for the file list
         queueViewerViewModel = ViewModelProviders.of(this).get(QueueViewerViewModel.class);
 
-
         //refresh the data for the first time
         Log.i("FBAC","we will load the route: "+getFilesDir().getPath());
         //fileViewerViewModel.refreshData(getFilesDir().getPath());
@@ -97,7 +99,12 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     final Observer<List<FileListEntry>> queueViewerViewModelObserver=new Observer<List<FileListEntry>>() {
         @Override
         public void onChanged(@Nullable List<FileListEntry> fileListEntries) {
-            fragmentQueueViewer.updateQueue(fileListEntries);
+            //only if it is not a swipe update since that is managed by the adapter
+            if (mIsNotDeletion) {
+                fragmentQueueViewer.updateQueue(fileListEntries);
+            }else{
+                mIsNotDeletion=true;
+            }
         }
     };
 
@@ -158,6 +165,9 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                 .replace(R.id.frag_afv_main, fragmentQueueViewer)
                 .commit();
 
+        //we reset the deletion
+        mIsNotDeletion=true;
+
         //it should load automatically from the lifecycle
         queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
     }
@@ -165,6 +175,14 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     @Override
     public void onItemSwiped(FileListEntry file) {
         //we delete it from the database
+        mIsNotDeletion=false;
         fileViewerViewModel.deleteFile(file);
+    }
+
+    @Override
+    public void onButtonSendClicked() {
+        //we go to the send activity
+        Intent intent=new Intent(this,SenderPickDestinationActivity.class);
+        startActivity(intent);
     }
 }
