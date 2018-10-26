@@ -3,7 +3,6 @@ package com.yumesoftworks.fileshare;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
-import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.support.v7.app.AppCompatActivity;
@@ -13,7 +12,7 @@ import com.yumesoftworks.fileshare.peerToPeer.BroadcastReceiverSender;
 
 import java.util.List;
 
-public class SenderPickDestinationActivity extends AppCompatActivity {
+public class SenderPickDestinationActivity extends AppCompatActivity{
 
     private final IntentFilter intentFilter=new IntentFilter();
     private Channel mChannel;
@@ -47,6 +46,19 @@ public class SenderPickDestinationActivity extends AppCompatActivity {
 
         mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         mChannel = mManager.initialize(this, getMainLooper(), null);
+
+        //discover peers
+        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+
+            }
+
+            @Override
+            public void onFailure(int reason) {
+
+            }
+        });
     }
 
     @Override
@@ -62,5 +74,10 @@ public class SenderPickDestinationActivity extends AppCompatActivity {
         super.onPause();
 
         unregisterReceiver(receiver);
+    }
+
+    //on peers received
+    public void getPeers(List peersRec){
+        peers=peersRec;
     }
 }

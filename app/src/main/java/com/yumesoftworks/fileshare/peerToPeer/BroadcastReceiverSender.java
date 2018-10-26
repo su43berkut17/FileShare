@@ -7,6 +7,7 @@ import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
+import android.util.Log;
 
 
 import com.yumesoftworks.fileshare.SenderPickDestinationActivity;
@@ -15,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BroadcastReceiverSender extends BroadcastReceiver {
+
+    private static final String TAG="BroadcastReceiverSender";
 
     private WifiP2pManager manager;
     private Channel channel;
@@ -45,13 +48,11 @@ public class BroadcastReceiverSender extends BroadcastReceiver {
             } else {
                 //activity.setIsWifiP2pEnabled(false);
             }
-
         } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
             // The peer list has changed
             if (manager != null) {
                 manager.requestPeers(channel, peerListListener);
             }
-
         } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
             // Connection state changed
 
@@ -60,7 +61,7 @@ public class BroadcastReceiverSender extends BroadcastReceiver {
                     .findFragmentById(R.id.frag_list);
             fragment.updateThisDevice((WifiP2pDevice) intent.getParcelableExtra(
                     WifiP2pManager.EXTRA_WIFI_P2P_DEVICE));*/
-
+            activity.getPeers(peers);
         }
     }
 
@@ -73,12 +74,17 @@ public class BroadcastReceiverSender extends BroadcastReceiver {
             peers.clear();
             peers.addAll(peerList.getDeviceList());
 
+            //debug only
+            for (int i=0;i<peers.size();i++){
+                Log.d(TAG,"number of peers: "+peers.get(i).toString());
+            }
+
             // If an AdapterView is backed by this data, notify it
             // of the change.  For instance, if you have a ListView of available
             // peers, trigger an update.
             //((WiFiPeerListAdapter) getListAdapter()).notifyDataSetChanged();
             if (peers.size() == 0) {
-                //Log.d(WiFiDirectActivity.TAG, "No devices found");
+                Log.d(TAG, "No devices found");
                 return;
             }
         }
