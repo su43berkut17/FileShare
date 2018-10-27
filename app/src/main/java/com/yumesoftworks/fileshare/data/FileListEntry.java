@@ -100,6 +100,11 @@ public class FileListEntry implements Comparable<FileListEntry>{
     //comparator
     @Override
     public int compareTo(FileListEntry entry) {
-        return this.fileName.compareTo(entry.getFileName());
+        String UppercaseEntry=entry.getFileName().toUpperCase();
+
+        String UppercaseCompare=this.fileName.toUpperCase();
+
+        //return this.fileName.compareTo(entry.getFileName());
+        return UppercaseCompare.compareTo(UppercaseEntry);
     }
 }
