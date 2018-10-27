@@ -33,9 +33,10 @@ public class JsonAvatarLoader {
             if (hasInput) {
                 do {
                     String toAdd = scanner.next();
-                    finalString = finalString + toAdd;
+                    finalString =finalString.concat(toAdd);
                     hasInput = scanner.hasNext();
-                } while (hasInput == true);
+                } while (hasInput);
+                //} while (hasInput == true);
                 Log.d(TAG,"JSON successfully loaded");
                 return finalString;
             } else {
