@@ -4,12 +4,14 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.MutableLiveData;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.Log;
 
 import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.utils.ReadFileList;
 
+import java.io.File;
 import java.util.List;
 
 public class FileViewerViewModel extends AndroidViewModel {
@@ -27,7 +29,8 @@ public class FileViewerViewModel extends AndroidViewModel {
 
         //we set the data to be read
         ReadFileList readFileList=new ReadFileList();
-        data=readFileList.loadList("/storage/emulated/0/Download",this.getApplication().getApplicationContext());
+        File path=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"");
+        data=readFileList.loadList(path.getAbsolutePath(),this.getApplication().getApplicationContext());
     }
 
     public MutableLiveData<List<FileListEntry>> getData(){
