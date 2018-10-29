@@ -7,12 +7,15 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.yumesoftworks.fileshare.peerToPeer.BroadcastReceiverSender;
 
 import java.util.List;
 
 public class SenderPickDestinationActivity extends AppCompatActivity{
+
+    private final static String TAG="SendPickActivity";
 
     private final IntentFilter intentFilter=new IntentFilter();
     private Channel mChannel;
@@ -32,6 +35,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity{
 
     private void createConnection(){
         //create the intent filters
+        Log.d(TAG,"registering the intent filters");
         //Indicates a change in the Wi-Fi Peer-to-Peer status.
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
 
@@ -51,12 +55,12 @@ public class SenderPickDestinationActivity extends AppCompatActivity{
         mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-
+                Log.d(TAG,"discover peers success");
             }
 
             @Override
             public void onFailure(int reason) {
-
+                Log.d(TAG,"discover peers failure "+reason);
             }
         });
     }
