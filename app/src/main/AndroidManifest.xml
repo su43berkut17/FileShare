@@ -26,7 +26,8 @@
         <activity android:name=".MainMenuActivity" />
         <activity android:name=".FileBrowserAndQueueActivity" />
         <activity android:name=".SenderPickDestinationActivity" />
-        <activity android:name=".ReceiverPickDestinationActivity"></activity>
+        <activity android:name=".ReceiverPickDestinationActivity" />
+        <activity android:name=".TransferProgressActivity"></activity>
     </application>
 
 </manifest>
