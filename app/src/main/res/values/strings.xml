@@ -46,6 +46,12 @@
     <string name="ru_avatar_description">Wait for the sender to connect</string>
     <string name="ru_tv_please_wait">Waiting for sender connection...</string>
 
+    <!--Activity transfer progress-->
+    <string name="atp_tv_filename">Filename</string>
+    <string name="atp_tv_out_of">Number of files transferred</string>
+    <string name="atp_tv_percentage">Percentage</string>
+    <string name="atp_tv_files_in_queue">Files in queue:</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
