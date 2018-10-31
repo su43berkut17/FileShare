@@ -182,7 +182,10 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     @Override
     public void onButtonSendClicked() {
         //we go to the send activity
-        Intent intent=new Intent(this,SenderPickDestinationActivity.class);
+        //Intent intent=new Intent(this,SenderPickDestinationActivity.class);
+
+        //this is a test to open directly the file progress
+        Intent intent=new Intent(this,TransferProgressActivity.class);
         startActivity(intent);
     }
 }

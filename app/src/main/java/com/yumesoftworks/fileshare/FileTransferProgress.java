@@ -93,7 +93,7 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            mListener.onFragmentInteractionProgress(uri);
         }
     }
 
@@ -137,6 +137,6 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void onFragmentInteractionProgress(Uri uri);
     }
 }

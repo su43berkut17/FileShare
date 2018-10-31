@@ -78,14 +78,14 @@ public class FileTransferSent extends Fragment implements QueueListAdapter.Queue
         //create the view
         View fileSentView=inflater.inflate(R.layout.fragment_file_transfer_sent,container,false);
 
-        rvFileList=fileSentView.findViewById(R.id.rv_file_progress_queue);
+        rvFileList=fileSentView.findViewById(R.id.rv_files_sent);
         rvFileList.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        rvAdapter=new QueueListAdapter(getContext(),this);
+            rvAdapter=new QueueListAdapter(getContext(),this);
 
-        //we set the adapter
-        rvFileList.setAdapter(rvAdapter);
-        rvAdapter.notifyDataSetChanged();
+            //we set the adapter
+            rvFileList.setAdapter(rvAdapter);
+            rvAdapter.notifyDataSetChanged();
 
         return fileSentView;
     }
@@ -93,7 +93,7 @@ public class FileTransferSent extends Fragment implements QueueListAdapter.Queue
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+            mListener.onFragmentInteractionSent(uri);
         }
     }
 
@@ -137,6 +137,6 @@ public class FileTransferSent extends Fragment implements QueueListAdapter.Queue
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+        void onFragmentInteractionSent(Uri uri);
     }
 }

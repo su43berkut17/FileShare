@@ -4,6 +4,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
+import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -13,7 +14,8 @@ import com.yumesoftworks.fileshare.data.FileListEntry;
 
 import java.util.List;
 
-public class TransferProgressActivity extends AppCompatActivity {
+public class TransferProgressActivity extends AppCompatActivity implements FileTransferProgress.OnFragmentInteractionListener,
+FileTransferSent.OnFragmentInteractionListener{
 
     private static final String TAG="TransferProgressAct";
 
@@ -62,4 +64,14 @@ public class TransferProgressActivity extends AppCompatActivity {
             fragmentFileTransferSent.updateRV(fileListEntries);
         }
     };
+
+    @Override
+    public void onFragmentInteractionSent(Uri uri) {
+
+    }
+
+    @Override
+    public void onFragmentInteractionProgress(Uri uri){
+
+    }
 }
