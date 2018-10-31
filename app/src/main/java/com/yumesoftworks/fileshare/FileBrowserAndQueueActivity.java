@@ -90,7 +90,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         @Override
         public void onChanged(@Nullable List<FileListEntry> fileListEntries) {
             //we update the recyclerView Adapter
-            Log.d(TAG,"ON CHANGED, the file list entries lenght returned in lifecycle is "+fileListEntries.size());
+            Log.d(TAG,"ON CHANGED, the file list entries length returned in lifecycle is "+fileListEntries.size());
             fragmentFileViewer.updateFileRV(fileListEntries);
         }
     };
