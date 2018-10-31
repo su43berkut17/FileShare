@@ -4,6 +4,7 @@
     <!-- General purpose -->
     <string name="gen_button_ok">OK</string>
     <string name="gen_button_cancel">Cancel</string>
+    <string name="gen_button_finish">Finish</string>
 
     <!-- Activity Welcome Screen -->
     <string name="aws_pick_avatar">Pick an avatar:</string>
@@ -51,6 +52,8 @@
     <string name="atp_tv_out_of">Number of files transferred</string>
     <string name="atp_tv_percentage">Percentage</string>
     <string name="atp_tv_files_in_queue">Files in queue:</string>
+    <string name="ats_tv_sent_files">Files sent</string>
+    <string name="ats_tv_received_files">Files received</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
