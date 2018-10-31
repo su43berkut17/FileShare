@@ -4,9 +4,16 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.yumesoftworks.fileshare.data.FileListEntry;
+import com.yumesoftworks.fileshare.recyclerAdapters.QueueListAdapter;
+
+import java.util.List;
 
 
 /**
@@ -17,7 +24,7 @@ import android.view.ViewGroup;
  * Use the {@link FileTransferSent#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FileTransferSent extends Fragment {
+public class FileTransferSent extends Fragment implements QueueListAdapter.QueueClickListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -28,6 +35,11 @@ public class FileTransferSent extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+
+    //recycler view
+    private RecyclerView rvFileList;
+    private QueueListAdapter rvAdapter;
+    private static List<FileListEntry> fileList;
 
     public FileTransferSent() {
         // Required empty public constructor
@@ -63,8 +75,19 @@ public class FileTransferSent extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_file_transfer_sent, container, false);
+        //create the view
+        View fileSentView=inflater.inflate(R.layout.fragment_file_transfer_sent,container,false);
+
+        rvFileList=fileSentView.findViewById(R.id.rv_file_progress_queue);
+        rvFileList.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        rvAdapter=new QueueListAdapter(getContext(),this);
+
+        //we set the adapter
+        rvFileList.setAdapter(rvAdapter);
+        rvAdapter.notifyDataSetChanged();
+
+        return fileSentView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -89,6 +112,17 @@ public class FileTransferSent extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    //updating recycler view
+    public void updateRV(List<FileListEntry> receivedFileList){
+        rvAdapter.setFileList(receivedFileList);
+        rvAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onQueueClickListener(int itemId) {
+
     }
 
     /**
