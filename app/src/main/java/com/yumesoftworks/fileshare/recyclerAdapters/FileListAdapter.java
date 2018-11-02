@@ -48,6 +48,12 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
 
         //set values in view
         fileListViewHolder.tv_fileName.setText(fileListEntry.getFileName());
+        //we check the checkbox status
+        if (fileListEntry.getIsSelected()==1){
+            fileListViewHolder.cv_selected.setChecked(true);
+        }else{
+            fileListViewHolder.cv_selected.setChecked(false);
+        }
 
         Log.d(TAG,"mime type is "+fileListEntry.getMimeType());
         Log.d(TAG,"the path is "+fileListEntry.getPath());

@@ -12,10 +12,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.MenuItem;
 
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.recyclerAdapters.QueueListRecyclerViewItemHelper;
@@ -28,9 +30,12 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         FileViewer.OnButtonGoToQueueInterface,
         QueueViewer.QueueFragmentClickListener{
     private static final String TAG="FileBaQActivity";
+    private static final int FILE_FRAGMENT=1000;
+    private static final int QUEUE_FRAGMENT=1001;
 
     //2 panel
     private boolean mTwoPanel;
+    private int mCurrentFragment;
 
     //fragment parts
     private FileViewer fragmentFileViewer;
@@ -50,10 +55,17 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_file_browser_and_queue);
 
         //we check if it is 1 or 2 panels
-        mTwoPanel=false;
+        if (findViewById(R.id.frag_afv_queue) != null) {
+            mTwoPanel = true;
+        } else {
+            mTwoPanel = false;
+        }
 
         //we check for the permissions
         askForFilePermission();
+
+        //we set the action bar
+        getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     private void initializeVariables(){
@@ -64,10 +76,10 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         fragmentQueueViewer=new QueueViewer();
 
         //we load the files
-        loadFragments(fragmentManager);
+        loadFragments();
     }
 
-    private void loadFragments(FragmentManager fragmentManager){
+    private void loadFragments(){
         fragmentManager.beginTransaction()
                 .add(R.id.frag_afv_main, fragmentFileViewer)
                 .commit();
@@ -78,6 +90,16 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
         //we load the database file list for the observer for the file list
         queueViewerViewModel = ViewModelProviders.of(this).get(QueueViewerViewModel.class);
+
+        //we load the queue too if it is 2 panels
+        if (mTwoPanel){
+            fragmentManager.beginTransaction()
+                    .replace(R.id.frag_afv_queue, fragmentQueueViewer)
+                    .commit();
+
+            //it should load automatically from the lifecycle
+            queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
+        }
 
         //refresh the data for the first time
         Log.i("FBAC","we will load the route: "+getFilesDir().getPath());
@@ -150,6 +172,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             //we check if it has been selected or not
             if (fileListEntry.getIsSelected()==0){
                 //it is not selected so we delete it
+                //we reset the is selected value as 1 so the fileListEntry is the same as the one that was saved before
+                fileListEntry.setIsSelected(1);
                 fileViewerViewModel.deleteFile(fileListEntry);
             }else{
                 //it is selected so we save it
@@ -161,15 +185,20 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     @Override
     public void onButtonQueueInteraction() {
         //we open the queue if it is single panel
-        fragmentManager.beginTransaction()
-                .replace(R.id.frag_afv_main, fragmentQueueViewer)
-                .commit();
+        if (mTwoPanel!=true) {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.frag_afv_main, fragmentQueueViewer)
+                    .commit();
+
+            //it should load automatically from the lifecycle
+            queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
+
+            //we set the current fragment as the 1st one
+            mCurrentFragment=QUEUE_FRAGMENT;
+        }
 
         //we reset the deletion
         mIsNotDeletion=true;
-
-        //it should load automatically from the lifecycle
-        queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
     }
 
     @Override
@@ -187,5 +216,33 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         //this is a test to open directly the file progress
         Intent intent=new Intent(this,TransferProgressActivity.class);
         startActivity(intent);
+    }
+
+    //override the back button normal behaviour
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //return super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                //if we are in 1 panel mode
+                if (mTwoPanel){
+                    //we go back
+                    onBackPressed();
+                }else {
+                    //we check the current fragment
+                    if (mCurrentFragment == QUEUE_FRAGMENT) {
+                        //we reload the  fragment 1
+                        fragmentManager.beginTransaction()
+                                .replace(R.id.frag_afv_main, fragmentFileViewer)
+                                .commit();
+                    } else {
+                        //we are on the 1st fragment so we can go back
+                        onBackPressed();
+                    }
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
