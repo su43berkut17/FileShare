@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,6 +25,7 @@ public class FileViewer extends Fragment implements
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String RECYCLER_VIEW_POSITION="rvPosition";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -33,6 +35,7 @@ public class FileViewer extends Fragment implements
     private RecyclerView rvFileList;
     private FileListAdapter rvAdapter;
     private static List<FileListEntry> fileList;
+    private Parcelable mRvPosition;
 
     //ui
     private Button btnQueue;
@@ -69,6 +72,16 @@ public class FileViewer extends Fragment implements
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
+            mRvPosition=getArguments().getParcelable(RECYCLER_VIEW_POSITION);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if (rvFileList!=null){
+            mRvPosition=rvFileList.getLayoutManager().onSaveInstanceState();
         }
     }
 
@@ -88,6 +101,10 @@ public class FileViewer extends Fragment implements
             //we set the adapter
             rvFileList.setAdapter(rvAdapter);
             rvAdapter.notifyDataSetChanged();
+
+            if (mRvPosition!=null){
+                rvFileList.getLayoutManager().onRestoreInstanceState(mRvPosition);
+            }
         //}
 
         //listeners button queue

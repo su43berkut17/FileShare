@@ -2,6 +2,7 @@ package com.yumesoftworks.fileshare;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -23,10 +24,13 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
         , QueueListRecyclerViewItemHelper.RecyclerViewItemTouchHelperListener
         ,View.OnClickListener{
 
+    private static final String RECYCLER_VIEW_POSITION="rvPosition";
+
     //recycler view
     private RecyclerView rvFileQueue;
     private QueueListAdapter rvAdapter;
     private static List<FileListEntry> fileList;
+    private Parcelable mRvPosition;
 
     private QueueFragmentClickListener mQueueClickListener;
 
@@ -41,6 +45,23 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
         super.onAttach(context);
 
         mQueueClickListener=(QueueFragmentClickListener) context;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            mRvPosition=getArguments().getParcelable(RECYCLER_VIEW_POSITION);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if (rvFileQueue!=null){
+            mRvPosition=rvFileQueue.getLayoutManager().onSaveInstanceState();
+        }
     }
 
     @Nullable
@@ -63,6 +84,10 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
             //we set the recycler view ite touch helper
             ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new QueueListRecyclerViewItemHelper(0, ItemTouchHelper.RIGHT, this);
             new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(rvFileQueue);
+
+            if (mRvPosition!=null){
+                rvFileQueue.getLayoutManager().onRestoreInstanceState(mRvPosition);
+            }
         //}
 
         btnSendFiles.setOnClickListener(this);

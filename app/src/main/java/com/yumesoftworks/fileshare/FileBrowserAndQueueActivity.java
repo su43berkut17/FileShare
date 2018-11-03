@@ -91,6 +91,9 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         //we load the database file list for the observer for the file list
         queueViewerViewModel = ViewModelProviders.of(this).get(QueueViewerViewModel.class);
 
+        //we set the current fragment
+        mCurrentFragment=FILE_FRAGMENT;
+
         //we load the queue too if it is 2 panels
         if (mTwoPanel){
             fragmentManager.beginTransaction()
@@ -101,10 +104,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
         }
 
-        //refresh the data for the first time
-        Log.i("FBAC","we will load the route: "+getFilesDir().getPath());
-        //fileViewerViewModel.refreshData(getFilesDir().getPath());
-        //fileViewerViewModel.refreshData(Environment.getExternalStorageDirectory().getPath());
+        changeActionBarName("FileShare - Send Files");
     }
 
     //observer for the file browser
@@ -195,6 +195,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
             //we set the current fragment as the 1st one
             mCurrentFragment=QUEUE_FRAGMENT;
+
+            changeActionBarName("FileShare - Queue");
         }
 
         //we reset the deletion
@@ -235,6 +237,10 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                         fragmentManager.beginTransaction()
                                 .replace(R.id.frag_afv_main, fragmentFileViewer)
                                 .commit();
+
+                        //we set the current fragment
+                        mCurrentFragment=FILE_FRAGMENT;
+                        changeActionBarName("FileShare - Send Files");
                     } else {
                         //we are on the 1st fragment so we can go back
                         onBackPressed();
@@ -244,5 +250,12 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    //action bar
+    //@Override
+    public void changeActionBarName(String newTitle) {
+        ActionBar titleUp=getSupportActionBar();
+        titleUp.setTitle(newTitle);
     }
 }
