@@ -30,7 +30,8 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
     private RecyclerView rvFileQueue;
     private QueueListAdapter rvAdapter;
     private static List<FileListEntry> fileList;
-    private Parcelable mRvPosition;
+    private int mRvPosition;
+    private LinearLayoutManager mLinearLayoutManager;
 
     private QueueFragmentClickListener mQueueClickListener;
 
@@ -50,8 +51,8 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mRvPosition=getArguments().getParcelable(RECYCLER_VIEW_POSITION);
+        if (savedInstanceState != null) {
+            mRvPosition=savedInstanceState.getInt(RECYCLER_VIEW_POSITION);
         }
     }
 
@@ -60,8 +61,19 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
         super.onPause();
 
         if (rvFileQueue!=null){
-            mRvPosition=rvFileQueue.getLayoutManager().onSaveInstanceState();
+            mRvPosition=mLinearLayoutManager.findFirstVisibleItemPosition();
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if (rvFileQueue!=null){
+            mRvPosition=mLinearLayoutManager.findFirstVisibleItemPosition();
+        }
+
+        outState.putInt(RECYCLER_VIEW_POSITION,mRvPosition);
     }
 
     @Nullable
@@ -72,7 +84,8 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
 
         btnSendFiles=queueView.findViewById(R.id.bt_fqv_send_files);
         rvFileQueue=queueView.findViewById(R.id.rv_file_queue);
-        rvFileQueue.setLayoutManager(new LinearLayoutManager(getContext()));
+        mLinearLayoutManager=new LinearLayoutManager(getContext());
+        rvFileQueue.setLayoutManager(mLinearLayoutManager);
 
         //if (fileList != null) {
             rvAdapter = new QueueListAdapter(getContext(),this);
@@ -81,13 +94,12 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
             rvFileQueue.setAdapter(rvAdapter);
             rvAdapter.notifyDataSetChanged();
 
+            //request an update
+            mQueueClickListener.queueFragmentRequestUpdate();
+
             //we set the recycler view ite touch helper
             ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new QueueListRecyclerViewItemHelper(0, ItemTouchHelper.RIGHT, this);
             new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(rvFileQueue);
-
-            if (mRvPosition!=null){
-                rvFileQueue.getLayoutManager().onRestoreInstanceState(mRvPosition);
-            }
         //}
 
         btnSendFiles.setOnClickListener(this);
@@ -104,9 +116,12 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
 
     //update queue viewer
     public void updateQueue(List<FileListEntry> fileListEntry){
-        fileList=fileListEntry;
-        rvAdapter.setFileList(fileListEntry);
-        rvAdapter.notifyDataSetChanged();
+        if (rvAdapter!=null) {
+            fileList = fileListEntry;
+            rvAdapter.setFileList(fileListEntry);
+            rvAdapter.notifyDataSetChanged();
+            mLinearLayoutManager.scrollToPosition(mRvPosition);
+        }
     }
 
     @Override
@@ -115,12 +130,11 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
 
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
+        FileListEntry entryToDelete = rvAdapter.getFileItem(position);
+
         // remove the item from recycler view
         rvAdapter.removeItem(position);
         rvAdapter.notifyItemRemoved(position);
-
-        //rvAdapter.removeItem(viewHolder.getAdapterPosition());
-        FileListEntry entryToDelete = rvAdapter.getFileItem(position);
 
         //remove it from the database
         mQueueClickListener.onItemSwiped(entryToDelete);
@@ -139,5 +153,6 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
     public interface QueueFragmentClickListener{
         void onItemSwiped(FileListEntry file);
         void onButtonSendClicked();
+        void queueFragmentRequestUpdate();
     }
 }

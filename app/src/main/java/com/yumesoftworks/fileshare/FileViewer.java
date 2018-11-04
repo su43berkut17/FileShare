@@ -36,6 +36,7 @@ public class FileViewer extends Fragment implements
 
     //ui
     private Button btnQueue;
+    private Boolean mIsButtonShown;
 
     //interfaces
     private OnFragmentFileInteractionListener mListener;
@@ -89,6 +90,11 @@ public class FileViewer extends Fragment implements
         mLinearLayoutManager=new LinearLayoutManager(getContext());
         rvFileList.setLayoutManager(mLinearLayoutManager);
 
+        //we hide the button
+        if (mIsButtonShown==false){
+            btnQueue.setVisibility(View.GONE);
+        }
+
         //if (fileList != null) {
             rvAdapter = new FileListAdapter(getContext(),this);
 
@@ -118,10 +124,17 @@ public class FileViewer extends Fragment implements
 
     //update file viewer
     public void updateFileRV(List<FileListEntry> fileListSent){
-        rvAdapter.setFileList(fileListSent);
-        rvAdapter.notifyDataSetChanged();
-        Log.d(TAG,"update file RV with position "+mRvPosition);
-        mLinearLayoutManager.scrollToPosition(mRvPosition);
+        if (rvAdapter!=null) {
+            rvAdapter.setFileList(fileListSent);
+            rvAdapter.notifyDataSetChanged();
+            Log.d(TAG, "update file RV with position " + mRvPosition);
+            mLinearLayoutManager.scrollToPosition(mRvPosition);
+        }
+    }
+
+    //hide the button here
+    public void hideButton(){
+        mIsButtonShown=false;
     }
 
     @Override

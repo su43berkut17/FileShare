@@ -75,7 +75,6 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         askForFilePermission();
 
         //we set the action bar
-        //getActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
@@ -90,34 +89,82 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         //we check if we have old versions of the fragments
         fragmentManager=getSupportFragmentManager();
 
-        //we check if it is 2 panels or 1 panel
+        int mainId=R.id.frag_afv_main;
+        int queueId=R.id.frag_afv_queue;
+
+        //we set the id vars
         if (mTwoPanel){
             //2 panels so we do different ids
             Log.d(TAG,"2 panel");
         }else{
+            //reset the id for the queue
+            queueId=R.id.frag_afv_main;
+        }
+
+        if (mTwoPanel) {
+            //2 panels
             //we need to check which fragment we will restore the instance of
-            Log.d(TAG,"1 panel");
-            if (mCurrentFragment==FILE_FRAGMENT){
-                Log.d(TAG,"the current fragment is file");
-                //it is the file one
-                Fragment fragmentFileViewerTemp=fragmentManager.findFragmentById(R.id.frag_afv_main);
+            Log.d(TAG, "2 panels");
 
-                if (fragmentFileViewerTemp==null){
-                    Log.d(TAG,"file fragment is null we create a new instance");
-                    fragmentFileViewer=new FileViewer();
-                }else{
-                    Log.d(TAG,"fragment exists we take from fragment manager");
-                    fragmentFileViewer=(FileViewer) fragmentManager.findFragmentById(R.id.frag_afv_main);
-                }
-            }else{
-                //it is the queue one
-                Fragment fragmentQueueViewerTemp=fragmentManager.findFragmentById(R.id.frag_afv_main);
+            //for the file one
+            Fragment fragmentFileViewerTemp = fragmentManager.findFragmentById(mainId);
 
-                if (fragmentQueueViewerTemp==null){
-                    fragmentQueueViewer=new QueueViewer();
-                }else {
-                    fragmentQueueViewer=(QueueViewer) fragmentManager.findFragmentById(R.id.frag_afv_main);
+            if (fragmentFileViewerTemp == null) {
+                Log.d(TAG, "file fragment is null we create a new instance");
+                fragmentFileViewer = new FileViewer();
+            } else {
+                Log.d(TAG, "fragment exists we take from fragment manager");
+                fragmentFileViewer = (FileViewer) fragmentManager.findFragmentById(mainId);
+            }
+
+            //hide the file viewer button
+            fragmentFileViewer.hideButton();
+
+            //queue one
+            Fragment fragmentQueueViewerTemp = fragmentManager.findFragmentById(queueId);
+
+            if (fragmentQueueViewerTemp == null) {
+                Log.d(TAG, "queue fragment is null we create a new instance");
+                fragmentQueueViewer = new QueueViewer();
+            } else {
+                Log.d(TAG, "queue fragment is null we create a new instance");
+                fragmentQueueViewer = (QueueViewer) fragmentManager.findFragmentById(queueId);
+            }
+        }else{
+            //1 panel, check which fragment is active to be reloaded from the saved instance state
+            //we need to check which fragment we will restore the instance of
+            Log.d(TAG, "1 panel, we decide which one to load an which one to create");
+
+            if (mCurrentFragment==FILE_FRAGMENT) {
+                //for the file one
+                Fragment fragmentFileViewerTemp = fragmentManager.findFragmentById(mainId);
+
+                if (fragmentFileViewerTemp == null) {
+                    Log.d(TAG, "file fragment is null we create a new instance");
+                    fragmentFileViewer = new FileViewer();
+                } else {
+                    Log.d(TAG, "fragment exists we take from fragment manager");
+                    fragmentFileViewer = (FileViewer) fragmentManager.findFragmentById(mainId);
                 }
+
+                //we create the queue one from scratch
+                fragmentQueueViewer=new QueueViewer();
+            }
+
+            if (mCurrentFragment==QUEUE_FRAGMENT) {
+                //queue one
+                Fragment fragmentQueueViewerTemp = fragmentManager.findFragmentById(mainId);
+
+                if (fragmentQueueViewerTemp == null) {
+                    Log.d(TAG, "queue fragment is null we create a new instance");
+                    fragmentQueueViewer = new QueueViewer();
+                } else {
+                    Log.d(TAG, "queue fragment is null we create a new instance");
+                    fragmentQueueViewer = (QueueViewer) fragmentManager.findFragmentById(mainId);
+                }
+
+                //we cteate the file one from scratch
+                fragmentFileViewer=new FileViewer();
             }
         }
 
@@ -127,29 +174,40 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
     private void loadFragments(){
         Log.d(TAG,"Load fragments");
-        fragmentManager.beginTransaction()
-                .replace(R.id.frag_afv_main, fragmentFileViewer)
-                .commit();
+        //we create the viewmodel observers if they are null
+        if (fileViewerViewModel==null){
+            fileViewerViewModel = ViewModelProviders.of(this).get(FileViewerViewModel.class);
+        }
+        if (queueViewerViewModel==null) {
+            queueViewerViewModel = ViewModelProviders.of(this).get(QueueViewerViewModel.class);
+        }
 
-        //we load the file list
-        fileViewerViewModel = ViewModelProviders.of(this).get(FileViewerViewModel.class);
-        fileViewerViewModel.getData().observe(this, fileViewerViewModelObserver);
-
-        //we load the database file list for the observer for the file list
-        queueViewerViewModel = ViewModelProviders.of(this).get(QueueViewerViewModel.class);
-
-        //we set the current fragment
-        mCurrentFragment=FILE_FRAGMENT;
-
-        //we load the queue too if it is 2 panels
-        if (mTwoPanel){
+        //we check which fragment to load depending on the current fragment
+        if (mCurrentFragment==0 || mCurrentFragment==FILE_FRAGMENT) {
             fragmentManager.beginTransaction()
-                    .add(R.id.frag_afv_queue, fragmentQueueViewer)
+                    .replace(R.id.frag_afv_main, fragmentFileViewer)
                     .commit();
 
-            //it should load automatically from the lifecycle
-            queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
+            //we set the current fragment
+            mCurrentFragment=FILE_FRAGMENT;
         }
+
+        //queue
+        if (mCurrentFragment==QUEUE_FRAGMENT || mTwoPanel){
+            if (mTwoPanel){
+                fragmentManager.beginTransaction()
+                        .replace(R.id.frag_afv_queue, fragmentQueueViewer)
+                        .commit();
+            }else {
+                fragmentManager.beginTransaction()
+                        .replace(R.id.frag_afv_main, fragmentQueueViewer)
+                        .commit();
+            }
+        }
+
+        //we attach the observers to the activiy
+        fileViewerViewModel.getData().observe(this,fileViewerViewModelObserver);
+        queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
 
         changeActionBarName("FileShare - Send Files");
     }
@@ -262,6 +320,12 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void queueFragmentRequestUpdate() {
+        //we update the queue per the fragment request
+        fragmentQueueViewer.updateQueue(queueViewerViewModel.getData().getValue());
+    }
+
+    @Override
     public void onItemSwiped(FileListEntry file) {
         //we delete it from the database
         mIsNotDeletion=false;
@@ -292,6 +356,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                     //we check the current fragment
                     if (mCurrentFragment == QUEUE_FRAGMENT) {
                         Log.d(TAG,"current is queue fragment so we reload the file fragment");
+
                         //we reload the  fragment
                         fragmentManager.beginTransaction()
                                 .replace(R.id.frag_afv_main, fragmentFileViewer)
