@@ -27,7 +27,17 @@
         <activity android:name=".FileBrowserAndQueueActivity" />
         <activity android:name=".SenderPickDestinationActivity" />
         <activity android:name=".ReceiverPickDestinationActivity" />
-        <activity android:name=".TransferProgressActivity"></activity>
+        <activity android:name=".TransferProgressActivity" />
+
+        <receiver android:name=".TransferProgressWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/transfer_progress_widget_info" />
+        </receiver>
     </application>
 
 </manifest>
