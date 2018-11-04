@@ -10,6 +10,7 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
@@ -20,7 +21,6 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import com.yumesoftworks.fileshare.data.FileListEntry;
-import com.yumesoftworks.fileshare.recyclerAdapters.QueueListRecyclerViewItemHelper;
 
 import java.util.List;
 
@@ -33,9 +33,13 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private static final int FILE_FRAGMENT=1000;
     private static final int QUEUE_FRAGMENT=1001;
 
+    private static final String FILE_FRAGMENT_TAG="fileFragmentTag";
+    private static final String QUEUE_FRAGMENT_TAG="queueFragmentTag";
+
     //2 panel
     private boolean mTwoPanel;
     private int mCurrentFragment;
+    private static final String CURRENT_FRAGMENT_TAG="currentFragmentTag";
 
     //fragment parts
     private FileViewer fragmentFileViewer;
@@ -54,6 +58,12 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_browser_and_queue);
 
+        if(savedInstanceState!=null){
+            mCurrentFragment=savedInstanceState.getInt(CURRENT_FRAGMENT_TAG);
+        }else{
+            mCurrentFragment=FILE_FRAGMENT;
+        }
+
         //we check if it is 1 or 2 panels
         if (findViewById(R.id.frag_afv_queue) != null) {
             mTwoPanel = true;
@@ -65,23 +75,60 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         askForFilePermission();
 
         //we set the action bar
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        //getActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(CURRENT_FRAGMENT_TAG,mCurrentFragment);
     }
 
     private void initializeVariables(){
-        //fragment stuff
+        Log.d(TAG,"initializing variables");
+        //we check if we have old versions of the fragments
         fragmentManager=getSupportFragmentManager();
 
-        fragmentFileViewer=new FileViewer();
-        fragmentQueueViewer=new QueueViewer();
+        //we check if it is 2 panels or 1 panel
+        if (mTwoPanel){
+            //2 panels so we do different ids
+            Log.d(TAG,"2 panel");
+        }else{
+            //we need to check which fragment we will restore the instance of
+            Log.d(TAG,"1 panel");
+            if (mCurrentFragment==FILE_FRAGMENT){
+                Log.d(TAG,"the current fragment is file");
+                //it is the file one
+                Fragment fragmentFileViewerTemp=fragmentManager.findFragmentById(R.id.frag_afv_main);
+
+                if (fragmentFileViewerTemp==null){
+                    Log.d(TAG,"file fragment is null we create a new instance");
+                    fragmentFileViewer=new FileViewer();
+                }else{
+                    Log.d(TAG,"fragment exists we take from fragment manager");
+                    fragmentFileViewer=(FileViewer) fragmentManager.findFragmentById(R.id.frag_afv_main);
+                }
+            }else{
+                //it is the queue one
+                Fragment fragmentQueueViewerTemp=fragmentManager.findFragmentById(R.id.frag_afv_main);
+
+                if (fragmentQueueViewerTemp==null){
+                    fragmentQueueViewer=new QueueViewer();
+                }else {
+                    fragmentQueueViewer=(QueueViewer) fragmentManager.findFragmentById(R.id.frag_afv_main);
+                }
+            }
+        }
 
         //we load the files
         loadFragments();
     }
 
     private void loadFragments(){
+        Log.d(TAG,"Load fragments");
         fragmentManager.beginTransaction()
-                .add(R.id.frag_afv_main, fragmentFileViewer)
+                .replace(R.id.frag_afv_main, fragmentFileViewer)
                 .commit();
 
         //we load the file list
@@ -97,7 +144,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         //we load the queue too if it is 2 panels
         if (mTwoPanel){
             fragmentManager.beginTransaction()
-                    .replace(R.id.frag_afv_queue, fragmentQueueViewer)
+                    .add(R.id.frag_afv_queue, fragmentQueueViewer)
                     .commit();
 
             //it should load automatically from the lifecycle
@@ -186,6 +233,11 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     public void onButtonQueueInteraction() {
         //we open the queue if it is single panel
         if (mTwoPanel!=true) {
+            Log.d(TAG,"it is the queue button so we create a new instance of the queue");
+            //we get or generate the queue
+            //it is the queue one
+            fragmentQueueViewer=new QueueViewer();
+
             fragmentManager.beginTransaction()
                     .replace(R.id.frag_afv_main, fragmentQueueViewer)
                     .commit();
@@ -201,6 +253,12 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
         //we reset the deletion
         mIsNotDeletion=true;
+    }
+
+    @Override
+    public void fileFragmentRequestUpdate() {
+        //we update the info of the fragment per the fragment request
+        fragmentFileViewer.updateFileRV(fileViewerViewModel.getData().getValue());
     }
 
     @Override
@@ -226,14 +284,15 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         //return super.onOptionsItemSelected(item);
         switch (item.getItemId()) {
             case android.R.id.home:
-                //if we are in 1 panel mode
+                //if we are in 1 or 2 panel mode
                 if (mTwoPanel){
                     //we go back
                     onBackPressed();
                 }else {
                     //we check the current fragment
                     if (mCurrentFragment == QUEUE_FRAGMENT) {
-                        //we reload the  fragment 1
+                        Log.d(TAG,"current is queue fragment so we reload the file fragment");
+                        //we reload the  fragment
                         fragmentManager.beginTransaction()
                                 .replace(R.id.frag_afv_main, fragmentFileViewer)
                                 .commit();
@@ -253,7 +312,6 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     }
 
     //action bar
-    //@Override
     public void changeActionBarName(String newTitle) {
         ActionBar titleUp=getSupportActionBar();
         titleUp.setTitle(newTitle);

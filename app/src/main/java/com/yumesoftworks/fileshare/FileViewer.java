@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,21 +23,16 @@ import java.util.List;
 public class FileViewer extends Fragment implements
         FileListAdapter.FileClickListener,
         View.OnClickListener{
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    private static final String RECYCLER_VIEW_POSITION="rvPosition";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private static final String TAG="FileViewerFrag";
+    private static final String RECYCLER_VIEW_POSITION="rvPosition";
 
     //recycler view
     private RecyclerView rvFileList;
     private FileListAdapter rvAdapter;
     private static List<FileListEntry> fileList;
-    private Parcelable mRvPosition;
+    private int mRvPosition;
+    private LinearLayoutManager mLinearLayoutManager;
 
     //ui
     private Button btnQueue;
@@ -48,31 +45,13 @@ public class FileViewer extends Fragment implements
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FileViewer.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static FileViewer newInstance(String param1, String param2) {
-        FileViewer fragment = new FileViewer();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-            mRvPosition=getArguments().getParcelable(RECYCLER_VIEW_POSITION);
+        Log.d(TAG,"on create");
+        if (savedInstanceState!=null) {
+            mRvPosition = savedInstanceState.getInt(RECYCLER_VIEW_POSITION);
+            Log.d(TAG, "We load the position " + mRvPosition);
         }
     }
 
@@ -81,19 +60,34 @@ public class FileViewer extends Fragment implements
         super.onPause();
 
         if (rvFileList!=null){
-            mRvPosition=rvFileList.getLayoutManager().onSaveInstanceState();
+            //Log.d(TAG,"number of items "+rvFileList.getLayoutManager().findFirst());
+
+            mRvPosition=mLinearLayoutManager.findFirstVisibleItemPosition();
+            Log.d(TAG,"pausing, we store the value "+mRvPosition);
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        //mRvPosition=rvFileList.getLayoutManager().onSaveInstanceState();
+        mRvPosition=mLinearLayoutManager.findFirstVisibleItemPosition();
+        Log.d(TAG,"on save instance state, saving rv "+mRvPosition);
+        outState.putInt(RECYCLER_VIEW_POSITION, mRvPosition);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(TAG,"onCreateView executing");
         //we check which view to inflate
         View mainView = inflater.inflate(R.layout.fragment_file_viewer, container, false);
 
         btnQueue=mainView.findViewById(R.id.bt_ffv_review_queue);
         rvFileList=mainView.findViewById(R.id.rv_file_viewer);
-        rvFileList.setLayoutManager(new LinearLayoutManager(getContext()));
+        mLinearLayoutManager=new LinearLayoutManager(getContext());
+        rvFileList.setLayoutManager(mLinearLayoutManager);
 
         //if (fileList != null) {
             rvAdapter = new FileListAdapter(getContext(),this);
@@ -102,9 +96,18 @@ public class FileViewer extends Fragment implements
             rvFileList.setAdapter(rvAdapter);
             rvAdapter.notifyDataSetChanged();
 
-            if (mRvPosition!=null){
-                rvFileList.getLayoutManager().onRestoreInstanceState(mRvPosition);
-            }
+            //request an update
+            mListener.fileFragmentRequestUpdate();
+
+            Log.d(TAG,"the number of items in the adapter is "+rvAdapter.getItemCount());
+        //}
+
+            /*if (mRvPosition!=null){
+                Log.d(TAG,"we load the position "+mRvPosition.describeContents());
+                //rvFileList.getLayoutManager().onRestoreInstanceState(mRvPosition);
+                mLinearLayoutManager.onRestoreInstanceState(mRvPosition);
+               //mLinearLayoutManager.scrollToPosition(3);
+            }*/
         //}
 
         //listeners button queue
@@ -117,6 +120,8 @@ public class FileViewer extends Fragment implements
     public void updateFileRV(List<FileListEntry> fileListSent){
         rvAdapter.setFileList(fileListSent);
         rvAdapter.notifyDataSetChanged();
+        Log.d(TAG,"update file RV with position "+mRvPosition);
+        mLinearLayoutManager.scrollToPosition(mRvPosition);
     }
 
     @Override
@@ -125,6 +130,7 @@ public class FileViewer extends Fragment implements
         if (context instanceof OnFragmentFileInteractionListener) {
             mListener = (OnFragmentFileInteractionListener) context;
             mQueueButton=(OnButtonGoToQueueInterface) context;
+            Log.d(TAG,"reattaching");
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -168,6 +174,7 @@ public class FileViewer extends Fragment implements
     //click on file browser item
     public interface OnFragmentFileInteractionListener {
         void onFragmentFileInteraction(FileListEntry fileItemSelected);
+        void fileFragmentRequestUpdate();
     }
 
     public interface OnButtonGoToQueueInterface{
