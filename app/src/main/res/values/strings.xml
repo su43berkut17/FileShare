@@ -65,7 +65,7 @@
     <string name="widget_tv_number">0</string>
     <string name="widget_tv_of">1 of 1</string>
     <string name="widget_tv_of_description">Progress by file number</string>
-
+    <string name="widget_tv_filename">File to be transferred</string>
     <string name="widget_tv_currently">Transferring...</string>
 
 </resources>
