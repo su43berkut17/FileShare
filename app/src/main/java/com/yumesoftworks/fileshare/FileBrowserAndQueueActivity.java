@@ -4,19 +4,15 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
 
@@ -32,9 +28,6 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private static final String TAG="FileBaQActivity";
     private static final int FILE_FRAGMENT=1000;
     private static final int QUEUE_FRAGMENT=1001;
-
-    private static final String FILE_FRAGMENT_TAG="fileFragmentTag";
-    private static final String QUEUE_FRAGMENT_TAG="queueFragmentTag";
 
     //2 panel
     private boolean mTwoPanel;

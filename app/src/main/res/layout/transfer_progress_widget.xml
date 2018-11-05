@@ -9,6 +9,7 @@
         android:id="@+id/widget_default_state">
 
         <LinearLayout
+            android:id="@+id/ly_widget_text_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/default_padding"
@@ -58,7 +59,7 @@
     <RelativeLayout
         android:id="@+id/widget_transfer_state"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true">
@@ -99,7 +100,7 @@
             android:textColor="@color/colorWidgetText" />
 
         <ProgressBar
-            android:id="@+id/progressBar"
+            android:id="@+id/pb_widget_progress"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
