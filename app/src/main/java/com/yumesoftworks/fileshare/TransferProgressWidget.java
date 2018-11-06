@@ -93,8 +93,18 @@ public class TransferProgressWidget extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
+        updateWidgetService.startActionUpdateWidget(context,mCurrentState,mTotalNumberOfTransfers,mNameOfCurrentFile,mTotalNumberOfFiles,mCurrentNumberOfFiles);
+    }
+
+    //method that updates all; the widgets since it is only 1 widget for all
+    public static void updateAllWidgets(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds, String currentState,
+                                 int totalNumberOfTransfers,
+                                 String nameOfCurrentFile,
+                                 int totalNumberOfFiles,
+                                 int currentNumberOfFiles){
+        // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, mCurrentState,mTotalNumberOfTransfers,mNameOfCurrentFile,mTotalNumberOfFiles,mCurrentNumberOfFiles);
+            updateAppWidget(context, appWidgetManager, appWidgetId, currentState,totalNumberOfTransfers,nameOfCurrentFile,totalNumberOfFiles,currentNumberOfFiles);
         }
     }
 

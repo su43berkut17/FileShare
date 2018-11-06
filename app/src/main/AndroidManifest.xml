@@ -38,6 +38,10 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/transfer_progress_widget_info" />
         </receiver>
+
+        <service
+            android:name=".updateWidgetService"
+            android:exported="false"></service>
     </application>
 
 </manifest>
