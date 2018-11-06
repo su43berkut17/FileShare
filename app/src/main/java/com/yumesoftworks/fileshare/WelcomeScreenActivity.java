@@ -38,6 +38,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     private int mSelectedAvatar=-1;
     private int mFilesTransferred=0;
     private int mVersion=-1;
+    private int mIsTransferInProgress=0;
 
     //recycler view
     private RecyclerView rvAvatars;
@@ -135,6 +136,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                         mVersion=userInfoEntries.get(0).getAssetVersion();
                         mFilesTransferred=userInfoEntries.get(0).getNumberFilesTransferred();
                         tvUsername.setText(userInfoEntries.get(0).getUsername());
+                        mIsTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
                     }else{
                         //we open the main activity
                         goMainActivity();
@@ -177,7 +179,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
                 }else{
                     //we save the data and open the activity
-                    UserInfoEntry dataToSave=new UserInfoEntry(tvUsername.getText().toString(),mSelectedAvatar,mFilesTransferred,mVersion);
+                    UserInfoEntry dataToSave=new UserInfoEntry(tvUsername.getText().toString(),mSelectedAvatar,mFilesTransferred,mVersion,mIsTransferInProgress);
                     viewModel.saveData(dataToSave);
 
                     //go to main activity

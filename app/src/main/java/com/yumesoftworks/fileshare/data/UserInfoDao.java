@@ -15,6 +15,9 @@ public interface UserInfoDao {
     @Query("SELECT * FROM userInfo" + " ORDER BY id")
     LiveData<List<UserInfoEntry>> loadUserInfo();
 
+    @Query("SELECT * FROM userInfo" + " ORDER BY id")
+    List<UserInfoEntry> loadUserWidget();
+
     @Insert
     void insertTask(UserInfoEntry userInfoEntry);
 

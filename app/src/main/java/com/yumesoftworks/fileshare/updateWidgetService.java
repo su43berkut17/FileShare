@@ -1,11 +1,20 @@
 package com.yumesoftworks.fileshare;
 
 import android.app.IntentService;
+import android.app.Notification;
 import android.appwidget.AppWidgetManager;
+import android.arch.persistence.room.Database;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
+
+import com.yumesoftworks.fileshare.data.AppDatabase;
+import com.yumesoftworks.fileshare.data.UserInfoDao;
+import com.yumesoftworks.fileshare.data.UserInfoEntry;
+
+import java.util.List;
 
 public class updateWidgetService extends IntentService {
 
@@ -23,6 +32,12 @@ public class updateWidgetService extends IntentService {
 
     public updateWidgetService() {
         super("updateWidgetService");
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        startForeground(1,new Notification());
     }
 
     @Override
@@ -60,6 +75,8 @@ public class updateWidgetService extends IntentService {
                                                int recCurrentNumberOfFiles){
 
         //we store the data if it is sent, if it is not the widget doesn't need to update
+        Log.d(TAG,"this is startActionUpdateWidget");
+
         if (recCurrentState!=null) {
             mCurrentState=recCurrentState;
             mTotalNumberOfTransfers=recTotalNumberOfTransfers;
@@ -73,12 +90,18 @@ public class updateWidgetService extends IntentService {
             mCurrentState="INITIAL_STATE";
 
             //read it from the database
-
+            Log.d(TAG,"update current state is null so it is scheduled update");
         }
 
         //we start the intent
         Intent intent=new Intent(context,updateWidgetService.class);
         intent.setAction(ACTION_UPDATE_APP);
-        context.startService(intent);
+
+        //we check if it is before android O
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
+            context.startForegroundService(intent);
+        }else {
+            context.startService(intent);
+        }
     }
 }

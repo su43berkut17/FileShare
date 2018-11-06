@@ -91,8 +91,10 @@ public class FileViewer extends Fragment implements
         rvFileList.setLayoutManager(mLinearLayoutManager);
 
         //we hide the button
-        if (mIsButtonShown==false){
-            btnQueue.setVisibility(View.GONE);
+        if (mIsButtonShown!=null) {
+            if (mIsButtonShown == false) {
+                btnQueue.setVisibility(View.GONE);
+            }
         }
 
         //if (fileList != null) {

@@ -16,21 +16,24 @@ public class UserInfoEntry {
     private int pickedAvatar;
     private int numberFilesTransferred;
     private int assetVersion;
+    private int isTransferInProgress;
 
     @Ignore
-    public UserInfoEntry(String username, int pickedAvatar, int numberFilesTransferred, int assetVersion){
+    public UserInfoEntry(String username, int pickedAvatar, int numberFilesTransferred, int assetVersion, int isTransferInProgress){
         this.username=username;
         this.pickedAvatar=pickedAvatar;
         this.numberFilesTransferred=numberFilesTransferred;
         this.assetVersion=assetVersion;
+        this.isTransferInProgress=isTransferInProgress;
     }
 
-    public UserInfoEntry(int id, String username, int pickedAvatar, int numberFilesTransferred, int assetVersion){
+    public UserInfoEntry(int id, String username, int pickedAvatar, int numberFilesTransferred, int assetVersion, int isTransferInProgress){
         this.id=id;
         this.username=username;
         this.pickedAvatar=pickedAvatar;
         this.numberFilesTransferred=numberFilesTransferred;
         this.assetVersion=assetVersion;
+        this.isTransferInProgress=isTransferInProgress;
     }
 
     //getters and setters
@@ -67,5 +70,12 @@ public class UserInfoEntry {
     }
     public void setAssetVersion(int assetVersion) {
         this.assetVersion = assetVersion;
+    }
+
+    public int getIsTransferInProgress() {
+        return isTransferInProgress;
+    }
+    public void setIsTransferInProgress(int isTransferInProgress) {
+        this.isTransferInProgress = isTransferInProgress;
     }
 }

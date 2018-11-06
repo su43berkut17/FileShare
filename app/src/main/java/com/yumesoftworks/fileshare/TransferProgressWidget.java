@@ -8,6 +8,11 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import com.yumesoftworks.fileshare.data.AppDatabase;
+import com.yumesoftworks.fileshare.data.UserInfoEntry;
+
+import java.util.List;
+
 /**
  * Implementation of App Widget functionality.
  */
@@ -33,21 +38,32 @@ public class TransferProgressWidget extends AppWidgetProvider {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.transfer_progress_widget);
 
         //set the values
-        mCurrentState=currentState;
-        mTotalNumberOfTransfers=totalNumberOfTransfers;
-        mNameOfCurrentFile=nameOfCurrentFile;
-        mTotalNumberOfFiles=totalNumberOfFiles;
-        mCurrentNumberOfFiles=currentNumberOfFiles;
+        //mCurrentState=currentState;
 
+        //database
+        //we load the database
+        AppDatabase database=AppDatabase.getInstance(context);
+        List<UserInfoEntry> listUser=database.userInfoDao().loadUserWidget();
+        UserInfoEntry user=listUser.get(0);
+
+        //set the values
+        if (user.getIsTransferInProgress()==0) {
+            mCurrentState = "DEFAULT_STATE";
+
+            mTotalNumberOfTransfers=user.getNumberFilesTransferred();
+        }else{
+            mCurrentState="TRANSFER_IN_PROGRESS";
+
+            mNameOfCurrentFile=nameOfCurrentFile;
+            mTotalNumberOfFiles=totalNumberOfFiles;
+            mCurrentNumberOfFiles=currentNumberOfFiles;
+        }
         //depending on the state we hide or show the layouts
         switch (mCurrentState){
-            case "INITIAL":
+            case "DEFAULT_STATE":
                 //We hide the stuff
                 views.setViewVisibility(R.id.widget_default_state, View.VISIBLE);
                 views.setViewVisibility(R.id.widget_transfer_state, View.GONE);
-
-                //calculate the percentage
-                mPercentage=mCurrentNumberOfFiles/mTotalNumberOfFiles;
 
                 //update the texts
                 views.setTextViewText(R.id.tv_widget_number_of_transfers,String.valueOf(mTotalNumberOfTransfers));
@@ -61,7 +77,7 @@ public class TransferProgressWidget extends AppWidgetProvider {
 
                 break;
 
-            case "TRANSFER":
+            case "TRANSFER_IN_PROGRESS":
                 //we hide the stuff
                 views.setViewVisibility(R.id.widget_default_state, View.GONE);
                 views.setViewVisibility(R.id.widget_transfer_state, View.VISIBLE);
@@ -69,6 +85,9 @@ public class TransferProgressWidget extends AppWidgetProvider {
                 //update the texts
                 views.setTextViewText(R.id.tv_widget_current_file,mNameOfCurrentFile);
                 views.setTextViewText(R.id.tv_widget_number_of_transfers,String.valueOf(mCurrentNumberOfFiles)+" of "+String.valueOf(mTotalNumberOfFiles));
+
+                //calculate the percentage
+                mPercentage=mCurrentNumberOfFiles/mTotalNumberOfFiles;
 
                 //update the progress bar
                 views.setProgressBar(R.id.pb_widget_progress,1,mPercentage,false);
