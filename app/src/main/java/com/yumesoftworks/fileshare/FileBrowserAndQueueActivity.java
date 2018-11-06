@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 
 import java.util.List;
@@ -34,6 +35,9 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private int mCurrentFragment;
     private static final String CURRENT_FRAGMENT_TAG="currentFragmentTag";
 
+    //analytics and admob
+    private FirebaseAnalytics mFireAnalytics;
+
     //fragment parts
     private FileViewer fragmentFileViewer;
     private QueueViewer fragmentQueueViewer;
@@ -50,6 +54,9 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_browser_and_queue);
+
+        //analytics
+        mFireAnalytics=FirebaseAnalytics.getInstance(this);
 
         if(savedInstanceState!=null){
             mCurrentFragment=savedInstanceState.getInt(CURRENT_FRAGMENT_TAG);

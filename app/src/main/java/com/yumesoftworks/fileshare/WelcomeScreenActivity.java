@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.AvatarAndVersion;
 import com.yumesoftworks.fileshare.data.AvatarDefaultImages;
@@ -32,6 +33,9 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     private static final String TAG=WelcomeScreenActivity.class.getSimpleName();
     private static final String NAME_ROTATION_AVATAR_STATE="savedAvatarId";
     public static final String EXTRA_SETTINGS_NAME="isThisSettings";
+
+    //analytics and admob
+    private FirebaseAnalytics mFireAnalytics;
 
     //this member variable will let us know if this activity is opened as settings or the first time
     private boolean mIsThisSettings;
@@ -57,6 +61,9 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome_screen);
+
+        //analytics
+        mFireAnalytics=FirebaseAnalytics.getInstance(this);
 
         //rotation values
         if (savedInstanceState==null){

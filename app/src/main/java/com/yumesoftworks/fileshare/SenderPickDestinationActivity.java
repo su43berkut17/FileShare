@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.peerToPeer.BroadcastReceiverSender;
 
 import java.util.List;
@@ -27,10 +28,16 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
     private List peers;
 
+    //analytics and admob
+    private FirebaseAnalytics mFireAnalytics;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sender_pick_destination);
+
+        //analytics
+        mFireAnalytics=FirebaseAnalytics.getInstance(this);
 
         //create the p2p connection
         createConnection();

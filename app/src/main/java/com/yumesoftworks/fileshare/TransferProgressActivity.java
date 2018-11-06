@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 
 import java.util.List;
@@ -24,6 +25,9 @@ FileTransferSent.OnFragmentInteractionListener{
     private FileTransferSent fragmentFileTransferSent;
     private FragmentManager fragmentManager;
 
+    //analytics and admob
+    private FirebaseAnalytics mFireAnalytics;
+
     //viewmodel
     private FileTransferViewModel fileTransferViewModel;
 
@@ -31,6 +35,9 @@ FileTransferSent.OnFragmentInteractionListener{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer_progress);
+
+        //analytics
+        mFireAnalytics=FirebaseAnalytics.getInstance(this);
 
         //initialize fragments
         initializeFragments();
