@@ -64,7 +64,7 @@
         android:layout_marginEnd="@dimen/zero_padding"
         android:layout_marginBottom="@dimen/zero_padding"
         android:foreground="?android:attr/selectableItemBackground"
-        app:layout_constraintBottom_toTopOf="@id/adView"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -103,16 +103,5 @@
             app:layout_constraintStart_toEndOf="@+id/iv_mm_receive"
             app:layout_constraintTop_toTopOf="parent" />
     </android.support.constraint.ConstraintLayout>
-
-    <com.google.android.gms.ads.AdView
-        xmlns:ads="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/adView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        ads:adSize="BANNER"
-        ads:adUnitId="ca-app-pub-3940256099942544/6300978111" />
 
 </android.support.constraint.ConstraintLayout>
