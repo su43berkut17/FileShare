@@ -1,28 +1,36 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorWidgetBackground"
     android:padding="@dimen/widget_margin">
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/widget_default_state">
 
-        <LinearLayout
+    <RelativeLayout
+        android:id="@+id/widget_default_state"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
             android:id="@+id/ly_widget_text_group"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_margin="@dimen/default_padding"
-            android:orientation="vertical"
+            android:layout_alignParentStart="true"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true">
+            android:layout_margin="@dimen/default_padding">
 
             <TextView
                 android:id="@+id/tv_widget_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="top"
-                android:layout_margin="@dimen/default_padding"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="@dimen/default_padding"
+                android:layout_marginLeft="@dimen/default_padding"
+                android:layout_marginTop="@dimen/default_padding"
+                android:layout_marginEnd="@dimen/default_padding"
+                android:layout_marginRight="@dimen/default_padding"
+                android:layout_marginBottom="@dimen/default_padding"
                 android:contentDescription="@string/widget_tv_title"
                 android:text="@string/widget_tv_title"
                 android:textColor="@color/colorWidgetText" />
@@ -31,12 +39,16 @@
                 android:id="@+id/tv_widget_transfers"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:layout_margin="@dimen/default_padding"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="@dimen/default_padding"
+                android:layout_marginLeft="@dimen/default_padding"
+                android:layout_marginBottom="@dimen/default_padding"
                 android:contentDescription="@string/widget_tv_lifetime"
                 android:text="@string/widget_tv_lifetime"
                 android:textColor="@color/colorWidgetText" />
-        </LinearLayout>
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -65,19 +77,6 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true">
-
-        <TextView
-            android:id="@+id/tv_widget_title_transfer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_margin="@dimen/default_padding"
-            android:contentDescription="@string/widget_tv_title"
-            android:text="@string/widget_tv_title"
-            android:textColor="@color/colorWidgetText" />
-
         <TextView
             android:id="@+id/tv_widget_number_of_transfers"
             android:text="@string/widget_tv_of"
@@ -89,26 +88,41 @@
             android:layout_alignParentEnd="true"
             android:textColor="@color/colorWidgetText" />
 
-        <TextView
-            android:id="@+id/tv_widget_current_file"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/tv_widget_title_transfer"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_margin="@dimen/default_padding"
-            android:contentDescription="@string/widget_tv_filename"
-            android:text="@string/widget_tv_filename"
-            android:textColor="@color/colorWidgetText" />
-
-        <ProgressBar
-            android:id="@+id/pb_widget_progress"
-            style="?android:attr/progressBarStyleHorizontal"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/tv_widget_current_file"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"/>
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_widget_title_transfer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_padding"
+                android:layout_weight=".3"
+                android:contentDescription="@string/widget_tv_title"
+                android:text="@string/widget_tv_title"
+                android:textColor="@color/colorWidgetText" />
+            <TextView
+                android:id="@+id/tv_widget_current_file"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_padding"
+                android:layout_weight=".3"
+                android:contentDescription="@string/widget_tv_filename"
+                android:text="@string/widget_tv_filename"
+                android:textColor="@color/colorWidgetText" />
+
+            <ProgressBar
+                android:id="@+id/pb_widget_progress"
+                style="@style/AppThemeProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_padding"
+                android:layout_weight=".3"
+                android:progress="20"/>
+
+        </LinearLayout>
 
     </RelativeLayout>
+
 </RelativeLayout>

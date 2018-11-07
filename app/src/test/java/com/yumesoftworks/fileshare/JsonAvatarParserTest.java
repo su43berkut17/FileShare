@@ -13,13 +13,13 @@ import org.junit.runner.RunWith;
 public class JsonAvatarParserTest implements JsonAvatarParser.OnLoadedAvatars{
     private JsonAvatarParser mAvatarParser;
 
-    @Test
+    /*@Test
     public void testJsonAvatarParser{
         mAvatarParser= new JsonAvatarParser(InstrumentationRegistry.getContext());
 
         //execute the object
         mAvatarParser.loadData();
-    }
+    }*/
 
     @Override
     public void LoadedRemoteAvatars(AvatarAndVersion retAvatarAndVersion) {
