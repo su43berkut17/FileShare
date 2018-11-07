@@ -10,6 +10,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.firebase.analytics.FirebaseAnalytics;
+
 public class MainMenuActivity extends AppCompatActivity implements View.OnClickListener{
     //buttons
     ConstraintLayout sendFilesButton;
@@ -18,10 +23,25 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
     //view model
     private FileViewerViewModel fileViewerViewModel;
 
+    //analytics and admob
+    private FirebaseAnalytics mFireAnalytics;
+    private AdView mAdView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
+
+        //analytics
+        mFireAnalytics=FirebaseAnalytics.getInstance(this);
+
+        //ads
+        MobileAds.initialize(this,
+                "ca-app-pub-3940256099942544/6300978111");
+
+        mAdView = findViewById(R.id.ad_view_main_menu);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         //we set the values of the constraint layouts
         sendFilesButton=(ConstraintLayout)findViewById(R.id.mm_surf_sendFileArea);

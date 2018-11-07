@@ -16,6 +16,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 
@@ -37,6 +40,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
     //analytics and admob
     private FirebaseAnalytics mFireAnalytics;
+    private AdView mAdView;
 
     //fragment parts
     private FileViewer fragmentFileViewer;
@@ -57,6 +61,14 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
         //analytics
         mFireAnalytics=FirebaseAnalytics.getInstance(this);
+
+        //ads
+        MobileAds.initialize(this,
+                "ca-app-pub-3940256099942544/6300978111");
+
+        mAdView = findViewById(R.id.ad_view_activity_file_browser_and_queue);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         if(savedInstanceState!=null){
             mCurrentFragment=savedInstanceState.getInt(CURRENT_FRAGMENT_TAG);

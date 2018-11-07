@@ -12,6 +12,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+
+import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.peerToPeer.BroadcastReceiverSender;
 
@@ -30,6 +34,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
     //analytics and admob
     private FirebaseAnalytics mFireAnalytics;
+    private AdView mAdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +43,14 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
         //analytics
         mFireAnalytics=FirebaseAnalytics.getInstance(this);
+
+        //ads
+        MobileAds.initialize(this,
+                "ca-app-pub-3940256099942544/6300978111");
+
+        mAdView = findViewById(R.id.ad_view_sender_pick_destination);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         //create the p2p connection
         createConnection();

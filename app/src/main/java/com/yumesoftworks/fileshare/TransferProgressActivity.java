@@ -10,6 +10,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 
@@ -30,6 +33,7 @@ FileTransferSent.OnFragmentInteractionListener{
 
     //viewmodel
     private FileTransferViewModel fileTransferViewModel;
+    private AdView mAdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +42,14 @@ FileTransferSent.OnFragmentInteractionListener{
 
         //analytics
         mFireAnalytics=FirebaseAnalytics.getInstance(this);
+
+        //ads
+        MobileAds.initialize(this,
+                "ca-app-pub-3940256099942544/6300978111");
+
+        mAdView = findViewById(R.id.ad_view_transfer_progress);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         //initialize fragments
         initializeFragments();
