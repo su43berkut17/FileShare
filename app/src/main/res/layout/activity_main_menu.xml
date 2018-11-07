@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".MainMenuActivity">
 
-
     <android.support.constraint.ConstraintLayout
         android:id="@+id/mm_surf_sendFileArea"
         android:layout_width="match_parent"
@@ -14,7 +13,7 @@
         android:layout_marginStart="@dimen/zero_padding"
         android:layout_marginTop="@dimen/zero_padding"
         android:layout_marginEnd="@dimen/zero_padding"
-        android:background="@color/colorAccent"
+        android:background="@color/colorGreen"
         android:foreground="?android:attr/selectableItemBackground"
         app:layout_constraintBottom_toTopOf="@+id/mm_surf_receiveArea"
         app:layout_constraintEnd_toEndOf="parent"

@@ -9,7 +9,7 @@
     </style>
 
     <style name="AppThemeProgressBar" parent="Base.Widget.AppCompat.ProgressBar.Horizontal">
-        <item name="android:progressTint">@color/colorCardWhite</item>
+        <item name="android:progressTint">@color/colorAccent</item>
         <item name="android:progressBackgroundTint">@color/colorPrimaryDark</item>
     </style>
 
