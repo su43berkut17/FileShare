@@ -64,11 +64,11 @@ dependencies {
     annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
 
     //firebase analytics and admob
-    implementation 'com.google.firebase:firebase-ads:17.1.0'
-    implementation 'com.google.firebase:firebase-core:16.0.5'
+    implementation 'com.google.firebase:firebase-ads:17.0.0'
+    implementation 'com.google.firebase:firebase-core:16.0.4'
 
     //crashlytics
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.6'
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.5'
 }
 
 apply plugin: 'com.google.gms.google-services'
