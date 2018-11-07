@@ -9,22 +9,22 @@
     <LinearLayout
         android:id="@+id/ll_receive_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginBottom="8dp"
         android:gravity="center"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/ad_view_main_menu"
+        app:layout_constraintBottom_toTopOf="@+id/ad_view_receiver_pick_destination"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/iv_receive_logo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/welcome_icon_size"
+            android:layout_height="@dimen/welcome_icon_size"
             android:layout_margin="@dimen/default_padding"
             android:contentDescription="@string/pu_avatar_description"
-            app:srcCompat="@drawable/avatar_1" />
+            app:srcCompat="@drawable/wait_transfer" />
 
         <TextView
             android:id="@+id/tv_receive_wait"

@@ -10,7 +10,7 @@ import java.net.URL;
 import java.util.Scanner;
 
 public class JsonAvatarLoader {
-    private static final String jsonUrl="https://www.yumesoftworks.com/fileshare/avatars.json";
+    private static final String jsonUrl="http://www.yumesoftworks.com/fileshare/avatars.json";
     private static final String TAG="JsonUtils";
 
     public void JsonUtils(){
