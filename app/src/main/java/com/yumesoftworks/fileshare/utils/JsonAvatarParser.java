@@ -6,6 +6,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.yumesoftworks.fileshare.WelcomeScreenActivity;
 import com.yumesoftworks.fileshare.data.AvatarAndVersion;
 import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
 
@@ -27,7 +28,9 @@ public class JsonAvatarParser {
 
     public JsonAvatarParser(Context contextSent){
         //initialize the interface
-        mOnLoadedAvatars=(OnLoadedAvatars) contextSent;
+        if (contextSent instanceof WelcomeScreenActivity) {
+            mOnLoadedAvatars = (OnLoadedAvatars) contextSent;
+        }
 
         context=contextSent;
         loadData();
@@ -63,11 +66,16 @@ public class JsonAvatarParser {
             }
 
             @Override
-            protected void onPostExecute(AvatarAndVersion avatarAndVersion) {
-                super.onPostExecute(avatarAndVersion);
+            protected void onPostExecute(AvatarAndVersion recAvatarAndVersion) {
+                super.onPostExecute(recAvatarAndVersion);
 
-                //return the results via the interface
-                mOnLoadedAvatars.LoadedRemoteAvatars(avatarAndVersion);
+                //we check is it is the instance of the activity we are looking for or if it is a test
+                if (mOnLoadedAvatars!=null) {
+                    //return the results via the interface
+                    mOnLoadedAvatars.LoadedRemoteAvatars(recAvatarAndVersion);
+                }else{
+                    avatarAndVersion=recAvatarAndVersion;
+                }
             }
         }.execute();
     }
@@ -118,7 +126,8 @@ public class JsonAvatarParser {
 
     //testing
     //getter for test
-    public AvatarAndVersion getAvatarAndVersionTest(String dataTest) {
+    public AvatarAndVersion getAvatarAndVersionTestMock(String dataTest) {
         return parse(dataTest);
     }
+    public AvatarAndVersion getAvatarAndVersionTest(){return avatarAndVersion;}
 }
