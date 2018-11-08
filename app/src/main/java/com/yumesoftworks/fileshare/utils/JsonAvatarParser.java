@@ -115,4 +115,10 @@ public class JsonAvatarParser {
     public interface OnLoadedAvatars {
         void LoadedRemoteAvatars(AvatarAndVersion retAvatarAndVersion);
     }
+
+    //testing
+    //getter for test
+    public AvatarAndVersion getAvatarAndVersionTest(String dataTest) {
+        return parse(dataTest);
+    }
 }
