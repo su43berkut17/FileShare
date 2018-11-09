@@ -23,7 +23,6 @@ public class JsonAvatarParserTest{
 
     @Test
     public void test_connection(){
-        //JsonAvatarParser mAvatarParser=new JsonAvatarParser(mActivityRule.getActivity().getApplicationContext());
         JsonAvatarParser mAvatarParser=new JsonAvatarParser(mContext);
 
         //we load the parser
@@ -45,7 +44,8 @@ public class JsonAvatarParserTest{
             //we check the data that we received from the json
             assertTrue(test.getVersion()==1);
 
-            assertTrue(test.getAvatarList().get(0).getPath()=="https://www.yumesoftworks.com/fileshare/avatars/avatar_9.png");
+            String path=test.getAvatarList().get(0).getPath();
+            assertTrue(path.equals("https://www.yumesoftworks.com/fileshare/avatars/avatar_9.png"));
         }
     }
 
@@ -62,13 +62,14 @@ public class JsonAvatarParserTest{
                 "}";
 
         //we check if the json has been updated
-        //JsonAvatarParser mAvatarParser=new JsonAvatarParser(mActivityRule.getActivity().getApplicationContext());
         JsonAvatarParser mAvatarParser=new JsonAvatarParser(mContext);
 
         AvatarAndVersion test=mAvatarParser.getAvatarAndVersionTestMock(mockJSON);
 
         //check data, it should be the same as the mock
         assertTrue(test.getVersion()==1);
-        assertTrue(test.getAvatarList().get(0).getPath()=="https://www.yumesoftworks.com/fileshare/avatars/avatar_9.png");
+
+        String path=test.getAvatarList().get(0).getPath();
+        assertTrue(path.equals("https://www.yumesoftworks.com/fileshare/avatars/avatar_9.png"));
     }
 }
