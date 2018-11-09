@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.recyclerAdapters.FileListAdapter;
@@ -37,6 +38,7 @@ public class FileViewer extends Fragment implements
     //ui
     private Button btnQueue;
     private Boolean mIsButtonShown;
+    private TextView textPath;
 
     //interfaces
     private OnFragmentFileInteractionListener mListener;
@@ -85,6 +87,7 @@ public class FileViewer extends Fragment implements
         //we check which view to inflate
         View mainView = inflater.inflate(R.layout.fragment_file_viewer, container, false);
 
+        textPath=mainView.findViewById(R.id.tv_ffv_current_path);
         btnQueue=mainView.findViewById(R.id.bt_ffv_review_queue);
         rvFileList=mainView.findViewById(R.id.rv_file_viewer);
         mLinearLayoutManager=new LinearLayoutManager(getContext());
@@ -132,6 +135,11 @@ public class FileViewer extends Fragment implements
             Log.d(TAG, "update file RV with position " + mRvPosition);
             mLinearLayoutManager.scrollToPosition(mRvPosition);
         }
+    }
+
+    //update the path
+    public void updatePath(String path){
+        textPath.setText(path);
     }
 
     //hide the button here

@@ -2,6 +2,7 @@ package com.yumesoftworks.fileshare;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -16,6 +17,7 @@ import java.util.List;
 
 public class FileViewerViewModel extends AndroidViewModel {
     private static MutableLiveData<List<FileListEntry>> data;
+    private static MutableLiveData<String> mPath;
     private String TAG = "FileViewerViewModel";
     private AppDatabase database;
 
@@ -30,6 +32,8 @@ public class FileViewerViewModel extends AndroidViewModel {
         //we set the data to be read
         ReadFileList readFileList=new ReadFileList();
         File path=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"");
+        mPath=new MutableLiveData<>();
+        mPath.postValue(path.getPath());
         data=readFileList.loadList(path.getAbsolutePath(),this.getApplication().getApplicationContext());
     }
 
@@ -38,12 +42,17 @@ public class FileViewerViewModel extends AndroidViewModel {
         return this.data;
     }
 
+    public LiveData<String> getPath(){
+        Log.d(TAG,"File Viewer View Model get data path");
+        return this.mPath;
+    }
+
     public void refreshData(String path){
         Log.d(TAG,"File Viewer View Model refresh data");
         ReadFileList s=new ReadFileList();
         //data=s.loadList(path,this.getApplication().getApplicationContext());
         //data.setValue(s.loadList(path,this.getApplication().getApplicationContext()).getValue());
-
+        mPath.postValue(path);
         try{
             data.postValue(s.loadList(path, this.getApplication().getApplicationContext()).getValue());
         }catch (Exception e){

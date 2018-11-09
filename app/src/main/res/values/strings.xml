@@ -33,6 +33,8 @@
     <string name="fb_file_name_placeholder">testFile.jpg</string>
     <string name="fb_icon_description">File icon</string>
     <string name="fb_button_review_queue">Review Queue</string>
+    <string name="fb_path_description">The filepath</string>
+    <string name="fb_path">/</string>
 
     <!-- Activity file queue -->
     <string name="fq_iv_delete_description">Remove from queue</string>

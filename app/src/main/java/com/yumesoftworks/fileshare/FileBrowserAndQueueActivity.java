@@ -219,6 +219,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
         //we attach the observers to the activiy
         fileViewerViewModel.getData().observe(this,fileViewerViewModelObserver);
+        fileViewerViewModel.getPath().observe(this,fileViewerViewModelObserverPath);
         queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
 
         changeActionBarName("FileShare - Send Files");
@@ -231,6 +232,14 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             //we update the recyclerView Adapter
             Log.d(TAG,"ON CHANGED, the file list entries length returned in lifecycle is "+fileListEntries.size());
             fragmentFileViewer.updateFileRV(fileListEntries);
+        }
+    };
+
+    final Observer<String> fileViewerViewModelObserverPath=new Observer<String>() {
+        @Override
+        public void onChanged(@Nullable String recPath) {
+            //we update the path
+            fragmentFileViewer.updatePath(recPath);
         }
     };
 
