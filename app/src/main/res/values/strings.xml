@@ -60,6 +60,10 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
+    <!-- Service -->
+    <string name="service_notification_text_initialize">Starting transfer...</string>
+
+    <!-- Widget -->
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
     <string name="widget_tv_title">FileShare</string>

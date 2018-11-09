@@ -43,6 +43,9 @@
             android:name=".updateWidgetService"
             android:exported="false"></service>
 
+        <service android:name=".ServiceFileShare"
+            android:exported="false"></service>
+
         <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
