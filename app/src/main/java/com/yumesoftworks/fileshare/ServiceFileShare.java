@@ -13,9 +13,10 @@ import android.support.v4.app.NotificationCompat;
 
 public class ServiceFileShare extends Service {
     private static final String TAG="ServiceFileShare";
-    private static final String NOTIFICATION_CHANNEL="Main Channel";
 
     //notification
+    private static final String NOTIFICATION_CHANNEL="Main Channel";
+    private static final int NOTIFICATION_ID=101010;
     private NotificationChannel channel;
     private NotificationManager manager;
     private int mTotalFiles;
@@ -47,15 +48,15 @@ public class ServiceFileShare extends Service {
         mCurrentFile=0;
 
         //initialize the notification
-        manager.notify(1, notificationBuilder(getString(R.string.app_name)
+        manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
                 ,getString(R.string.service_notification_text_initialize)
                 ,false).build());
 
         //we check if the intent is to send or to receive
-        if (intent.getAction().equals(TAG)){
+        if (intent.getAction().equals(TransferProgressActivity.FILES_SENDING)){
             //we are sending files
 
-        }else{
+        }else if (intent.getAction().equals(TransferProgressActivity.FILES_RECEIVING)){
             //we are receiving files
 
         }

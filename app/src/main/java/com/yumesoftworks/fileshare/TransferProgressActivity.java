@@ -4,7 +4,9 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +24,13 @@ public class TransferProgressActivity extends AppCompatActivity implements FileT
 FileTransferSent.OnFragmentInteractionListener{
 
     private static final String TAG="TransferProgressAct";
+
+    //extras names
+    public static final String EXTRA_TYPE="ExtraType";
+
+    //constants for the actions
+    public static final String FILES_SENDING="SendingFiles";
+    public static final String FILES_RECEIVING="ReceivingFiles";
 
     //fragment parts
     private FileTransferProgress fragmentFileTransferProgress;
@@ -50,6 +59,41 @@ FileTransferSent.OnFragmentInteractionListener{
         mAdView = findViewById(R.id.ad_view_transfer_progress);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
+
+        //we check the intent with the information to start the service
+        Intent intent=getIntent();
+
+        //get the data to see how do we start the service
+        String typeOfService=intent.getStringExtra(EXTRA_TYPE);
+
+        //intent
+        Intent serviceIntent=new Intent(this,ServiceFileShare.class);
+        Bundle extras=new Bundle();
+
+        //choose data in the intent
+        if (typeOfService==FILES_SENDING){
+            //we start the services as sending stuff
+            serviceIntent.setAction(FILES_SENDING);
+
+            //bundle
+            extras.putString("","");
+
+        }else if (typeOfService==FILES_RECEIVING){
+            //we start the service as receiving stuff
+            serviceIntent.setAction(FILES_RECEIVING);
+
+            //bundle
+            extras.putString("","");
+        }
+
+        //start the service
+        serviceIntent.putExtras(extras);
+
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent);
+        }else{
+            startService(serviceIntent);
+        }
 
         //initialize fragments
         initializeFragments();
