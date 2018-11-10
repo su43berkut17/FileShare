@@ -1,6 +1,7 @@
 package com.yumesoftworks.fileshare.utils;
 
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.util.Scanner;
 
 public class JsonAvatarLoader {
     private static final String jsonUrl="https://www.yumesoftworks.com/fileshare/avatars.json";
+    private static final String jsonUrlUnsafe="http://www.yumesoftworks.com/fileshare/avatars.json";
     private static final String TAG="JsonUtils";
 
     public void JsonUtils(){
@@ -18,7 +20,13 @@ public class JsonAvatarLoader {
 
     //load the json file
     public static String loadJson() throws IOException {
-        Uri uri=Uri.parse(jsonUrl).buildUpon().build();
+        Uri uri;
+        //we check the api version
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.KITKAT) {
+            uri = Uri.parse(jsonUrl).buildUpon().build();
+        }else{
+            uri = Uri.parse(jsonUrlUnsafe).buildUpon().build();
+        }
         URL url=new URL(uri.toString());
         HttpURLConnection connection=(HttpURLConnection)url.openConnection();
 
@@ -43,6 +51,7 @@ public class JsonAvatarLoader {
                 return null;
             }
         }catch (IOException e) {
+            Log.d(TAG,"There is an error with the https");
             e.printStackTrace();
             return null;
         }finally {

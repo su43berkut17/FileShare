@@ -16,7 +16,7 @@ public class ServiceFileShare extends Service {
 
     //notification
     private static final String NOTIFICATION_CHANNEL="Main Channel";
-    private static final int NOTIFICATION_ID=101010;
+    private static final int NOTIFICATION_ID=1002;
     private NotificationChannel channel;
     private NotificationManager manager;
     private int mTotalFiles;

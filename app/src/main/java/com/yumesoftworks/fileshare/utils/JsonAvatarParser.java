@@ -55,12 +55,18 @@ public class JsonAvatarParser {
                         String AvatarListString = JsonAvatarLoader.loadJson();
                         Log.d(TAG,"before parsing "+AvatarListString);
 
-                        return parse(AvatarListString);
+                        if (AvatarListString!=null){
+                            return parse(AvatarListString);
+                        }else{
+                            return null;
+                        }
                     }catch (IOException e){
+                        Log.d(TAG,"read error on the parser, we return null");
                         e.printStackTrace();
                         return null;
                     }
                 }else{
+                    Log.d(TAG,"it is not connected");
                     return null;
                 }
             }
@@ -69,12 +75,17 @@ public class JsonAvatarParser {
             protected void onPostExecute(AvatarAndVersion recAvatarAndVersion) {
                 super.onPostExecute(recAvatarAndVersion);
 
-                //we check is it is the instance of the activity we are looking for or if it is a test
-                if (mOnLoadedAvatars!=null) {
-                    //return the results via the interface
-                    mOnLoadedAvatars.LoadedRemoteAvatars(recAvatarAndVersion);
+                if (recAvatarAndVersion!=null) {
+                    Log.d(TAG,"The async task returned "+recAvatarAndVersion.toString());
+                    //we check is it is the instance of the activity we are looking for or if it is a test
+                    if (mOnLoadedAvatars != null) {
+                        //return the results via the interface
+                        mOnLoadedAvatars.LoadedRemoteAvatars(recAvatarAndVersion);
+                    } else {
+                        avatarAndVersion = recAvatarAndVersion;
+                    }
                 }else{
-                    avatarAndVersion=recAvatarAndVersion;
+                    Log.d(TAG,"The async task returned null, we cant load the remote avatars, ignore and used the default ones");
                 }
             }
         }.execute();

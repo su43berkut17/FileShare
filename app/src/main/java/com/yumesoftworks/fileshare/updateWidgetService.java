@@ -2,12 +2,16 @@ package com.yumesoftworks.fileshare;
 
 import android.app.IntentService;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.appwidget.AppWidgetManager;
 import android.arch.persistence.room.Database;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.yumesoftworks.fileshare.data.AppDatabase;
@@ -20,6 +24,8 @@ public class updateWidgetService extends IntentService {
 
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String TAG="WidgetUpdaterService";
+    private static final String WIDGET_CHANNEL="Widget Channel";
+    private static final int WIDGET_NOTIFICATION_ID=1001;
     public static final String ACTION_UPDATE = "com.yumesoftworks.fileshare.action.APPWIDGET_UPDATE";
     public static final String ACTION_UPDATE_APP = "com.yumesoftworks.fileshare.action.APPWIDGET_UPDATE_APP";
 
@@ -37,7 +43,33 @@ public class updateWidgetService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        startForeground(1,new Notification());
+
+        //channel
+        //check the API
+        NotificationManager manager= (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationChannel channel;
+
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
+            //we set the channel
+            channel = new NotificationChannel(WIDGET_CHANNEL,
+                    getString(R.string.app_name),
+                    NotificationManager.IMPORTANCE_LOW);
+            channel.setLightColor(Color.BLUE);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            manager.createNotificationChannel(channel);
+        }
+
+        Notification notification=notificationBuilder().build();
+
+        startForeground(WIDGET_NOTIFICATION_ID,notification);
+    }
+
+    //notification build
+    private NotificationCompat.Builder notificationBuilder(){
+        //we set the notification
+        return new NotificationCompat.Builder(this, WIDGET_CHANNEL)
+                .setContentTitle(getString(R.string.app_name))
+                .setAutoCancel(true);
     }
 
     @Override

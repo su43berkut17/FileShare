@@ -3,8 +3,10 @@ package com.yumesoftworks.fileshare;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
@@ -57,6 +59,9 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     }
 
     private void createConnection(){
+        //check is if it is compattible with p2p
+        Log.d(TAG,"is it compatible with wifi "+getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_DIRECT));
+
         //create the intent filters
         Log.d(TAG,"registering the intent filters");
         //Indicates a change in the Wi-Fi Peer-to-Peer status.
@@ -75,7 +80,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         mChannel = mManager.initialize(this, getMainLooper(), null);
 
         //discover peers
-        mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
+        /*mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
                 Log.d(TAG,"discover peers success");
@@ -83,7 +88,24 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
             @Override
             public void onFailure(int reason) {
-                Log.d(TAG,"discover peers failure "+reason);
+                Log.d(TAG,"discover peer failure "+reason);
+            }
+        });*/
+        //create a group
+        mManager.createGroup(mChannel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                mManager.requestGroupInfo(mChannel, new WifiP2pManager.GroupInfoListener() {
+                    @Override
+                    public void onGroupInfoAvailable(WifiP2pGroup group) {
+                        Log.d(TAG,"Group created");
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                Log.d(TAG,"Error on group creation, code: "+reason);
             }
         });
     }
@@ -129,6 +151,8 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
             if (peers.size() == 0) {
                 Log.d(TAG, "No devices found");
                 return;
+            }else{
+                Log.d(TAG,"Devices found");
             }
         }
     };
