@@ -89,6 +89,8 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
                 break;
             case R.id.mm_surf_receiveArea:
                 //we open the master picker
+                Intent intentReceive=new Intent(this,ReceiverPickDestinationActivity.class);
+                startActivity(intentReceive);
                 break;
             default:
                 break;
