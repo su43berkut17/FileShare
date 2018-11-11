@@ -45,10 +45,9 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity {
 
         }
 
-        mNsdHelper=new NsdHelper(this, true);
+        mNsdHelper=new NsdHelper(this);
         mNsdHelper.initializeNsd();
         mNsdHelper.registerService(mServerSocket.getLocalPort());
-        //mNsdHelper.discoverServices();
     }
 
     @Override

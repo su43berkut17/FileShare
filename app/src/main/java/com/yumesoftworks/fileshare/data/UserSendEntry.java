@@ -1,16 +1,20 @@
 package com.yumesoftworks.fileshare.data;
 
-import android.graphics.Bitmap;
+import java.net.InetAddress;
 
 public class UserSendEntry {
     private String username;
-    private Bitmap avatar;
+    private int avatar;
     private String infoToSend;
+    private InetAddress ipAddress;
+    private int port;
 
-    public UserSendEntry(String username, Bitmap avatar, String infoToSend){
+    public UserSendEntry(String username, int avatar, String infoToSend, InetAddress ipAddress, int port){
         this.username=username;
         this.avatar=avatar;
         this.infoToSend=infoToSend;
+        this.ipAddress=ipAddress;
+        this.port=port;
     }
 
     //getters and setters
@@ -21,10 +25,10 @@ public class UserSendEntry {
         this.username = username;
     }
 
-    public Bitmap getAvatar() {
+    public int getAvatar() {
         return avatar;
     }
-    public void setAvatar(Bitmap avatar) {
+    public void setAvatar(int avatar) {
         this.avatar = avatar;
     }
 
@@ -33,5 +37,19 @@ public class UserSendEntry {
     }
     public void setInfoToSend(String infoToSend) {
         this.infoToSend = infoToSend;
+    }
+
+    public InetAddress getIpAddress() {
+        return ipAddress;
+    }
+    public void setIpAddress(InetAddress ipAddress) {
+        this.ipAddress = ipAddress;
+    }
+
+    public int getPort() {
+        return port;
+    }
+    public void setPort(int port) {
+        this.port = port;
     }
 }

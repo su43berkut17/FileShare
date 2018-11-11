@@ -14,6 +14,8 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import com.google.android.gms.ads.AdRequest;
@@ -21,13 +23,17 @@ import com.google.android.gms.ads.AdView;
 
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.yumesoftworks.fileshare.data.UserSendEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
+import com.yumesoftworks.fileshare.recyclerAdapters.SendFileUserListAdapter;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.ArrayList;
 import java.util.List;
 
-public class SenderPickDestinationActivity extends AppCompatActivity {
+public class SenderPickDestinationActivity extends AppCompatActivity implements NsdHelper.ChangedServicesListener,
+        SendFileUserListAdapter.ItemClickListener {
 
     private final static String TAG="SendPickActivity";
 
@@ -37,7 +43,13 @@ public class SenderPickDestinationActivity extends AppCompatActivity {
 
     //nds vars
     private NsdHelper mNsdHelper;
-    ServerSocket mServerSocket;
+    private ServerSocket mServerSocket;
+
+    //recyclerview
+    private RecyclerView mRecyclerView;
+    private SendFileUserListAdapter mAdapter;
+    private static List<UserSendEntry> userList;
+    private LinearLayoutManager mLinearLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,13 +60,23 @@ public class SenderPickDestinationActivity extends AppCompatActivity {
         //mFireAnalytics=FirebaseAnalytics.getInstance(this);
 
         //ads
-       /* MobileAds.initialize(this,
+        /* MobileAds.initialize(this,
                 "ca-app-pub-3940256099942544/6300978111");
 
         mAdView = findViewById(R.id.ad_view_sender_pick_destination);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);*/
-       Log.d(TAG,"initializing nsd");
+        Log.d(TAG,"initializing nsd");
+
+        //create recycler view and adapter
+        mRecyclerView=findViewById(R.id.rv_sdpa_destinations);
+        mLinearLayoutManager=new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLinearLayoutManager);
+        mAdapter=new SendFileUserListAdapter(this,this);
+        mRecyclerView.setAdapter(mAdapter);
+
+        //create a new list
+        userList=new ArrayList<>();
 
        //server socket
         try{
@@ -63,7 +85,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity {
 
         }
 
-        mNsdHelper=new NsdHelper(this, false);
+        mNsdHelper=new NsdHelper(this);
         mNsdHelper.initializeNsd();
         mNsdHelper.registerService(mServerSocket.getLocalPort());
         mNsdHelper.discoverServices();
@@ -86,5 +108,34 @@ public class SenderPickDestinationActivity extends AppCompatActivity {
             mNsdHelper.registerService(mServerSocket.getLocalPort());
             mNsdHelper.discoverServices();
         }
+    }
+
+    //callback
+    @Override
+    public void addedService(NsdServiceInfo serviceInfo) {
+        //we create the user
+        UserSendEntry entry=new UserSendEntry("reading info...",1,"",serviceInfo.getHost(), serviceInfo.getPort());
+        boolean entryExists=false;
+
+        //we check if it exists in the list
+        for (int i=0;i<userList.size();i++){
+            if (userList.get(i).getIpAddress()==serviceInfo.getHost()){
+                entryExists=true;
+            }
+        }
+
+        //we add the entry to the list and we update the adapter
+        if(entryExists==false){
+            //we add it to the list
+            userList.add(entry);
+            mAdapter.setUsers(userList);
+            mAdapter.notifyDataSetChanged();
+        }
+    }
+
+    //when the user has been clicked
+    @Override
+    public void onItemClickListener(int itemId) {
+
     }
 }

@@ -43,7 +43,7 @@ public class SendFileUserListAdapter extends RecyclerView.Adapter<SendFileUserLi
         // Determine the values of the wanted data
         UserSendEntry userInfoEntry = mUserEntryList.get(i);
 
-        String name=userInfoEntry.getUsername();
+        String name=userInfoEntry.getUsername()+" "+userInfoEntry.getIpAddress()+"-"+userInfoEntry.getPort();
         //int avatar=userInfoEntry.getPickedAvatar();
 
         userListViewHolder.textView.setText(name);
@@ -75,7 +75,6 @@ public class SendFileUserListAdapter extends RecyclerView.Adapter<SendFileUserLi
     //public method to update adapter
     public void setUsers(List<UserSendEntry> userData){
         mUserEntryList=userData;
-        notifyDataSetChanged();
     }
 
     //interface

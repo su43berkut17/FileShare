@@ -19,14 +19,17 @@ public class NsdHelper {
     NsdManager.DiscoveryListener mDiscoveryListener;
     NsdManager.RegistrationListener mRegistrationListener;
     NsdServiceInfo mService;
-    int mPort;
 
-    Boolean isServer;
+    //interface to send services added or deleted
+    private ChangedServicesListener mServiceListener;
 
-    public NsdHelper(Context context, Boolean recIsServer) {
+    public NsdHelper(Context context) {
         mContext = context;
-        isServer=recIsServer;
         mNsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+
+        if (context instanceof ChangedServicesListener){
+            mServiceListener=(ChangedServicesListener) context;
+        }
     }
 
     public void initializeNsd() {
@@ -68,6 +71,10 @@ public class NsdHelper {
                             }
                             Log.d(TAG,"Service resolved "+serviceInfo.getPort()+"-"+serviceInfo.getHost());
                             //mService = serviceInfo;
+                            //return found service to be added to the recycler view on the activity]
+                            if (mServiceListener!=null) {
+                                mServiceListener.addedService(serviceInfo);
+                            }
                         }
                     });
                 }
@@ -187,5 +194,10 @@ public class NsdHelper {
             }
             mRegistrationListener = null;
         }
+    }
+
+    //interface
+    public interface ChangedServicesListener{
+        void addedService(NsdServiceInfo serviceInfo);
     }
 }
