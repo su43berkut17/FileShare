@@ -2,6 +2,7 @@ package com.yumesoftworks.fileshare;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.nsd.NsdManager;
@@ -166,10 +167,11 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         }
 
         //we assign the adapter to the normal list
-        mAdapter.setUsers(mUserList);
-        mAdapter.notifyDataSetChanged();
+        //mAdapter.setUsers(mUserList);
+        //mAdapter.notifyDataSetChanged();
 
         //we start method that will load the right data in the recycler views
+        startSocketTransfer();
 
         //we clear the temp user list
         mTempUserList.clear();
@@ -187,6 +189,11 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         },mDelayCheck);
     }
 
+    private void startSocketTransfer(){
+        //cycle that creates a socket
+
+    }
+
     //callback
     @Override
     public void addedService(NsdServiceInfo serviceInfo) {
@@ -202,6 +209,26 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     @Override
     public void onItemClickListener(int itemId) {
         //we call the activity that will start the service with the info
+        Intent intent=new Intent(this,TransferProgressActivity.class);
 
+        //data to send on the intent
+        Bundle bundleSend=new Bundle();
+
+        //local ip and port
+        bundleSend.putString(TransferProgressActivity.LOCAL_IP,mServerSocket.getInetAddress().toString());
+        bundleSend.putInt(TransferProgressActivity.LOCAL_PORT,mServerSocket.getLocalPort());
+        //bundleSend.putString(TransferProgressActivity.REMOTE_IP,mServerSocket.getInetAddress().toString());
+        //bundleSend.putInt(TransferProgressActivity.REMOTE_PORT,mServerSocket.getLocalPort());
+
+        //close the port
+        try{
+            mServerSocket.close();
+        }catch (Exception e){
+            Log.d(TAG,"Couldn't close the server socket");
+        }
+
+        //open the activity
+        intent.putExtras(bundleSend);
+        startActivity(intent);
     }
 }

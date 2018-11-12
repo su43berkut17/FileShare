@@ -26,7 +26,18 @@ FileTransferSent.OnFragmentInteractionListener{
     private static final String TAG="TransferProgressAct";
 
     //extras names
-    public static final String EXTRA_TYPE="ExtraType";
+    //general
+    public static final String EXTRA_TYPE_TRANSFER="ExtraType";
+    public static final String LOCAL_IP="LocalIp";
+    public static final String REMOTE_IP="RemoteIp";
+    public static final String LOCAL_PORT="LocalPort";
+    public static final String REMOTE_PORT="RemotePort";
+
+    //when sending
+
+
+    //when receiving, the list
+
 
     //constants for the actions
     public static final String FILES_SENDING="SendingFiles";
@@ -64,7 +75,7 @@ FileTransferSent.OnFragmentInteractionListener{
         Intent intent=getIntent();
 
         //get the data to see how do we start the service
-        String typeOfService=intent.getStringExtra(EXTRA_TYPE);
+        String typeOfService=intent.getStringExtra(EXTRA_TYPE_TRANSFER);
 
         //intent
         Intent serviceIntent=new Intent(this,ServiceFileShare.class);
@@ -76,14 +87,14 @@ FileTransferSent.OnFragmentInteractionListener{
             serviceIntent.setAction(FILES_SENDING);
 
             //bundle
-            extras.putString("","");
+            extras.getString("");
 
         }else if (typeOfService==FILES_RECEIVING){
             //we start the service as receiving stuff
             serviceIntent.setAction(FILES_RECEIVING);
 
             //bundle
-            extras.putString("","");
+            extras.getString("");
         }
 
         //start the service
