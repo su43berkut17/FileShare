@@ -12,6 +12,7 @@ import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -48,8 +49,14 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     //recyclerview
     private RecyclerView mRecyclerView;
     private SendFileUserListAdapter mAdapter;
-    private static List<UserSendEntry> userList;
     private LinearLayoutManager mLinearLayoutManager;
+    private List<UserSendEntry> mUserList;
+    private List<UserSendEntry> mTempUserList;
+
+    //handler for discovery every n seconds
+    private Handler mHandler;
+    private Runnable mRunnableCheck;
+    private int mDelayCheck;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,19 +83,23 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         mRecyclerView.setAdapter(mAdapter);
 
         //create a new list
-        userList=new ArrayList<>();
+        mUserList=new ArrayList<>();
+        mTempUserList=new ArrayList<>();
 
        //server socket
         try{
             mServerSocket=new ServerSocket(0);
         }catch (IOException e){
-
+            Log.d(TAG,"There was an error registering the server socket");
         }
 
         mNsdHelper=new NsdHelper(this);
         mNsdHelper.initializeNsd();
         mNsdHelper.registerService(mServerSocket.getLocalPort());
-        mNsdHelper.discoverServices();
+        //mNsdHelper.discoverServices();
+        //start process that checks every few seconds the updated list
+        mHandler=new Handler();
+        mDelayCheck=5*1000;
     }
 
     @Override
@@ -97,6 +108,9 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
             mNsdHelper.stopDiscovery();
             mNsdHelper.cancelPreviousRegRequest();
         }
+        //we remove any callbacks
+        mHandler.removeCallbacks(mRunnableCheck);
+
         super.onPause();
     }
 
@@ -106,36 +120,88 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
         if (mNsdHelper!=null){
             mNsdHelper.registerService(mServerSocket.getLocalPort());
-            mNsdHelper.discoverServices();
         }
+
+        //we start the 1st discovery
+        startDiscoveryAndTimer();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        //we empty the list
+        mUserList.clear();
+        mTempUserList.clear();
+    }
+
+    //timer
+    private void startDiscoveryAndTimer(){
+        Log.d(TAG,"Running the discovery and Timer");
+        //clear the user list
+        mUserList.clear();
+        //we move the temp list to the adapter user list
+        Boolean exists;
+        for (int i=0;i<mTempUserList.size();i++){
+            //push the 1st item
+            if (i==0) {
+                mUserList.add(mTempUserList.get(i));
+            }else{
+                //loop that checks with every item if it has been added already
+                exists=false;
+                Log.d(TAG,"Will start comparing "+mTempUserList.get(i).getIpAddress().getHostAddress());
+
+                for (int j=0;j<mUserList.size();j++){
+                    Log.d(TAG,"comparing "+mTempUserList.get(i).getIpAddress().getHostAddress()+" with:"+mUserList.get(j).getIpAddress().getHostAddress());
+                    if (mTempUserList.get(i).getIpAddress().getHostAddress()==mUserList.get(j).getIpAddress().getHostAddress()){
+                        exists=true;
+                    }
+                }
+
+                //we check if it doesnt exist
+                if (exists==false){
+                    mUserList.add(mTempUserList.get(i));
+                }
+            }
+        }
+
+        //we assign the adapter to the normal list
+        mAdapter.setUsers(mUserList);
+        mAdapter.notifyDataSetChanged();
+
+        //we start method that will load the right data in the recycler views
+
+        //we clear the temp user list
+        mTempUserList.clear();
+
+        //we start the discovery again
+        mNsdHelper.discoverServices();
+
+        //we start the handler
+        mHandler.postDelayed(mRunnableCheck = new Runnable() {
+            @Override
+            public void run() {
+                //clear the temp list
+                startDiscoveryAndTimer();
+            }
+        },mDelayCheck);
     }
 
     //callback
     @Override
     public void addedService(NsdServiceInfo serviceInfo) {
+        Log.d(TAG,"Received a service Info "+serviceInfo.getHost());
         //we create the user
         UserSendEntry entry=new UserSendEntry("reading info...",1,"",serviceInfo.getHost(), serviceInfo.getPort());
-        boolean entryExists=false;
 
-        //we check if it exists in the list
-        for (int i=0;i<userList.size();i++){
-            if (userList.get(i).getIpAddress()==serviceInfo.getHost()){
-                entryExists=true;
-            }
-        }
-
-        //we add the entry to the list and we update the adapter
-        if(entryExists==false){
-            //we add it to the list
-            userList.add(entry);
-            mAdapter.setUsers(userList);
-            mAdapter.notifyDataSetChanged();
-        }
+        //we push it to the temp
+        mTempUserList.add(entry);
     }
 
     //when the user has been clicked
     @Override
     public void onItemClickListener(int itemId) {
+        //we call the activity that will start the service with the info
 
     }
 }

@@ -2,6 +2,7 @@ package com.yumesoftworks.fileshare;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -14,13 +15,15 @@ import java.net.ServerSocket;
 
 public class ReceiverPickDestinationActivity extends AppCompatActivity {
 
+    private static final String TAG="ReceiverDesActivity";
+
     //analytics and admob
     private FirebaseAnalytics mFireAnalytics;
     private AdView mAdView;
 
     //nds vars
     private NsdHelper mNsdHelper;
-    ServerSocket mServerSocket;
+    private ServerSocket mServerSocket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +45,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity {
         try{
             mServerSocket=new ServerSocket(0);
         }catch (IOException e){
-
+            Log.d(TAG,"There was an error registering the server socket");
         }
 
         mNsdHelper=new NsdHelper(this);
@@ -53,7 +56,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         if (mNsdHelper!=null){
-            mNsdHelper.stopDiscovery();
             mNsdHelper.cancelPreviousRegRequest();
         }
         super.onPause();
@@ -65,7 +67,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity {
 
         if (mNsdHelper!=null){
             mNsdHelper.registerService(mServerSocket.getLocalPort());
-            mNsdHelper.discoverServices();
         }
     }
 }
