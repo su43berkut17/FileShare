@@ -48,15 +48,13 @@ public class NsdHelper {
             public void onServiceFound(NsdServiceInfo service) {
                 //refactor this so the service type is not making an error due to the serviceType method returning it ith an exta . at the end
                 Log.d(TAG, "1-Service discovery success:" + service.getServiceName());
+
+                //unknown service
                 if (!service.getServiceType().equals(SERVICE_TYPE)) {
-                    //unknown service
-                    Log.d(TAG, "Unknown Service Type: " + service.getServiceType());
-                //} else if (service.getServiceName().equals(mServiceName)) {
-                    //Log.d(TAG, "Same machine: " + mServiceName);
-                } else if (service.getServiceName().contains(mServiceName)){
-                    //Log.d(TAG,"2-resolving service");
-                    //Log.d(TAG,"3-service data "+service.getHost()+"-port:"+service.getPort()+"-"+service.getServiceName()+service.getServiceType());
-                    //mNsdManager.resolveService(service, mResolveListener);
+                    Log.d(TAG,"Unkwown service type");
+                }else if(service.getServiceName().contains(mServiceName)||mServiceName.contains(service.getServiceName())){
+                    Log.d(TAG,"Comparing the received service name "+service.getServiceName()+" with local service name: "+mServiceName);
+
                     mNsdManager.resolveService(service, new NsdManager.ResolveListener() {
                         @Override
                         public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
@@ -78,7 +76,41 @@ public class NsdHelper {
                             }
                         }
                     });
+                }else{
+                    Log.d(TAG,"There was an error on service found");
+                    Log.d(TAG,"Compared received service name "+service.getServiceName()+" with local service name: "+mServiceName);
                 }
+                /*if (!service.getServiceType().equals(SERVICE_TYPE)) {
+                    //unknown service
+                    Log.d(TAG, "Unknown Service Type: " + service.getServiceType());
+                //} else if (service.getServiceName().equals(mServiceName)) {
+                    //Log.d(TAG, "Same machine: " + mServiceName);
+                } else if (service.getServiceName().contains(mServiceName)){
+                    //Log.d(TAG,"2-resolving service");
+                    //Log.d(TAG,"3-service data "+service.getHost()+"-port:"+service.getPort()+"-"+service.getServiceName()+service.getServiceType());
+                    //mNsdManager.resolveService(service, mResolveListener);
+                    mNsdManager.resolveService(service, new NsdManager.ResolveListener() {
+                        @Override
+                        public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                            Log.e(TAG, "Resolve failed " + errorCode+"service name: "+ serviceInfo.getServiceName()+" service type: "+serviceInfo.getServiceType());
+                        }
+
+                        @Override
+                        public void onServiceResolved(NsdServiceInfo serviceInfo) {
+                            //Log.e(TAG, "Resolve Succeeded. " + serviceInfo);
+                            if (serviceInfo.getServiceName().equals(mServiceName)) {
+                                //Log.d(TAG, "Same IP.");
+                                return;
+                            }
+                            Log.d(TAG,"Service resolved "+serviceInfo.getPort()+"-"+serviceInfo.getHost());
+                            //mService = serviceInfo;
+                            //return found service to be added to the recycler view on the activity]
+                            if (mServiceListener!=null) {
+                                mServiceListener.addedService(serviceInfo);
+                            }
+                        }
+                    });
+                }*/
             }
 
             @Override
