@@ -12,6 +12,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
+import com.yumesoftworks.fileshare.peerToPeer.ReceiverPickSocket;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -30,11 +31,13 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity {
     private NsdHelper mNsdHelper;
     private ServerSocket mServerSocket;
 
+    //server socket
+    private ReceiverPickSocket mReceiverSocket;
+
     //database
     private UserInfoEntry mUserInfoEntry;
-
-    //async socket
-    private AsyncTask serverSocketTask;
+    private AppDatabase database;
+    private DatabaseAsyncTask mDatabaseTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,9 +56,34 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity {
         mAdView.loadAd(adRequest);*/
 
         //load the database data to be sent (name and number of avatar)
-        AppDatabase database=AppDatabase.getInstance(this);
-        mUserInfoEntry=database.userInfoDao().loadUserInfo().getValue().get(0);
+        database=AppDatabase.getInstance(this);
 
+        //we start the task on the background
+        mDatabaseTask=new DatabaseAsyncTask();
+        //mDatabaseTask.execute();
+    }
+
+    //class that loads the database
+    private class DatabaseAsyncTask extends AsyncTask<Void, Void, Void>{
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Log.d(TAG,"Loading the database");
+            mUserInfoEntry=database.userInfoDao().loadUserWidget().get(0);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            //we initialize the sockets
+            Log.d(TAG,"On post execute of the async of the database, we will initialize the sockets");
+            initializeNsd();
+            super.onPostExecute(aVoid);
+        }
+    }
+
+    //after loading database initialize discovery
+    public void initializeNsd(){
+        Log.d(TAG,"Initializing Nsd and sockets");
         //server socket
         try{
             mServerSocket=new ServerSocket(0);
@@ -63,35 +91,13 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity {
             Log.d(TAG,"There was an error registering the server socket");
         }
 
-        mNsdHelper=new NsdHelper(this);
+        mNsdHelper = new NsdHelper(this);
         mNsdHelper.initializeNsd();
         mNsdHelper.registerService(mServerSocket.getLocalPort());
 
-        //execute the async task that waits for the client to ask for the information
-        serverSocketTask=new AsyncTaskServer();
-        serverSocketTask.execute();
-    }
-
-    //asynctask that runs on the server
-    private class AsyncTaskServer extends AsyncTask<Void, Void, Void>{
-        @Override
-        protected Void doInBackground(Void... voids) {
-
-            while (true) {
-                // block the call until connection is created and return
-                // Socket object
-                try {
-                    //wait for a connection
-                    Socket socket = mServerSocket.accept();
-
-                    Log.d(TAG,"Sending the user data");
-                    ObjectOutputStream messageOut=new ObjectOutputStream(socket.getOutputStream());
-                    messageOut.writeObject(mUserInfoEntry);
-
-                }catch (Exception e){
-                    Log.d(TAG,"the socket accept has failed");
-                }
-            }
+        //we create the receiver pick socket
+        if (mReceiverSocket==null) {
+            mReceiverSocket = new ReceiverPickSocket(mServerSocket, mUserInfoEntry);
         }
     }
 
@@ -100,23 +106,33 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity {
         if (mNsdHelper!=null){
             mNsdHelper.cancelPreviousRegRequest();
         }
-        if (serverSocketTask!=null) {
-            serverSocketTask.cancel(true);
-        }
+
+        //we destroy the socket
+        //mReceiverSocket.destroySocket();
+        //mReceiverSocket=null;
 
         super.onPause();
     }
 
     @Override
+    protected void onDestroy() {
+        //we destroy the database asynctask
+        //mDatabaseTask.cancel(true);
+        //mDatabaseTask=null;
+
+        super.onDestroy();
+    }
+
+    @Override
     protected void onResume() {
-        super.onResume();
-
         if (mNsdHelper!=null){
-            mNsdHelper.registerService(mServerSocket.getLocalPort());
-        }
-        if (serverSocketTask!=null){
-            serverSocketTask.execute();
+            //mNsdHelper.cancelPreviousRegRequest();
+            //mNsdHelper.registerService(mServerSocket.getLocalPort());
         }
 
+        //we excute the database read again
+        mDatabaseTask.execute();
+
+        super.onResume();
     }
 }

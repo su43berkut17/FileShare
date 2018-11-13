@@ -186,6 +186,8 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
         //we start method that will load the right data in the recycler views
         startSocketTransfer();
+        //mAdapter.setUsers(mUserList);
+        //mAdapter.notifyDataSetChanged();
 
         //we clear the temp user list
         mTempUserList.clear();
@@ -227,7 +229,9 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
                 // Socket object
                 try {
                     //wait for a connection
-                    Socket socket = new Socket(mUserList.get(mCurrentSocketItem).getIpAddress(),mUserList.get(mCurrentSocketItem).getPort());
+                    Log.d(TAG,"we try to create the socket: "+mUserList.get(mCurrentSocketItem).getIpAddress().getHostAddress()+" with port: "+mUserList.get(mCurrentSocketItem).getPort());
+                    //Socket socket = new Socket(mUserList.get(mCurrentSocketItem).getIpAddress().getHostAddress(),mUserList.get(mCurrentSocketItem).getPort());
+                    Socket socket = new Socket(mUserList.get(mCurrentSocketItem).getInfoToSend(),mUserList.get(mCurrentSocketItem).getPort());
 
                     Log.d(TAG,"Reading the user data");
                     ObjectInputStream messageIn=new ObjectInputStream(socket.getInputStream());
@@ -239,6 +243,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
                     socket.close();
                 }catch (Exception e){
                     Log.d(TAG,"the socket creation has failed");
+                    return null;
                 }
             }
         }
@@ -257,7 +262,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     public void addedService(NsdServiceInfo serviceInfo) {
         Log.d(TAG,"Received a service Info "+serviceInfo.getHost());
         //we create the user
-        UserSendEntry entry=new UserSendEntry("reading info...",1,"",serviceInfo.getHost(), serviceInfo.getPort());
+        UserSendEntry entry=new UserSendEntry("reading info...",1,serviceInfo.getServiceName(),serviceInfo.getHost(), serviceInfo.getPort());
 
         //we push it to the temp
         mTempUserList.add(entry);

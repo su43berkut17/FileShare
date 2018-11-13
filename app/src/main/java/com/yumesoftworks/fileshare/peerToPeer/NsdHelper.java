@@ -48,10 +48,13 @@ public class NsdHelper {
             public void onServiceFound(NsdServiceInfo service) {
                 //refactor this so the service type is not making an error due to the serviceType method returning it ith an exta . at the end
                 Log.d(TAG, "1-Service discovery success:" + service.getServiceName());
-
+                Log.d(TAG,"Comparing service type: remote: "+service.getServiceType()+". local:"+SERVICE_TYPE);
                 //unknown service
-                if (!service.getServiceType().equals(SERVICE_TYPE)) {
+                /*if (!service.getServiceType().equals(SERVICE_TYPE)) {
                     Log.d(TAG,"Unkwown service type");
+                }else*/
+                if (service.getServiceName().equals(mServiceName)){
+                    Log.d(TAG,"It is the same device");
                 }else if(service.getServiceName().contains(mServiceName)||mServiceName.contains(service.getServiceName())){
                     Log.d(TAG,"Comparing the received service name "+service.getServiceName()+" with local service name: "+mServiceName);
 
@@ -63,13 +66,8 @@ public class NsdHelper {
 
                         @Override
                         public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                            //Log.e(TAG, "Resolve Succeeded. " + serviceInfo);
-                            /*if (serviceInfo.getServiceName().equals(mServiceName)) {
-                                //Log.d(TAG, "Same IP.");
-                                return;
-                            }*/
                             Log.d(TAG,"Service resolved "+serviceInfo.getPort()+"-"+serviceInfo.getHost());
-                            //mService = serviceInfo;
+
                             //return found service to be added to the recycler view on the activity]
                             if (mServiceListener!=null) {
                                 mServiceListener.addedService(serviceInfo);

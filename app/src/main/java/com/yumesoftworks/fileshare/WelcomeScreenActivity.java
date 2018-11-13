@@ -63,7 +63,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         setContentView(R.layout.activity_welcome_screen);
 
         //analytics
-        mFireAnalytics=FirebaseAnalytics.getInstance(this);
+        //mFireAnalytics=FirebaseAnalytics.getInstance(this);
 
         //rotation values
         if (savedInstanceState==null){
