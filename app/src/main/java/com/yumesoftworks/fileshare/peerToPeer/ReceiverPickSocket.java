@@ -104,16 +104,18 @@ public class ReceiverPickSocket {
 
     //kill the socket
     public void destroySocket(){
+        //cancel task
+        if (serverSocketTask.getStatus()==AsyncTask.Status.RUNNING){
+            Log.d(TAG,"Cancelling the task");
+            serverSocketTask.cancel(true);
+        }
+
+        //cancel socket
         Log.d(TAG,"Trying to close socket");
         try {
             mSocket.close();
         }catch (Exception e){
             Log.d(TAG,"Cannot close socket "+e.getMessage());
-        }
-
-        if (serverSocketTask.getStatus()==AsyncTask.Status.RUNNING){
-            Log.d(TAG,"Cancelling the task");
-            serverSocketTask.cancel(true);
         }
     }
 }
