@@ -13,6 +13,7 @@ import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,12 +26,16 @@ import com.google.android.gms.ads.AdView;
 
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.data.UserSendEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
 import com.yumesoftworks.fileshare.recyclerAdapters.SendFileUserListAdapter;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +63,11 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     private Handler mHandler;
     private Runnable mRunnableCheck;
     private int mDelayCheck;
+
+    //for client socket
+    private int mNumberOfItems;
+    private int mCurrentSocketItem;
+    private AsyncTaskClient mSocketTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +107,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         mNsdHelper=new NsdHelper(this);
         mNsdHelper.initializeNsd();
         mNsdHelper.registerService(mServerSocket.getLocalPort());
-        //mNsdHelper.discoverServices();
+
         //start process that checks every few seconds the updated list
         mHandler=new Handler();
         mDelayCheck=5*1000;
@@ -111,6 +121,10 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         }
         //we remove any callbacks
         mHandler.removeCallbacks(mRunnableCheck);
+        //we cancel the task if it is paused, it will resume once the discovery begins
+        if (mSocketTask!=null){
+            mSocketTask.cancel(true);
+        }
 
         super.onPause();
     }
@@ -166,9 +180,9 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
             }
         }
 
-        //we assign the adapter to the normal list
-        //mAdapter.setUsers(mUserList);
-        //mAdapter.notifyDataSetChanged();
+        //we reset the number of times we need to do a socket reading
+        mNumberOfItems=mUserList.size();
+        mCurrentSocketItem=0;
 
         //we start method that will load the right data in the recycler views
         startSocketTransfer();
@@ -189,9 +203,53 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         },mDelayCheck);
     }
 
+    //cycle that creates a socket connection and gets the avatar
     private void startSocketTransfer(){
-        //cycle that creates a socket
+        //we check if we are in the right socket
+        if (mCurrentSocketItem<mNumberOfItems){
+            //we execute the async task
+            mSocketTask=new AsyncTaskClient();
+            mSocketTask.execute();
+        }else{
+            //we finished now we update the adapter
+            mAdapter.setUsers(mUserList);
+            mAdapter.notifyDataSetChanged();
+        }
+    }
 
+    //asynctasdk for each client
+    private class AsyncTaskClient extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            while (true) {
+                // block the call until connection is created and return
+                // Socket object
+                try {
+                    //wait for a connection
+                    Socket socket = new Socket(mUserList.get(mCurrentSocketItem).getIpAddress(),mUserList.get(mCurrentSocketItem).getPort());
+
+                    Log.d(TAG,"Reading the user data");
+                    ObjectInputStream messageIn=new ObjectInputStream(socket.getInputStream());
+                    UserInfoEntry readEntry = (UserInfoEntry) messageIn.readObject();
+
+                    //set the right data
+                    mUserList.get(mCurrentSocketItem).setAvatar(readEntry.getPickedAvatar());
+                    mUserList.get(mCurrentSocketItem).setUsername(readEntry.getUsername());
+                    socket.close();
+                }catch (Exception e){
+                    Log.d(TAG,"the socket creation has failed");
+                }
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            //increase to call the next socket
+            mCurrentSocketItem++;
+            startSocketTransfer();
+        }
     }
 
     //callback
