@@ -1,5 +1,6 @@
 package com.yumesoftworks.fileshare;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -19,7 +20,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ReceiverPickDestinationActivity extends AppCompatActivity {
+public class ReceiverPickDestinationActivity extends AppCompatActivity implements ReceiverPickSocket.SocketReceiverConnectionInterface{
 
     private static final String TAG="ReceiverDesActivity";
 
@@ -63,6 +64,24 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity {
         //mDatabaseTask.execute();
     }
 
+    @Override
+    public void openNexActivity() {
+        //we open the next activity with the socket information
+        //we call the activity that will start the service with the info
+        Intent intent=new Intent(this,TransferProgressActivity.class);
+
+        //data to send on the intent
+        Bundle bundleSend=new Bundle();
+
+        //variables to be sent
+        bundleSend.putString(TransferProgressActivity.EXTRA_TYPE_TRANSFER,TransferProgressActivity.FILES_SENDING);
+        //bundleSend.putString(TransferProgressActivity.LOCAL_IP,mServerSocket.getInetAddress().getHostAddress());
+        bundleSend.putInt(TransferProgressActivity.LOCAL_IP,mServerSocket.getLocalPort());
+
+        intent.putExtras(bundleSend);
+        startActivity(intent);
+    }
+
     //class that loads the database
     private class DatabaseAsyncTask extends AsyncTask<Void, Void, Void>{
         @Override
@@ -97,7 +116,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity {
 
         //we create the receiver pick socket
         if (mReceiverSocket==null) {
-            mReceiverSocket = new ReceiverPickSocket(mServerSocket, mUserInfoEntry);
+            mReceiverSocket = new ReceiverPickSocket(getApplicationContext(),mServerSocket, mUserInfoEntry);
         }
     }
 
@@ -105,11 +124,12 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity {
     protected void onPause() {
         if (mNsdHelper!=null){
             mNsdHelper.cancelPreviousRegRequest();
+            mNsdHelper=null;
         }
 
         //we destroy the socket
-        //mReceiverSocket.destroySocket();
-        //mReceiverSocket=null;
+        mReceiverSocket.destroySocket();
+        mReceiverSocket=null;
 
         super.onPause();
     }
@@ -125,12 +145,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        if (mNsdHelper!=null){
-            //mNsdHelper.cancelPreviousRegRequest();
-            //mNsdHelper.registerService(mServerSocket.getLocalPort());
-        }
-
-        //we excute the database read again
+        //we execute the database read again
         mDatabaseTask.execute();
 
         super.onResume();

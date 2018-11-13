@@ -45,6 +45,8 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         SendFileUserListAdapter.ItemClickListener {
 
     private final static String TAG="SendPickActivity";
+    public final static String MESSAGE_OPEN_ACTIVITY="pleaseOpenANewActivity";
+
 
     //analytics and admob
     private FirebaseAnalytics mFireAnalytics;
@@ -288,6 +290,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         Bundle bundleSend=new Bundle();
 
         //local ip and port
+        bundleSend.putString(TransferProgressActivity.EXTRA_TYPE_TRANSFER,TransferProgressActivity.FILES_SENDING);
         bundleSend.putString(TransferProgressActivity.LOCAL_IP,mServerSocket.getInetAddress().toString());
         bundleSend.putInt(TransferProgressActivity.LOCAL_PORT,mServerSocket.getLocalPort());
         bundleSend.putString(TransferProgressActivity.REMOTE_IP,sendEntry.getIpAddress().getHostAddress());
@@ -301,7 +304,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
             //send the info to go to the next stage to wait
             ObjectOutputStream messageOut=new ObjectOutputStream(socket.getOutputStream());
-            messageOut.writeUTF("GO_NEXT_ACTIVITY");
+            messageOut.writeUTF(MESSAGE_OPEN_ACTIVITY);
 
             socket.close();
 
