@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.MenuItem;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -115,6 +116,9 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         //start process that checks every few seconds the updated list
         mHandler=new Handler();
         mDelayCheck=5*1000;
+
+        //we set the action bar
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -331,6 +335,17 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
                         }
                     });
             builder.show();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 }

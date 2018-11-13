@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -62,6 +63,9 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         //we start the task on the background
         mDatabaseTask=new DatabaseAsyncTask();
         //mDatabaseTask.execute();
+
+        //we set the action bar
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -149,5 +153,16 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         mDatabaseTask.execute();
 
         super.onResume();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
