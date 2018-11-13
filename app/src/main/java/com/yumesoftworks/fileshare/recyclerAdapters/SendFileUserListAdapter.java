@@ -44,19 +44,28 @@ public class SendFileUserListAdapter extends RecyclerView.Adapter<SendFileUserLi
         UserSendEntry userInfoEntry = mUserEntryList.get(i);
 
         String name=userInfoEntry.getUsername()+" "+userInfoEntry.getIpAddress()+"-"+userInfoEntry.getPort();
-        //int avatar=userInfoEntry.getPickedAvatar();
+        int avatar=userInfoEntry.getAvatar();
+        String path;
+        //we create the path
+        if (userInfoEntry.getAvatar()<8){
+            //it is a drawable
+            path="avatar_"+String.valueOf(userInfoEntry.getAvatar());
+        }else{
+            //it is a url
+            path="https://www.yumesoftworks.com/fileshare/avatars/avatar_" +String.valueOf(userInfoEntry.getAvatar())+".png";
+        }
 
         userListViewHolder.textView.setText(name);
 
         //Set values in view
-        /*if (type==UserInfoEntry.TYPE_LOCAL){
+        if (avatar<=8){
             int imageUri = mContext.getResources().getIdentifier(path,"drawable",mContext.getPackageName());
             Picasso.get().load(imageUri).into(userListViewHolder.iv_avatar);
-            //Log.d(TAG,"path "+path);
+            Log.d(TAG,"path "+path);
         }else{
             Picasso.get().load(path).into(userListViewHolder.iv_avatar);
-            //Log.d(TAG,"path "+path);
-        }*/
+            Log.d(TAG,"path "+path);
+        }
     }
 
     @Override
