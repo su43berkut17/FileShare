@@ -2,6 +2,7 @@ package com.yumesoftworks.fileshare;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -15,6 +16,7 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -230,8 +232,13 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
                 try {
                     //wait for a connection
                     Log.d(TAG,"we try to create the socket: "+mUserList.get(mCurrentSocketItem).getIpAddress().getHostAddress()+" with port: "+mUserList.get(mCurrentSocketItem).getPort());
+                    //vars
+                    String hostAddress=mUserList.get(mCurrentSocketItem).getIpAddress().getHostAddress();
+                    int hostIp=mUserList.get(mCurrentSocketItem).getPort();
+
                     //Socket socket = new Socket(mUserList.get(mCurrentSocketItem).getIpAddress().getHostAddress(),mUserList.get(mCurrentSocketItem).getPort());
-                    Socket socket = new Socket(mUserList.get(mCurrentSocketItem).getInfoToSend(),mUserList.get(mCurrentSocketItem).getPort());
+                    //Socket socket = new Socket(mUserList.get(mCurrentSocketItem).getInfoToSend(),mUserList.get(mCurrentSocketItem).getPort());
+                    Socket socket= new Socket(hostAddress,hostIp);
 
                     Log.d(TAG,"Reading the user data");
                     ObjectInputStream messageIn=new ObjectInputStream(socket.getInputStream());
@@ -242,7 +249,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
                     mUserList.get(mCurrentSocketItem).setUsername(readEntry.getUsername());
                     socket.close();
                 }catch (Exception e){
-                    Log.d(TAG,"the socket creation has failed");
+                    Log.d(TAG,"the socket creation has failed"+e.getMessage());
                     return null;
                 }
             }
@@ -274,24 +281,53 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         //we call the activity that will start the service with the info
         Intent intent=new Intent(this,TransferProgressActivity.class);
 
+        //get the current entry
+        UserSendEntry sendEntry = mAdapter.getUserList().get(itemId);
+
         //data to send on the intent
         Bundle bundleSend=new Bundle();
 
         //local ip and port
         bundleSend.putString(TransferProgressActivity.LOCAL_IP,mServerSocket.getInetAddress().toString());
         bundleSend.putInt(TransferProgressActivity.LOCAL_PORT,mServerSocket.getLocalPort());
-        //bundleSend.putString(TransferProgressActivity.REMOTE_IP,mServerSocket.getInetAddress().toString());
-        //bundleSend.putInt(TransferProgressActivity.REMOTE_PORT,mServerSocket.getLocalPort());
+        bundleSend.putString(TransferProgressActivity.REMOTE_IP,sendEntry.getIpAddress().getHostAddress());
+        bundleSend.putInt(TransferProgressActivity.REMOTE_PORT,sendEntry.getPort());
 
-        //close the port
-        try{
-            mServerSocket.close();
+        //send
+        String hostAddress=sendEntry.getIpAddress().getHostAddress();
+        int hostIp=sendEntry.getPort();
+        try {
+            Socket socket = new Socket(hostAddress, hostIp);
+
+            //send the info to go to the next stage to wait
+            ObjectOutputStream messageOut=new ObjectOutputStream(socket.getOutputStream());
+            messageOut.writeUTF("GO_NEXT_ACTIVITY");
+
+            socket.close();
+
+            //close the server socket
+            try{
+                mServerSocket.close();
+            }catch (Exception e){
+                Log.d(TAG,"Couldn't close the server socket");
+            }
+
+            //open the activity
+            Log.d(TAG,"Opening new activity with socket");
+            intent.putExtras(bundleSend);
+            startActivity(intent);
         }catch (Exception e){
-            Log.d(TAG,"Couldn't close the server socket");
+            Log.d(TAG,"Couldn't connect to the socket, we show dialog with error");
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.pu_error_connect_dialog)
+                    .setCancelable(true)
+                    .setNeutralButton(R.string.gen_button_ok,
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            builder.show();
         }
-
-        //open the activity
-        intent.putExtras(bundleSend);
-        startActivity(intent);
     }
 }

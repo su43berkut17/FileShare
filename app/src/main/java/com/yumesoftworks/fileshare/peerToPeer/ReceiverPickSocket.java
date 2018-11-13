@@ -45,6 +45,12 @@ public class ReceiverPickSocket {
             }catch (Exception e) {
                 Log.d(TAG, "the socket accept has failed");
                 return null;
+            }finally{
+                try{
+                    mSocket.close();
+                }catch (Exception e){
+                    Log.d(TAG,"Can't close the socket, this is inside finally");
+                }
             }
         }
 

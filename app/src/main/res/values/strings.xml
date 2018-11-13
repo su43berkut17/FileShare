@@ -44,6 +44,7 @@
     <string name="pu_avatar_description">User avatar</string>
     <string name="pu_username_description">Username</string>
     <string name="pu_instructions">Tap the user who will receive the files</string>
+    <string name="pu_error_connect_dialog">Cannot connect to the user. Try again.</string>
 
     <!--Activity wait user receive -->
     <string name="ru_avatar_description">Wait for the sender to connect</string>
