@@ -12,6 +12,7 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.AppDatabase;
+import com.yumesoftworks.fileshare.data.LoadUserListHelper;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
 import com.yumesoftworks.fileshare.peerToPeer.ReceiverPickSocket;
@@ -21,7 +22,8 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ReceiverPickDestinationActivity extends AppCompatActivity implements ReceiverPickSocket.SocketReceiverConnectionInterface{
+public class ReceiverPickDestinationActivity extends AppCompatActivity implements ReceiverPickSocket.SocketReceiverConnectionInterface,
+        LoadUserListHelper.LoadUserHelperInterface {
 
     private static final String TAG="ReceiverDesActivity";
 
@@ -38,8 +40,10 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     //database
     private UserInfoEntry mUserInfoEntry;
-    private AppDatabase database;
-    private DatabaseAsyncTask mDatabaseTask;
+    private LoadUserListHelper mDatabaseHelper;
+
+    //lifecycle
+    private Boolean isFirstExecution=true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,13 +61,10 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);*/
 
-        //load the database data to be sent (name and number of avatar)
-        database=AppDatabase.getInstance(this);
-
-        //we start the task on the background
-        mDatabaseTask=new DatabaseAsyncTask();
-        //mDatabaseTask.execute();
-
+        Log.d(TAG,"Creating new instance of mDatabaseHelper");
+        mDatabaseHelper=new LoadUserListHelper(this);
+        mDatabaseHelper.executeAsync();
+        Log.d(TAG,"instance of mDatabase helper is "+mDatabaseHelper.toString());
         //we set the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
@@ -86,24 +87,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         startActivity(intent);
     }
 
-    //class that loads the database
-    private class DatabaseAsyncTask extends AsyncTask<Void, Void, Void>{
-        @Override
-        protected Void doInBackground(Void... voids) {
-            Log.d(TAG,"Loading the database");
-            mUserInfoEntry=database.userInfoDao().loadUserWidget().get(0);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            //we initialize the sockets
-            Log.d(TAG,"On post execute of the async of the database, we will initialize the sockets");
-            initializeNsd();
-            super.onPostExecute(aVoid);
-        }
-    }
-
     //after loading database initialize discovery
     public void initializeNsd(){
         Log.d(TAG,"Initializing Nsd and sockets");
@@ -120,39 +103,57 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
         //we create the receiver pick socket
         if (mReceiverSocket==null) {
-            mReceiverSocket = new ReceiverPickSocket(getApplicationContext(),mServerSocket, mUserInfoEntry);
+            mReceiverSocket = new ReceiverPickSocket(this,mServerSocket, mUserInfoEntry);
         }
+
+        //we change the initial execution counter
+        isFirstExecution=false;
     }
 
     @Override
     protected void onPause() {
+        super.onPause();
         if (mNsdHelper!=null){
             mNsdHelper.cancelPreviousRegRequest();
-            mNsdHelper=null;
         }
 
         //we destroy the socket
-        mReceiverSocket.destroySocket();
-        mReceiverSocket=null;
-
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-        //we destroy the database asynctask
-        //mDatabaseTask.cancel(true);
-        //mDatabaseTask=null;
-
-        super.onDestroy();
+        try {
+            mReceiverSocket.destroySocket();
+            mReceiverSocket=null;
+        }catch (Exception e){
+            Log.d(TAG,"Couldn't destroy socket on pause");
+            mReceiverSocket=null;
+        }
     }
 
     @Override
     protected void onResume() {
-        //we execute the database read again
-        mDatabaseTask.execute();
-
         super.onResume();
+        Log.d(TAG,"onResume");
+
+        //we check if it is the initial execution
+        if (!isFirstExecution) {
+            if (mServerSocket != null) {
+                //we resume the service discovery
+                mNsdHelper.registerService(mServerSocket.getLocalPort());
+
+                //we check if the receiver socket is null
+                if (mReceiverSocket == null) {
+                    Log.d(TAG, "recreating socket");
+                    mReceiverSocket = new ReceiverPickSocket(this, mServerSocket, mUserInfoEntry);
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //destroy the discovery
+        mNsdHelper=null;
+        mDatabaseHelper.destroyTask();
+        mDatabaseHelper=null;
     }
 
     @Override
@@ -164,5 +165,12 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void userLoadingFinished(UserInfoEntry userInfoEntry) {
+        mUserInfoEntry=userInfoEntry;
+        //we initiate the nsd
+        initializeNsd();
     }
 }
