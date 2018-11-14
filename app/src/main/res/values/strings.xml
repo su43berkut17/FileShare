@@ -38,7 +38,7 @@
 
     <!-- Activity file queue -->
     <string name="fq_iv_delete_description">Remove from queue</string>
-    <string name="fb_button_send_files">Send Files&#x8230;</string>
+    <string name="fb_button_send_files">Send Files</string>
 
     <!--Activity pick user to send -->
     <string name="pu_avatar_description">User avatar</string>
@@ -57,6 +57,7 @@
     <string name="atp_tv_files_in_queue">Files in queue:</string>
     <string name="ats_tv_sent_files">Files sent</string>
     <string name="ats_tv_received_files">Files received</string>
+    <string name="ats_try_again_dialog">Cannot connect to device. Try again?</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

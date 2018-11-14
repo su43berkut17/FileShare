@@ -80,7 +80,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         //variables to be sent
         bundleSend.putString(TransferProgressActivity.EXTRA_TYPE_TRANSFER,TransferProgressActivity.FILES_SENDING);
         //bundleSend.putString(TransferProgressActivity.LOCAL_IP,mServerSocket.getInetAddress().getHostAddress());
-        bundleSend.putInt(TransferProgressActivity.LOCAL_IP,mServerSocket.getLocalPort());
+        bundleSend.putInt(TransferProgressActivity.LOCAL_PORT,mServerSocket.getLocalPort());
 
         intent.putExtras(bundleSend);
         startActivity(intent);

@@ -4,19 +4,30 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Build;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.LinearLayout;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
+import com.yumesoftworks.fileshare.peerToPeer.ClientSocketTransfer;
 
 import java.util.List;
 
@@ -27,11 +38,13 @@ FileTransferSent.OnFragmentInteractionListener{
 
     //extras names
     //general
+    public static final String LOCAL_BROADCAST_REC="LocalBroadCastFileShare";
     public static final String EXTRA_TYPE_TRANSFER="ExtraType";
     public static final String LOCAL_IP="LocalIp";
     public static final String REMOTE_IP="RemoteIp";
     public static final String LOCAL_PORT="LocalPort";
     public static final String REMOTE_PORT="RemotePort";
+    private LinearLayout mProgressBarHide;
 
     //when sending
 
@@ -55,13 +68,14 @@ FileTransferSent.OnFragmentInteractionListener{
     private FileTransferViewModel fileTransferViewModel;
     private AdView mAdView;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer_progress);
 
         //analytics
-        mFireAnalytics=FirebaseAnalytics.getInstance(this);
+        /*mFireAnalytics=FirebaseAnalytics.getInstance(this);
 
         //ads
         MobileAds.initialize(this,
@@ -69,7 +83,10 @@ FileTransferSent.OnFragmentInteractionListener{
 
         mAdView = findViewById(R.id.ad_view_transfer_progress);
         AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+        mAdView.loadAd(adRequest);*/
+
+        //we get the instance of the indeterminate progress bar
+        mProgressBarHide=findViewById(R.id.pb_atp_waitingForConnection);
 
         //we check the intent with the information to start the service
         Intent intent=getIntent();
@@ -79,22 +96,15 @@ FileTransferSent.OnFragmentInteractionListener{
 
         //intent
         Intent serviceIntent=new Intent(this,ServiceFileShare.class);
-        Bundle extras=new Bundle();
+        Bundle extras=intent.getExtras();
 
         //choose data in the intent
         if (typeOfService==FILES_SENDING){
             //we start the services as sending stuff
             serviceIntent.setAction(FILES_SENDING);
-
-            //bundle
-            extras.getString("");
-
         }else if (typeOfService==FILES_RECEIVING){
             //we start the service as receiving stuff
             serviceIntent.setAction(FILES_RECEIVING);
-
-            //bundle
-            extras.getString("");
         }
 
         //start the service
@@ -108,6 +118,9 @@ FileTransferSent.OnFragmentInteractionListener{
 
         //initialize fragments
         initializeFragments();
+
+        //get the broadcast receivers for responses from the service
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceived,new IntentFilter(LOCAL_BROADCAST_REC));
     }
 
     private void initializeFragments(){
@@ -138,6 +151,20 @@ FileTransferSent.OnFragmentInteractionListener{
             fragmentFileTransferSent.updateRV(fileListEntries);
         }
     };
+
+    //broadcast receiving
+    private BroadcastReceiver mMessageReceived=new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action=intent.getAction();
+
+            //we check what to do depending on what the service needs to do
+            if (action==""){
+
+            }
+        }
+    };
+
 
     @Override
     public void onFragmentInteractionSent(Uri uri) {
