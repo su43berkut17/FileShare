@@ -146,15 +146,16 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
         //we check if it is the initial execution
         if (!isFirstExecution) {
+            Log.d(TAG,"it is not 1st execution anymore");
             if (mServerSocket != null) {
                 //we resume the service discovery
                 mNsdHelper.registerService(mServerSocket.getLocalPort());
 
                 //we check if the receiver socket is null
-                if (mReceiverSocket == null) {
+                //if (mReceiverSocket == null) {
                     Log.d(TAG, "recreating socket");
                     mReceiverSocket = new ReceiverPickSocket(this, mServerSocket, mUserInfoEntry);
-                }
+                //}
             }
         }
     }
