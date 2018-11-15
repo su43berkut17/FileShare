@@ -3,6 +3,7 @@ package com.yumesoftworks.fileshare;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
 import com.yumesoftworks.fileshare.data.AppDatabase;
@@ -27,5 +28,25 @@ public class FileTransferViewModel extends AndroidViewModel {
 
     public LiveData<List<FileListEntry>> getFileListInfo(){
         return data;
+    }
+
+    //update the data, once it has been copied
+    public void updateFile(FileListEntry fileListEntry){
+        new updateDatabaseAsyncTask(database).execute(fileListEntry);
+    }
+
+    private static class updateDatabaseAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
+        private AppDatabase database;
+
+        updateDatabaseAsyncTask(AppDatabase recDatabase){
+            database=recDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(final FileListEntry... params) {
+            //we save the new file
+            database.fileListDao().updateFile(params[0]);
+            return null;
+        }
     }
 }
