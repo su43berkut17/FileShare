@@ -1,7 +1,9 @@
 package com.yumesoftworks.fileshare;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,18 +14,15 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.AppDatabase;
-import com.yumesoftworks.fileshare.data.LoadUserListHelper;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
 import com.yumesoftworks.fileshare.peerToPeer.ReceiverPickSocket;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
-import java.net.Socket;
+import java.util.List;
 
-public class ReceiverPickDestinationActivity extends AppCompatActivity implements ReceiverPickSocket.SocketReceiverConnectionInterface,
-        LoadUserListHelper.LoadUserHelperInterface {
+public class ReceiverPickDestinationActivity extends AppCompatActivity implements ReceiverPickSocket.SocketReceiverConnectionInterface{
 
     private static final String TAG="ReceiverDesActivity";
 
@@ -40,7 +39,8 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     //database
     private UserInfoEntry mUserInfoEntry;
-    private LoadUserListHelper mDatabaseHelper;
+    private AppDatabase mDb;
+    private ReceiverPickDestinationViewModel viewModel;
 
     //lifecycle
     private Boolean isFirstExecution=true;
@@ -61,12 +61,24 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);*/
 
-        Log.d(TAG,"Creating new instance of mDatabaseHelper");
-        mDatabaseHelper=new LoadUserListHelper(this);
-        mDatabaseHelper.executeAsync();
-        Log.d(TAG,"instance of mDatabase helper is "+mDatabaseHelper.toString());
+        //we will use livedata for user
+        mDb=AppDatabase.getInstance(getApplicationContext());
+        setupViewModel();
+
         //we set the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    //view model
+    private void setupViewModel(){
+        viewModel=ViewModelProviders.of(this).get(ReceiverPickDestinationViewModel.class);
+        viewModel.getUserInfo().observe(this, new Observer<List<UserInfoEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<UserInfoEntry> userInfoEntries) {
+                mUserInfoEntry=userInfoEntries.get(0);
+                initializeNsd();
+            }
+        });
     }
 
     @Override
@@ -152,8 +164,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         super.onDestroy();
         //destroy the discovery
         mNsdHelper=null;
-        mDatabaseHelper.destroyTask();
-        mDatabaseHelper=null;
     }
 
     @Override
@@ -165,12 +175,5 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    @Override
-    public void userLoadingFinished(UserInfoEntry userInfoEntry) {
-        mUserInfoEntry=userInfoEntry;
-        //we initiate the nsd
-        initializeNsd();
     }
 }
