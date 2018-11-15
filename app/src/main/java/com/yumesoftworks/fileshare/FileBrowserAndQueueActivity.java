@@ -53,6 +53,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
     //for deletion in the queue viewer
     private boolean mIsNotDeletion;
+    //for checkbox interaction
+    private boolean mIsCheckBoxInteraction=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -231,7 +233,11 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         public void onChanged(@Nullable List<FileListEntry> fileListEntries) {
             //we update the recyclerView Adapter
             Log.d(TAG,"ON CHANGED, the file list entries length returned in lifecycle is "+fileListEntries.size());
-            fragmentFileViewer.updateFileRV(fileListEntries);
+            if (!mIsCheckBoxInteraction) {
+                fragmentFileViewer.updateFileRV(fileListEntries);
+            }else{
+                mIsCheckBoxInteraction=false;
+            }
         }
     };
 
@@ -287,6 +293,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         }
     }
 
+    //when whe click on a file or directory
     @Override
     public void onFragmentFileInteraction(FileListEntry fileListEntry) {
         //check if it is a directory
@@ -296,6 +303,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             fileViewerViewModel.refreshData(fileListEntry.getPath());
         }else{
             //we check if it has been selected or not
+            //mIsCheckBoxInteraction=true;
             if (fileListEntry.getIsSelected()==0){
                 //it is not selected so we delete it
                 //we reset the is selected value as 1 so the fileListEntry is the same as the one that was saved before
