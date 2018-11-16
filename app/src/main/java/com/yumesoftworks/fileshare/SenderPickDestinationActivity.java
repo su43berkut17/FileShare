@@ -32,6 +32,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.data.UserSendEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
+import com.yumesoftworks.fileshare.peerToPeer.SenderPickSocket;
 import com.yumesoftworks.fileshare.recyclerAdapters.SendFileUserListAdapter;
 
 import java.io.IOException;
@@ -43,7 +44,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SenderPickDestinationActivity extends AppCompatActivity implements NsdHelper.ChangedServicesListener,
-        SendFileUserListAdapter.ItemClickListener {
+        SendFileUserListAdapter.ItemClickListener,
+    SenderPickSocket.SocketSenderConnectionInterface{
 
     private final static String TAG="SendPickActivity";
     public final static String MESSAGE_OPEN_ACTIVITY="pleaseOpenANewActivity";
@@ -72,7 +74,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     //for client socket
     private int mNumberOfItems;
     private int mCurrentSocketItem;
-    private AsyncTaskClient mSocketTask;
+    //private AsyncTaskClient mSocketTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,10 +114,12 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         mNsdHelper=new NsdHelper(this);
         mNsdHelper.initializeNsd();
         mNsdHelper.registerService(mServerSocket.getLocalPort());
+        mNsdHelper.discoverServices();
+
 
         //start process that checks every few seconds the updated list
-        mHandler=new Handler();
-        mDelayCheck=5*1000;
+        //mHandler=new Handler();
+        //mDelayCheck=5*1000;
 
         //we set the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -130,9 +134,9 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         //we remove any callbacks
         mHandler.removeCallbacks(mRunnableCheck);
         //we cancel the task if it is paused, it will resume once the discovery begins
-        if (mSocketTask!=null){
+        /*if (mSocketTask!=null){
             mSocketTask.cancel(true);
-        }
+        }*/
 
         super.onPause();
     }
@@ -146,7 +150,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         }
 
         //we start the 1st discovery
-        startDiscoveryAndTimer();
+        //startDiscoveryAndTimer();
     }
 
     @Override
@@ -159,7 +163,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     }
 
     //timer
-    private void startDiscoveryAndTimer(){
+    /*private void startDiscoveryAndTimer(){
         Log.d(TAG,"Running the discovery and Timer");
         //clear the user list
         mUserList.clear();
@@ -211,10 +215,10 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
                 startDiscoveryAndTimer();
             }
         },mDelayCheck);
-    }
+    }*/
 
     //cycle that creates a socket connection and gets the avatar
-    private void startSocketTransfer(){
+    /*private void startSocketTransfer(){
         //we check if we are in the right socket
         if (mCurrentSocketItem<mNumberOfItems){
             //we execute the async task
@@ -225,10 +229,10 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
             mAdapter.setUsers(mUserList);
             mAdapter.notifyDataSetChanged();
         }
-    }
+    }*/
 
     //asynctasdk for each client
-    private class AsyncTaskClient extends AsyncTask<Void, Void, Void> {
+    /*private class AsyncTaskClient extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
 
@@ -268,7 +272,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
             mCurrentSocketItem++;
             startSocketTransfer();
         }
-    }
+    }*/
 
     //callback
     @Override
@@ -278,8 +282,40 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         UserSendEntry entry=new UserSendEntry("reading info...",1,serviceInfo.getServiceName(),serviceInfo.getHost(), serviceInfo.getPort());
 
         //we push it to the temp
-        mTempUserList.add(entry);
+        //mTempUserList.add(entry)
+        mUserList.add(entry);
+
+        //we check the real information with the socket
+        SenderPickSocket senderPickSocket=new SenderPickSocket(this, entry);
     }
+
+    //update the data of the user
+    @Override
+    public void updateUserDataSocket(UserSendEntry userSendEntry) {
+        //look in the list
+        for (int i=0;i<mUserList.size();i++){
+            if (mUserList.get(i).getInfoToSend()==userSendEntry.getInfoToSend()){
+                mUserList.get(i).setUsername(userSendEntry.getUsername());
+                mUserList.get(i).setAvatar(userSendEntry.getAvatar());
+            }
+        }
+
+        //once it is done we update the adapter
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void removedService(NsdServiceInfo serviceInfo) {
+        Log.d(TAG,"Removing a service");
+
+        //cycle
+        for (int i=0;i<mUserList.size();i++){
+            if (mUserList.get(i).getInfoToSend()==serviceInfo.getServiceName()){
+                mUserList.remove(i);
+            }
+        }
+    }
+
 
     //when the user has been clicked
     @Override

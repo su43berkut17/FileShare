@@ -168,7 +168,8 @@ public class NsdHelper {
             }
             @Override
             public void onServiceUnregistered(NsdServiceInfo arg0) {
-                Log.d(TAG, "Service unregistered: " + arg0.getServiceName());
+                Log.d(TAG, "Service unregistered, we send it to the activity: " + arg0.getServiceName());
+                mServiceListener.removedService(arg0);
             }
             @Override
             public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
@@ -235,5 +236,6 @@ public class NsdHelper {
     //interface
     public interface ChangedServicesListener{
         void addedService(NsdServiceInfo serviceInfo);
+        void removedService(NsdServiceInfo serviceInfo);
     }
 }
