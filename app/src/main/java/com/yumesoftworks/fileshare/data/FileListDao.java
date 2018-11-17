@@ -24,6 +24,9 @@ public interface FileListDao {
     @Delete
     void deleteFile(FileListEntry fileListEntry);
 
+    @Query("DELETE FROM FileList WHERE path = :pathToDelete")
+    void deleteFileNotSameId(String pathToDelete);
+
     @Query("DELETE FROM FileList")
     void clearFileList();
 }

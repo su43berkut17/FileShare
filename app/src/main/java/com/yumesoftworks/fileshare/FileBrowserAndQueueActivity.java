@@ -52,7 +52,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private QueueViewerViewModel queueViewerViewModel;
 
     //for deletion in the queue viewer
-    private boolean mIsNotDeletion;
+    private boolean mIsNotDeletion=true;
     //for checkbox interaction
     private boolean mIsCheckBoxInteraction=false;
 
@@ -308,7 +308,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                 //it is not selected so we delete it
                 //we reset the is selected value as 1 so the fileListEntry is the same as the one that was saved before
                 fileListEntry.setIsSelected(1);
-                fileViewerViewModel.deleteFile(fileListEntry);
+                //fileViewerViewModel.deleteFile(fileListEntry);
+                fileViewerViewModel.deleteFileCheckbox(fileListEntry);
             }else{
                 //it is selected so we save it
                 fileViewerViewModel.saveFile(fileListEntry);
@@ -346,6 +347,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     public void fileFragmentRequestUpdate() {
         //we update the info of the fragment per the fragment request
         fragmentFileViewer.updateFileRV(fileViewerViewModel.getData().getValue());
+        fragmentFileViewer.updatePath(fileViewerViewModel.getPath().getValue());
     }
 
     @Override
@@ -391,6 +393,13 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                         fragmentManager.beginTransaction()
                                 .replace(R.id.frag_afv_main, fragmentFileViewer)
                                 .commit();
+
+                        //we reattach the observer
+                        fileViewerViewModel.getData().observe(this, fileViewerViewModelObserver);
+                        fileViewerViewModel.getPath().observe(this,fileViewerViewModelObserverPath);
+
+                        //we update the data and path
+                        fileFragmentRequestUpdate();
 
                         //we set the current fragment
                         mCurrentFragment=FILE_FRAGMENT;

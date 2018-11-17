@@ -132,7 +132,11 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
             mNsdHelper.cancelPreviousRegRequest();
         }
         //we remove any callbacks
-        mHandler.removeCallbacks(mRunnableCheck);
+        try {
+            mHandler.removeCallbacks(mRunnableCheck);
+        }catch (Exception e){
+            Log.d(TAG,"Cant remove callbacks "+e.getMessage());
+        }
         //we cancel the task if it is paused, it will resume once the discovery begins
         /*if (mSocketTask!=null){
             mSocketTask.cancel(true);

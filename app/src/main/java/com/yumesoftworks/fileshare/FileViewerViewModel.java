@@ -18,7 +18,7 @@ import java.util.List;
 public class FileViewerViewModel extends AndroidViewModel {
     private static MutableLiveData<List<FileListEntry>> data;
     private static MutableLiveData<String> mPath;
-    private String TAG = "FileViewerViewModel";
+    private final static String TAG = "FileViewerViewModel";
     private AppDatabase database;
 
     public FileViewerViewModel(Application application){
@@ -99,8 +99,25 @@ public class FileViewerViewModel extends AndroidViewModel {
 
         @Override
         protected Void doInBackground(FileListEntry... fileListEntries) {
-            //we delete the file
+            Log.d(TAG,"Deleting "+fileListEntries[0].getFileName()+" is selected "+fileListEntries[0].getIsSelected());
             database.fileListDao().deleteFile(fileListEntries[0]);
+            return null;
+        }
+    }
+
+    public void deleteFileCheckbox(FileListEntry fileListEntry){
+        new deletePathAsyncTask(database).execute(fileListEntry);
+    }
+
+    private static class deletePathAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
+        private AppDatabase database;
+
+        deletePathAsyncTask(AppDatabase recDatabase){database = recDatabase;}
+
+        @Override
+        protected Void doInBackground(FileListEntry... voids) {
+            //we drop the table
+            database.fileListDao().deleteFileNotSameId(voids[0].getPath());
             return null;
         }
     }

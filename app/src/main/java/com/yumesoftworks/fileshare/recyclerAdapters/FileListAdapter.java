@@ -164,6 +164,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
                 if (mFileList.get(getAdapterPosition()).getIsSelected() == 0) {
                     //we activate the checkbox
                     mFileList.get(getAdapterPosition()).setIsSelected(1);
+
                     if (view.getId() != R.id.cb_item_file) {
 
                         Log.d(TAG, "we didnt click the checkbox so we change it");
@@ -172,6 +173,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
                 } else {
                     //we deactivate the checkbox and values
                     mFileList.get(getAdapterPosition()).setIsSelected(0);
+
                     if (view.getId() != R.id.cb_item_file) {
                         Log.d(TAG, "we didnt click the checkbox so we change it");
                         cv_selected.setChecked(false);
