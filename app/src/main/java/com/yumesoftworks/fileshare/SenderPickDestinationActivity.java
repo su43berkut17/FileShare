@@ -50,7 +50,6 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     private final static String TAG="SendPickActivity";
     public final static String MESSAGE_OPEN_ACTIVITY="pleaseOpenANewActivity";
 
-
     //analytics and admob
     private FirebaseAnalytics mFireAnalytics;
     private AdView mAdView;
@@ -58,6 +57,9 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     //nds vars
     private NsdHelper mNsdHelper;
     private ServerSocket mServerSocket;
+
+    //we check if it is 1st execution
+    private Boolean isFirstExecution=true;
 
     //recyclerview
     private RecyclerView mRecyclerView;
@@ -114,8 +116,9 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         mNsdHelper=new NsdHelper(this);
         mNsdHelper.initializeNsd();
         mNsdHelper.registerService(mServerSocket.getLocalPort());
-        mNsdHelper.discoverServices();
+        //mNsdHelper.discoverServices();
 
+        isFirstExecution=true;
 
         //start process that checks every few seconds the updated list
         //mHandler=new Handler();
@@ -127,9 +130,11 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
     @Override
     protected void onPause() {
+        Log.d(TAG,"onPause");
         if (mNsdHelper!=null){
             mNsdHelper.stopDiscovery();
-            mNsdHelper.cancelPreviousRegRequest();
+            mNsdHelper.cancelRegistration();
+            mNsdHelper.cancelResolver();
         }
         //we remove any callbacks
         try {
@@ -149,9 +154,14 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     protected void onResume() {
         super.onResume();
 
-        if (mNsdHelper!=null){
-            mNsdHelper.registerService(mServerSocket.getLocalPort());
+        if (!isFirstExecution) {
+            if (mNsdHelper != null) {
+                mNsdHelper.initializeNsd();
+                mNsdHelper.registerService(mServerSocket.getLocalPort());
+            }
         }
+        isFirstExecution=false;
+        mNsdHelper.discoverServices();
 
         //we start the 1st discovery
         //startDiscoveryAndTimer();
@@ -310,7 +320,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
     @Override
     public void removedService(NsdServiceInfo serviceInfo) {
-        Log.d(TAG,"Removing a service");
+        Log.d(TAG,"Removing a service: "+serviceInfo.getServiceName());
 
         //cycle
         for (int i=0;i<mUserList.size();i++){

@@ -44,6 +44,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     //lifecycle
     private Boolean isFirstExecution=true;
+    private Boolean NSDInitialized=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +61,9 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         mAdView = findViewById(R.id.ad_view_receiver_pick_destination);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);*/
+        //we reset the execution
+        isFirstExecution=true;
+        NSDInitialized=false;
 
         //we will use livedata for user
         mDb=AppDatabase.getInstance(getApplicationContext());
@@ -76,27 +80,12 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
             @Override
             public void onChanged(@Nullable List<UserInfoEntry> userInfoEntries) {
                 mUserInfoEntry=userInfoEntries.get(0);
-                initializeNsd();
+                if (!NSDInitialized) {
+                    initializeNsd();
+                    NSDInitialized=true;
+                }
             }
         });
-    }
-
-    @Override
-    public void openNexActivity() {
-        //we open the next activity with the socket information
-        //we call the activity that will start the service with the info
-        Intent intent=new Intent(this,TransferProgressActivity.class);
-
-        //data to send on the intent
-        Bundle bundleSend=new Bundle();
-
-        //variables to be sent
-        bundleSend.putString(TransferProgressActivity.EXTRA_TYPE_TRANSFER,TransferProgressActivity.FILES_SENDING);
-        //bundleSend.putString(TransferProgressActivity.LOCAL_IP,mServerSocket.getInetAddress().getHostAddress());
-        bundleSend.putInt(TransferProgressActivity.LOCAL_PORT,mServerSocket.getLocalPort());
-
-        intent.putExtras(bundleSend);
-        startActivity(intent);
     }
 
     //after loading database initialize discovery
@@ -117,16 +106,15 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         if (mReceiverSocket==null) {
             mReceiverSocket = new ReceiverPickSocket(this,mServerSocket, mUserInfoEntry);
         }
-
-        //we change the initial execution counter
-        isFirstExecution=false;
     }
 
     @Override
     protected void onPause() {
+        Log.d(TAG,"onPause");
         super.onPause();
         if (mNsdHelper!=null){
-            mNsdHelper.cancelPreviousRegRequest();
+            mNsdHelper.cancelRegistration();
+            mNsdHelper.cancelResolver();
         }
 
         //we destroy the socket
@@ -149,6 +137,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
             Log.d(TAG,"it is not 1st execution anymore");
             if (mServerSocket != null) {
                 //we resume the service discovery
+                mNsdHelper.initializeNsd();
                 mNsdHelper.registerService(mServerSocket.getLocalPort());
 
                 //we check if the receiver socket is null
@@ -158,6 +147,9 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
                 //}
             }
         }
+
+        //we change the initial execution counter
+        isFirstExecution=false;
     }
 
     @Override
@@ -165,6 +157,24 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         super.onDestroy();
         //destroy the discovery
         mNsdHelper=null;
+    }
+
+    @Override
+    public void openNexActivity() {
+        //we open the next activity with the socket information
+        //we call the activity that will start the service with the info
+        Intent intent=new Intent(this,TransferProgressActivity.class);
+
+        //data to send on the intent
+        Bundle bundleSend=new Bundle();
+
+        //variables to be sent
+        bundleSend.putString(TransferProgressActivity.EXTRA_TYPE_TRANSFER,TransferProgressActivity.FILES_SENDING);
+        //bundleSend.putString(TransferProgressActivity.LOCAL_IP,mServerSocket.getInetAddress().getHostAddress());
+        bundleSend.putInt(TransferProgressActivity.LOCAL_PORT,mServerSocket.getLocalPort());
+
+        intent.putExtras(bundleSend);
+        startActivity(intent);
     }
 
     @Override

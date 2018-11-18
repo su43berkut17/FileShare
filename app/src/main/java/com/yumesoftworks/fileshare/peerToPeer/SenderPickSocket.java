@@ -54,15 +54,24 @@ public class SenderPickSocket {
                     mSocket = new Socket(hostAddress, hostIp);
 
                     Log.d(TAG, "Reading the user data");
-                    ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
-                    UserInfoEntry readEntry = (UserInfoEntry) messageIn.readObject();
 
-                    //set the right data
-                    mUserList.setAvatar(readEntry.getPickedAvatar());
-                    mUserList.setUsername(readEntry.getUsername());
-                    mSocket.close();
+                    while(true) {
+                        try {
+                            Log.d(TAG,"Object output stream started");
+                            ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
+                            UserInfoEntry readEntry = (UserInfoEntry) messageIn.readObject();
 
-                    socketHandler.post(new SenderPickSocket.updateUIThread(mUserList));
+                            //set the right data
+                            mUserList.setAvatar(readEntry.getPickedAvatar());
+                            mUserList.setUsername(readEntry.getUsername());
+
+                            socketHandler.post(new SenderPickSocket.updateUIThread(mUserList));
+                            mSocket.close();
+                        } catch (Exception e) {
+                            Log.d(TAG, "InputStream failed " + e.getMessage());
+                        }
+                    }
+
                 } catch (Exception e) {
                     Log.d(TAG, "the socket creation has failed" + e.getMessage());
                 }

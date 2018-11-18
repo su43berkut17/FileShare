@@ -8,7 +8,7 @@ import android.util.Log;
 public class NsdHelper {
 
     public String mServiceName = "FileShareNdsServiceForFileTransfer";
-    public static final String SERVICE_TYPE = "_nsdchat._tcp";
+    public static final String SERVICE_TYPE = "_http._tcp";
     public static final String TAG = "NsdHelper";
 
     Context mContext;
@@ -33,30 +33,36 @@ public class NsdHelper {
     }
 
     public void initializeNsd() {
-        initializeResolveListener();
+        if (mResolveListener==null) {
+            initializeResolveListener();
+        }
+        if (mRegistrationListener==null) {
+            initializeRegistrationListener();
+        }
         //mNsdManager.init(mContext.getMainLooper(), this);
     }
 
     public void initializeDiscoveryListener() {
+        Log.d(TAG,"initializeDiscoveryListener called");
         mDiscoveryListener = new NsdManager.DiscoveryListener() {
             @Override
             public void onDiscoveryStarted(String regType) {
-                Log.d(TAG, "Service discovery started "+regType);
+                //Log.d(TAG, "Service discovery started "+regType);
             }
-            @Override
 
+            @Override
             public void onServiceFound(NsdServiceInfo service) {
                 //refactor this so the service type is not making an error due to the serviceType method returning it ith an exta . at the end
-                Log.d(TAG, "1-Service discovery success:" + service.getServiceName());
-                Log.d(TAG,"Comparing service type: remote: "+service.getServiceType()+". local:"+SERVICE_TYPE);
+                Log.d(TAG, "1-Service discovery success:" + service.getServiceName()+" "+service.getPort());
+
                 //unknown service
                 /*if (!service.getServiceType().equals(SERVICE_TYPE)) {
                     Log.d(TAG,"Unkwown service type");
                 }else*/
                 if (service.getServiceName().equals(mServiceName)){
-                    Log.d(TAG,"It is the same device");
+                    Log.d(TAG,"It is the same device "+service.getServiceName()+" compared to local "+mServiceName);
                 }else if(service.getServiceName().contains(mServiceName)||mServiceName.contains(service.getServiceName())){
-                    Log.d(TAG,"Comparing the received service name "+service.getServiceName()+" with local service name: "+mServiceName);
+                    //Log.d(TAG,"Comparing the received service name "+service.getServiceName()+" with local service name: "+mServiceName);
 
                     mNsdManager.resolveService(service, new NsdManager.ResolveListener() {
                         @Override
@@ -159,8 +165,8 @@ public class NsdHelper {
         mRegistrationListener = new NsdManager.RegistrationListener() {
             @Override
             public void onServiceRegistered(NsdServiceInfo NsdServiceInfo) {
-                mServiceName = NsdServiceInfo.getServiceName();
-                Log.d(TAG, "Service registered: " + mServiceName);
+                //mServiceName = NsdServiceInfo.getServiceName();
+                Log.d(TAG, "Service registered: " + NsdServiceInfo.getServiceName());
             }
             @Override
             public void onRegistrationFailed(NsdServiceInfo arg0, int arg1) {
@@ -169,7 +175,11 @@ public class NsdHelper {
             @Override
             public void onServiceUnregistered(NsdServiceInfo arg0) {
                 Log.d(TAG, "Service unregistered, we send it to the activity: " + arg0.getServiceName());
-                mServiceListener.removedService(arg0);
+                try{
+                    mServiceListener.removedService(arg0);
+                }catch (Exception e){
+                    Log.d(TAG,"Cannot remove service since we unregistered the registration");
+                }
             }
             @Override
             public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
@@ -180,16 +190,17 @@ public class NsdHelper {
     public void registerService(int port) {
         Log.d(TAG,"Registering service with port "+port);
         // Cancel any previous registration request
-        cancelPreviousRegRequest();
-
-        initializeRegistrationListener();
 
         NsdServiceInfo serviceInfo  = new NsdServiceInfo();
         serviceInfo.setPort(port);
         serviceInfo.setServiceName(mServiceName);
+        mServiceName=serviceInfo.getServiceName();
         serviceInfo.setServiceType(SERVICE_TYPE);
+        Log.d(TAG,"Registering service type: "+SERVICE_TYPE+"-- the service info has as: "+serviceInfo.getServiceType());
         mNsdManager.registerService(
                 serviceInfo, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
+
+        //Log.d(TAG,"The register service ran, the service type inside the ndsmanager is "+mNsdManager);
     }
 
     public void discoverServices() {
@@ -202,7 +213,7 @@ public class NsdHelper {
     }
 
     public void stopDiscovery() {
-        Log.d(TAG,"Cancelling former discovery");
+        //Log.d(TAG,"Cancelling former discovery");
         if (mDiscoveryListener != null) {
             Log.d(TAG,"mDiscoverListener is no null so we stop service and set it to null");
             try {
@@ -215,12 +226,8 @@ public class NsdHelper {
         }
     }
 
-    public NsdServiceInfo getChosenServiceInfo() {
-        return mService;
-    }
-
-    public void cancelPreviousRegRequest() {
-        Log.d(TAG,"Cancelling previous request");
+    public void cancelRegistration() {
+        //Log.d(TAG,"Cancelling previous request");
         if (mRegistrationListener != null) {
             Log.d(TAG,"mRegistration listener is not null so we unregister and then st to null");
             try {
@@ -230,6 +237,17 @@ public class NsdHelper {
             } finally {
             }
             mRegistrationListener = null;
+        }
+    }
+
+    public void cancelResolver(){
+        if (mResolveListener!=null){
+            Log.d(TAG,"mResolveListener is not null so we unregister and set it to null");
+            try {
+                mResolveListener=null;
+            }catch (Exception e){
+                Log.d(TAG,"Couldnt cancel the resolve listener");
+            }
         }
     }
 

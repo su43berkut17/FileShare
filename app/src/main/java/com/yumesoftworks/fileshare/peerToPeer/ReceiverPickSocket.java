@@ -48,13 +48,15 @@ public class ReceiverPickSocket {
                 try {
                     //wait for a connection
                     Log.d(TAG, "Async:Waiting for the socket to be connected " + mServerSocket.getLocalPort());
-                    socketHandler.post(new updateUIThread("test"));
+
                     mSocket = mServerSocket.accept();
 
                     Log.d(TAG, "Async:Sending the user data");
                     try {
                         ObjectOutputStream messageOut = new ObjectOutputStream(mSocket.getOutputStream());
                         messageOut.writeObject(mUserInfoEntry);
+                        messageOut.close();
+                        Log.d(TAG,"ObjectOutputSteamSent closed");
                     } catch (Exception e) {
                         Log.d(TAG, "Async:There is no output stream " + e.getMessage());
                     }
@@ -62,7 +64,8 @@ public class ReceiverPickSocket {
                     try {
                         ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
                         String message = messageIn.readUTF();
-
+                        messageIn.close();
+                        Log.d(TAG,"ObjectInputStreamReceived closed");
                         if (message == SenderPickDestinationActivity.MESSAGE_OPEN_ACTIVITY) {
                             //we will open the new activity and wait for the connection via interface
                             mReceiverInterface.openNexActivity();
