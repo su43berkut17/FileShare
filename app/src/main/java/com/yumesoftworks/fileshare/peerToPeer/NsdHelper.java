@@ -11,14 +11,14 @@ public class NsdHelper {
     public static final String SERVICE_TYPE = "_http._tcp";
     public static final String TAG = "NsdHelper";
 
-    Context mContext;
+    private Context mContext;
 
     //network service discovery vars
-    NsdManager mNsdManager;
-    NsdManager.ResolveListener mResolveListener;
-    NsdManager.DiscoveryListener mDiscoveryListener;
-    NsdManager.RegistrationListener mRegistrationListener;
-    NsdServiceInfo mService;
+    private NsdManager mNsdManager;
+    private NsdManager.ResolveListener mResolveListener;
+    private NsdManager.DiscoveryListener mDiscoveryListener;
+    private NsdManager.RegistrationListener mRegistrationListener;
+    //private NsdServiceInfo mService;
 
     //interface to send services added or deleted
     private ChangedServicesListener mServiceListener;
@@ -34,7 +34,7 @@ public class NsdHelper {
 
     public void initializeNsd() {
         if (mResolveListener==null) {
-            initializeResolveListener();
+            //initializeResolveListener();
         }
         if (mRegistrationListener==null) {
             initializeRegistrationListener();
@@ -59,9 +59,9 @@ public class NsdHelper {
                 /*if (!service.getServiceType().equals(SERVICE_TYPE)) {
                     Log.d(TAG,"Unkwown service type");
                 }else*/
-                if (service.getServiceName().equals(mServiceName)){
+                /*if (service.getServiceName().equals(mServiceName)){
                     Log.d(TAG,"It is the same device "+service.getServiceName()+" compared to local "+mServiceName);
-                }else if(service.getServiceName().contains(mServiceName)||mServiceName.contains(service.getServiceName())){
+                }else */if(service.getServiceName().contains(mServiceName)||mServiceName.contains(service.getServiceName())){
                     //Log.d(TAG,"Comparing the received service name "+service.getServiceName()+" with local service name: "+mServiceName);
 
                     mNsdManager.resolveService(service, new NsdManager.ResolveListener() {
@@ -73,6 +73,7 @@ public class NsdHelper {
                         @Override
                         public void onServiceResolved(NsdServiceInfo serviceInfo) {
                             Log.d(TAG,"Service resolved "+serviceInfo.getPort()+"-"+serviceInfo.getHost());
+                            //Log.d(TAG,"comparing ips, local: ");
 
                             //return found service to be added to the recycler view on the activity]
                             if (mServiceListener!=null) {
@@ -84,44 +85,22 @@ public class NsdHelper {
                     Log.d(TAG,"There was an error on service found");
                     Log.d(TAG,"Compared received service name "+service.getServiceName()+" with local service name: "+mServiceName);
                 }
-                /*if (!service.getServiceType().equals(SERVICE_TYPE)) {
-                    //unknown service
-                    Log.d(TAG, "Unknown Service Type: " + service.getServiceType());
-                //} else if (service.getServiceName().equals(mServiceName)) {
-                    //Log.d(TAG, "Same machine: " + mServiceName);
-                } else if (service.getServiceName().contains(mServiceName)){
-                    //Log.d(TAG,"2-resolving service");
-                    //Log.d(TAG,"3-service data "+service.getHost()+"-port:"+service.getPort()+"-"+service.getServiceName()+service.getServiceType());
-                    //mNsdManager.resolveService(service, mResolveListener);
-                    mNsdManager.resolveService(service, new NsdManager.ResolveListener() {
-                        @Override
-                        public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                            Log.e(TAG, "Resolve failed " + errorCode+"service name: "+ serviceInfo.getServiceName()+" service type: "+serviceInfo.getServiceType());
-                        }
 
-                        @Override
-                        public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                            //Log.e(TAG, "Resolve Succeeded. " + serviceInfo);
-                            if (serviceInfo.getServiceName().equals(mServiceName)) {
-                                //Log.d(TAG, "Same IP.");
-                                return;
-                            }
-                            Log.d(TAG,"Service resolved "+serviceInfo.getPort()+"-"+serviceInfo.getHost());
-                            //mService = serviceInfo;
-                            //return found service to be added to the recycler view on the activity]
-                            if (mServiceListener!=null) {
-                                mServiceListener.addedService(serviceInfo);
-                            }
-                        }
-                    });
-                }*/
             }
 
             @Override
             public void onServiceLost(NsdServiceInfo service) {
-                Log.e(TAG, "service lost" + service);
-                if (mService == service) {
+                Log.e(TAG, "service lost " + service);
+                /*if (mService == service) {
                     mService = null;
+                }*/
+
+                //we delete service from the list
+                Log.d(TAG, "Service unregistered, we send it to the activity: " + service.getServiceName());
+                try{
+                    mServiceListener.removedService(service);
+                }catch (Exception e){
+                    Log.d(TAG,"Cannot remove service since we unregistered the registration");
                 }
             }
 
@@ -155,7 +134,7 @@ public class NsdHelper {
                     Log.d(TAG, "Same IP.");
                     return;
                 }
-                mService = serviceInfo;
+                //mService = serviceInfo;
             }
         };
     }
@@ -194,9 +173,8 @@ public class NsdHelper {
         NsdServiceInfo serviceInfo  = new NsdServiceInfo();
         serviceInfo.setPort(port);
         serviceInfo.setServiceName(mServiceName);
-        mServiceName=serviceInfo.getServiceName();
         serviceInfo.setServiceType(SERVICE_TYPE);
-        Log.d(TAG,"Registering service type: "+SERVICE_TYPE+"-- the service info has as: "+serviceInfo.getServiceType());
+        //Log.d(TAG,"Registering service type: "+SERVICE_TYPE+"-- the service info has as: "+serviceInfo.getServiceType());
         mNsdManager.registerService(
                 serviceInfo, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
 

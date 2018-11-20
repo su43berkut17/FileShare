@@ -39,7 +39,9 @@ public class SenderPickSocket {
 
         @Override
         public void run() {
-            while (true) {
+            Boolean doWeRepeat=true;
+
+            while (doWeRepeat) {
                 // block the call until connection is created and return
                 // Socket object
                 try {
@@ -54,8 +56,11 @@ public class SenderPickSocket {
                     mSocket = new Socket(hostAddress, hostIp);
 
                     Log.d(TAG, "Reading the user data");
+                    doWeRepeat=false;
 
-                    while(true) {
+                    Boolean streamLoop=true;
+
+                    while(streamLoop) {
                         try {
                             Log.d(TAG,"Object output stream started");
                             ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
@@ -66,9 +71,12 @@ public class SenderPickSocket {
                             mUserList.setUsername(readEntry.getUsername());
 
                             socketHandler.post(new SenderPickSocket.updateUIThread(mUserList));
+                            streamLoop=false;
+                            doWeRepeat=false;
                             mSocket.close();
                         } catch (Exception e) {
                             Log.d(TAG, "InputStream failed " + e.getMessage());
+                            streamLoop=true;
                         }
                     }
 
@@ -93,6 +101,9 @@ public class SenderPickSocket {
 
             //we send it back to the main activity via interface
             mSenderInterface.updateUserDataSocket(user);
+
+            //we close the thread
+            destroySocket();
         }
     }
 

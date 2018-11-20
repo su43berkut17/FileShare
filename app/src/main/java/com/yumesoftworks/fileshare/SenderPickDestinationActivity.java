@@ -176,131 +176,23 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         mTempUserList.clear();
     }
 
-    //timer
-    /*private void startDiscoveryAndTimer(){
-        Log.d(TAG,"Running the discovery and Timer");
-        //clear the user list
-        mUserList.clear();
-        //we move the temp list to the adapter user list
-        Boolean exists;
-        for (int i=0;i<mTempUserList.size();i++){
-            //push the 1st item
-            if (i==0) {
-                mUserList.add(mTempUserList.get(i));
-            }else{
-                //loop that checks with every item if it has been added already
-                exists=false;
-                Log.d(TAG,"Will start comparing "+mTempUserList.get(i).getIpAddress().getHostAddress());
-
-                for (int j=0;j<mUserList.size();j++){
-                    Log.d(TAG,"comparing "+mTempUserList.get(i).getIpAddress().getHostAddress()+" with:"+mUserList.get(j).getIpAddress().getHostAddress());
-                    if (mTempUserList.get(i).getIpAddress().getHostAddress()==mUserList.get(j).getIpAddress().getHostAddress()){
-                        exists=true;
-                    }
-                }
-
-                //we check if it doesnt exist
-                if (exists==false){
-                    mUserList.add(mTempUserList.get(i));
-                }
-            }
-        }
-
-        //we reset the number of times we need to do a socket reading
-        mNumberOfItems=mUserList.size();
-        mCurrentSocketItem=0;
-
-        //we start method that will load the right data in the recycler views
-        startSocketTransfer();
-        //mAdapter.setUsers(mUserList);
-        //mAdapter.notifyDataSetChanged();
-
-        //we clear the temp user list
-        mTempUserList.clear();
-
-        //we start the discovery again
-        mNsdHelper.discoverServices();
-
-        //we start the handler
-        mHandler.postDelayed(mRunnableCheck = new Runnable() {
-            @Override
-            public void run() {
-                //clear the temp list
-                startDiscoveryAndTimer();
-            }
-        },mDelayCheck);
-    }*/
-
-    //cycle that creates a socket connection and gets the avatar
-    /*private void startSocketTransfer(){
-        //we check if we are in the right socket
-        if (mCurrentSocketItem<mNumberOfItems){
-            //we execute the async task
-            mSocketTask=new AsyncTaskClient();
-            mSocketTask.execute();
-        }else{
-            //we finished now we update the adapter
-            mAdapter.setUsers(mUserList);
-            mAdapter.notifyDataSetChanged();
-        }
-    }*/
-
-    //asynctasdk for each client
-    /*private class AsyncTaskClient extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... voids) {
-
-            while (true) {
-                // block the call until connection is created and return
-                // Socket object
-                try {
-                    //wait for a connection
-                    Log.d(TAG,"we try to create the socket: "+mUserList.get(mCurrentSocketItem).getIpAddress().getHostAddress()+" with port: "+mUserList.get(mCurrentSocketItem).getPort());
-                    //vars
-                    String hostAddress=mUserList.get(mCurrentSocketItem).getIpAddress().getHostAddress();
-                    int hostIp=mUserList.get(mCurrentSocketItem).getPort();
-
-                    //Socket socket = new Socket(mUserList.get(mCurrentSocketItem).getIpAddress().getHostAddress(),mUserList.get(mCurrentSocketItem).getPort());
-                    //Socket socket = new Socket(mUserList.get(mCurrentSocketItem).getInfoToSend(),mUserList.get(mCurrentSocketItem).getPort());
-                    Socket socket= new Socket(hostAddress,hostIp);
-
-                    Log.d(TAG,"Reading the user data");
-                    ObjectInputStream messageIn=new ObjectInputStream(socket.getInputStream());
-                    UserInfoEntry readEntry = (UserInfoEntry) messageIn.readObject();
-
-                    //set the right data
-                    mUserList.get(mCurrentSocketItem).setAvatar(readEntry.getPickedAvatar());
-                    mUserList.get(mCurrentSocketItem).setUsername(readEntry.getUsername());
-                    socket.close();
-                }catch (Exception e){
-                    Log.d(TAG,"the socket creation has failed"+e.getMessage());
-                    return null;
-                }
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            //increase to call the next socket
-            mCurrentSocketItem++;
-            startSocketTransfer();
-        }
-    }*/
-
     //callback
     @Override
     public void addedService(NsdServiceInfo serviceInfo) {
-        Log.d(TAG,"Received a service Info "+serviceInfo.getHost());
-        //we create the user
-        UserSendEntry entry=new UserSendEntry("reading info...",1,serviceInfo.getServiceName(),serviceInfo.getHost(), serviceInfo.getPort());
+        Log.d(TAG,"Received a service Info "+serviceInfo.getHost()+" ip "+serviceInfo.getHost().getHostAddress()+" local ip is "+mServerSocket.getInetAddress().getHostAddress());
+        //we check the ip
+        Log.d(TAG,"Comparing local IP: "+mServerSocket.getLocalSocketAddress().toString()+" with received: "+serviceInfo.getHost().getHostAddress());
+        if (mServerSocket.getInetAddress().getHostAddress()!=serviceInfo.getHost().getHostAddress()) {
+            //we create the user
+            UserSendEntry entry = new UserSendEntry("reading info...", 1, serviceInfo.getServiceName(), serviceInfo.getHost(), serviceInfo.getPort());
 
-        //we push it to the temp
-        //mTempUserList.add(entry)
-        mUserList.add(entry);
+            //we push it to the temp
+            //mTempUserList.add(entry)
+            mUserList.add(entry);
 
-        //we check the real information with the socket
-        SenderPickSocket senderPickSocket=new SenderPickSocket(this, entry);
+            //we check the real information with the socket
+            SenderPickSocket senderPickSocket = new SenderPickSocket(this, entry);
+        }
     }
 
     //update the data of the user
@@ -316,7 +208,13 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
         //once it is done we update the adapter
         mAdapter.setUsers(mUserList);
-        mAdapter.notifyDataSetChanged();
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     @Override
@@ -325,13 +223,20 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
         //cycle
         for (int i=0;i<mUserList.size();i++){
+            Log.d(TAG,"comparing "+mUserList.get(i).getInfoToSend());
             if (mUserList.get(i).getInfoToSend()==serviceInfo.getServiceName()){
+                Log.d(TAG,"We remove "+mUserList.get(i).getUsername());
                 mUserList.remove(i);
             }
         }
 
         mAdapter.setUsers(mUserList);
-        mAdapter.notifyDataSetChanged();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
 
@@ -358,7 +263,9 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         String hostAddress=sendEntry.getIpAddress().getHostAddress();
         int hostIp=sendEntry.getPort();
         try {
+            Log.d(TAG,"we create a socket "+hostAddress+" "+hostIp);
             Socket socket = new Socket(hostAddress, hostIp);
+            Log.d(TAG,"socket is "+socket.toString());
 
             //send the info to go to the next stage to wait
             ObjectOutputStream messageOut=new ObjectOutputStream(socket.getOutputStream());
@@ -378,7 +285,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
             intent.putExtras(bundleSend);
             startActivity(intent);
         }catch (Exception e){
-            Log.d(TAG,"Couldn't connect to the socket, we show dialog with error");
+            Log.d(TAG,"Couldn't connect to the socket, we show dialog with error "+e.getMessage());
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage(R.string.pu_error_connect_dialog)
                     .setCancelable(true)
