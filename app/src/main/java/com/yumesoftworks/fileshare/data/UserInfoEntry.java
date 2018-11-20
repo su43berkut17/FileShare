@@ -4,9 +4,11 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 
-@Entity (tableName = "userInfo")
-public class UserInfoEntry {
+import java.io.Serializable;
 
+@Entity (tableName = "userInfo")
+public class UserInfoEntry implements Serializable {
+    private static final long serialversionUID = 129348938L;
     public static int TYPE_LOCAL=1001;
     public static int TYPE_REMOTE=1002;
 

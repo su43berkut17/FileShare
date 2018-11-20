@@ -315,6 +315,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         }
 
         //once it is done we update the adapter
+        mAdapter.setUsers(mUserList);
         mAdapter.notifyDataSetChanged();
     }
 
@@ -328,6 +329,9 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
                 mUserList.remove(i);
             }
         }
+
+        mAdapter.setUsers(mUserList);
+        mAdapter.notifyDataSetChanged();
     }
 
 

@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.net.InetAddress;
 
 public class UserSendEntry implements Serializable {
-    static final long serialVersionUID=11111111;
+    private static final long serialversionUID = 129348938L;
     private String username;
     private int avatar;
     private String infoToSend;

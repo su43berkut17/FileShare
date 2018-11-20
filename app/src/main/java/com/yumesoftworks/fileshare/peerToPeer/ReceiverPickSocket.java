@@ -61,6 +61,7 @@ public class ReceiverPickSocket {
                         Log.d(TAG, "Async:There is no output stream " + e.getMessage());
                     }
 
+                    Log.d(TAG,"Async: Receiving the user data");
                     try {
                         ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
                         String message = messageIn.readUTF();
