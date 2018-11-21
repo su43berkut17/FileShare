@@ -14,10 +14,19 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.yumesoftworks.fileshare.data.AppDatabase;
+import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.peerToPeer.ClientSocketTransfer;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.List;
 
 public class ServiceFileShare extends Service implements ClientSocketTransfer.ClientSocketTransferInterface {
     private static final String TAG="ServiceFileShare";
@@ -67,13 +76,55 @@ public class ServiceFileShare extends Service implements ClientSocketTransfer.Cl
         //we get the bundle of extras
         Bundle receivedBundle=intent.getExtras();
 
+        //values
+        String ipAddress = receivedBundle.getString(TransferProgressActivity.REMOTE_IP);
+        int port =receivedBundle.getInt(TransferProgressActivity.REMOTE_PORT);
+
         //we check if the intent is to send or to receive
         if (intent.getAction().equals(TransferProgressActivity.FILES_SENDING)){
             //we are sending files
-
             //we read the database
+            AppDatabase database=AppDatabase.getInstance(this.getApplication());
+            List<FileListEntry> fileListEntries =database.fileListDao().loadFileList().getValue();
+            mTotalFiles=fileListEntries.size();
 
             //we start the socket for communication
+            try{
+                Socket socket=new Socket(ipAddress,port);
+
+                //now we send the 1st data which is an object with the number of files to be transferred
+                //send the info to go to the next stage to wait
+                ObjectOutputStream messageOut=new ObjectOutputStream(socket.getOutputStream());
+                messageOut.writeInt(fileListEntries.size());
+
+                //cycle to send each file
+                Boolean isOver=false;
+
+                while(!isOver){
+                    //we check what is the client telling us
+
+
+                    //we send the file
+
+                    File file=new File(fileListEntries.get(mCurrentFile).getPath());
+                    // Get the size of the file
+                    long length = file.length();
+                    byte[] bytes = new byte[16 * 1024];
+                    InputStream in = new FileInputStream(file);
+                    OutputStream out = socket.getOutputStream();
+
+                    int count;
+                    while ((count = in.read(bytes)) > 0) {
+                        out.write(bytes, 0, count);
+                    }
+
+                    out.close();
+
+                }
+
+            }catch (Exception e){
+                Log.d(TAG,"There was an error");
+            }
 
         }else if (intent.getAction().equals(TransferProgressActivity.FILES_RECEIVING)){
             //we are receiving files
@@ -87,7 +138,7 @@ public class ServiceFileShare extends Service implements ClientSocketTransfer.Cl
                 //create the listener
                 mReceiverTransferSocket=new ClientSocketTransfer(this,mServerSocket);
             }catch (IOException e){
-                Log.d(TAG,"There was an error registering the server socket");
+                Log.d(TAG,"There was an error registering the server socket "+e.getMessage());
             }
 
         }
