@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pGroup;
@@ -21,6 +22,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.MenuItem;
 
@@ -29,6 +31,7 @@ import com.google.android.gms.ads.AdView;
 
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.yumesoftworks.fileshare.data.SocketListEntry;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.data.UserSendEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
@@ -38,6 +41,7 @@ import com.yumesoftworks.fileshare.recyclerAdapters.SendFileUserListAdapter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -67,16 +71,10 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     private LinearLayoutManager mLinearLayoutManager;
     private List<UserSendEntry> mUserList;
     private List<UserSendEntry> mTempUserList;
-
-    //handler for discovery every n seconds
-    private Handler mHandler;
-    private Runnable mRunnableCheck;
-    private int mDelayCheck;
+    private List<SocketListEntry> mSocketList;
 
     //for client socket
-    private int mNumberOfItems;
-    private int mCurrentSocketItem;
-    //private AsyncTaskClient mSocketTask;
+    private String localIp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +91,11 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         mAdView = findViewById(R.id.ad_view_sender_pick_destination);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);*/
+        //storing locla ip address
+        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        int ipAddress = wm.getConnectionInfo().getIpAddress();
+        localIp = String.format("%d.%d.%d.%d", (ipAddress & 0xff),(ipAddress >> 8 & 0xff),(ipAddress >> 16 & 0xff),(ipAddress >> 24 & 0xff));
+
         Log.d(TAG,"initializing nsd");
 
         //create recycler view and adapter
@@ -105,6 +108,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         //create a new list
         mUserList=new ArrayList<>();
         mTempUserList=new ArrayList<>();
+        mSocketList=new ArrayList<>();
 
        //server socket
         try{
@@ -136,16 +140,6 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
             mNsdHelper.cancelRegistration();
             mNsdHelper.cancelResolver();
         }
-        //we remove any callbacks
-        try {
-            mHandler.removeCallbacks(mRunnableCheck);
-        }catch (Exception e){
-            Log.d(TAG,"Cant remove callbacks "+e.getMessage());
-        }
-        //we cancel the task if it is paused, it will resume once the discovery begins
-        /*if (mSocketTask!=null){
-            mSocketTask.cancel(true);
-        }*/
 
         super.onPause();
     }
@@ -157,14 +151,11 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         if (!isFirstExecution) {
             if (mNsdHelper != null) {
                 mNsdHelper.initializeNsd();
-                mNsdHelper.registerService(mServerSocket.getLocalPort());
+                //mNsdHelper.registerService(mServerSocket.getLocalPort());
             }
         }
         isFirstExecution=false;
         mNsdHelper.discoverServices();
-
-        //we start the 1st discovery
-        //startDiscoveryAndTimer();
     }
 
     @Override
@@ -181,8 +172,10 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     public void addedService(NsdServiceInfo serviceInfo) {
         Log.d(TAG,"Received a service Info "+serviceInfo.getHost()+" ip "+serviceInfo.getHost().getHostAddress()+" local ip is "+mServerSocket.getInetAddress().getHostAddress());
         //we check the ip
-        Log.d(TAG,"Comparing local IP: "+mServerSocket.getLocalSocketAddress().toString()+" with received: "+serviceInfo.getHost().getHostAddress());
-        if (mServerSocket.getInetAddress().getHostAddress()!=serviceInfo.getHost().getHostAddress()) {
+        //Log.d(TAG,"Comparing local IP: "+localIp+" with received: "+serviceInfo.getHost().getHostAddress());
+
+        if (!localIp.equals(serviceInfo.getHost().getHostAddress())) {
+            Log.d(TAG,"it is different we create");
             //we create the user
             UserSendEntry entry = new UserSendEntry("reading info...", 1, serviceInfo.getServiceName(), serviceInfo.getHost(), serviceInfo.getPort());
 
@@ -191,7 +184,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
             mUserList.add(entry);
 
             //we check the real information with the socket
-            SenderPickSocket senderPickSocket = new SenderPickSocket(this, entry);
+            mSocketList.add(new SocketListEntry(serviceInfo.getServiceName(),serviceInfo.getHost().getHostAddress(),new SenderPickSocket(this,entry)));
         }
     }
 
@@ -230,6 +223,13 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
             }
         }
 
+        for (int j=0;j<mSocketList.size();j++){
+            if (mSocketList.get(j).getServiceName().equals(serviceInfo.getServiceName())){
+                mSocketList.get(j).getSenderSocket().destroySocket();
+                mSocketList.remove(j);
+            }
+        }
+
         mAdapter.setUsers(mUserList);
         runOnUiThread(new Runnable() {
             @Override
@@ -239,65 +239,55 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         });
     }
 
-
     //when the user has been clicked
     @Override
-    public void onItemClickListener(int itemId) {
-        //we call the activity that will start the service with the info
-        Intent intent=new Intent(this,TransferProgressActivity.class);
+    public void onItemClickListener(final int itemId) {
+        //we send the message
+         mSocketList.get(itemId).getSenderSocket().sendMessage(MESSAGE_OPEN_ACTIVITY);
 
-        //get the current entry
-        UserSendEntry sendEntry = mAdapter.getUserList().get(itemId);
+        /*if (messageSent) {
+            //we call the activity that will start the service with the info
+            Intent intent = new Intent(this, TransferProgressActivity.class);
 
-        //data to send on the intent
-        Bundle bundleSend=new Bundle();
+            //get the current entry
+            UserSendEntry sendEntry = mAdapter.getUserList().get(itemId);
 
-        //local ip and port
-        bundleSend.putString(TransferProgressActivity.EXTRA_TYPE_TRANSFER,TransferProgressActivity.FILES_SENDING);
-        bundleSend.putString(TransferProgressActivity.LOCAL_IP,mServerSocket.getInetAddress().toString());
-        bundleSend.putInt(TransferProgressActivity.LOCAL_PORT,mServerSocket.getLocalPort());
-        bundleSend.putString(TransferProgressActivity.REMOTE_IP,sendEntry.getIpAddress().getHostAddress());
-        bundleSend.putInt(TransferProgressActivity.REMOTE_PORT,sendEntry.getPort());
+            //data to send on the intent
+            Bundle bundleSend = new Bundle();
 
-        //send
-        String hostAddress=sendEntry.getIpAddress().getHostAddress();
-        int hostIp=sendEntry.getPort();
-        try {
-            Log.d(TAG,"we create a socket "+hostAddress+" "+hostIp);
-            Socket socket = new Socket(hostAddress, hostIp);
-            Log.d(TAG,"socket is "+socket.toString());
+            //local ip and port
+            bundleSend.putString(TransferProgressActivity.EXTRA_TYPE_TRANSFER, TransferProgressActivity.FILES_SENDING);
+            bundleSend.putString(TransferProgressActivity.LOCAL_IP, mServerSocket.getInetAddress().toString());
+            bundleSend.putInt(TransferProgressActivity.LOCAL_PORT, mServerSocket.getLocalPort());
+            bundleSend.putString(TransferProgressActivity.REMOTE_IP, sendEntry.getIpAddress().getHostAddress());
+            bundleSend.putInt(TransferProgressActivity.REMOTE_PORT, sendEntry.getPort());
 
-            //send the info to go to the next stage to wait
-            ObjectOutputStream messageOut=new ObjectOutputStream(socket.getOutputStream());
-            messageOut.writeUTF(MESSAGE_OPEN_ACTIVITY);
-
-            socket.close();
-
-            //close the server socket
-            try{
-                mServerSocket.close();
-            }catch (Exception e){
-                Log.d(TAG,"Couldn't close the server socket");
-            }
-
+            //we close the socket
+            mSocketList.get(itemId).getSenderSocket().destroySocket();
             //open the activity
-            Log.d(TAG,"Opening new activity with socket");
+            Log.d(TAG, "Opening new activity with socket");
             intent.putExtras(bundleSend);
             startActivity(intent);
-        }catch (Exception e){
-            Log.d(TAG,"Couldn't connect to the socket, we show dialog with error "+e.getMessage());
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(R.string.pu_error_connect_dialog)
-                    .setCancelable(true)
-                    .setNeutralButton(R.string.gen_button_ok,
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-            builder.show();
-        }
+        } else {
+
+        }*/
     }
+
+    @Override
+    public void showErrorDialog() {
+        Log.d(TAG, "Couldn't connect to the socket, we show dialog with error ");
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.pu_error_connect_dialog)
+                .setCancelable(true)
+                .setNeutralButton(R.string.gen_button_ok,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+        builder.show();
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

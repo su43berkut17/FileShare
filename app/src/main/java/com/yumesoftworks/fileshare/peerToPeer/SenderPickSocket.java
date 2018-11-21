@@ -7,7 +7,10 @@ import android.util.Log;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.data.UserSendEntry;
 
+import java.io.DataOutputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 public class SenderPickSocket {
@@ -19,6 +22,9 @@ public class SenderPickSocket {
 
     //socket
     private Socket mSocket;
+
+    //data
+    private String messageToSend;
 
     //user list
     private UserSendEntry mUserList;
@@ -35,7 +41,7 @@ public class SenderPickSocket {
         socketThread.start();
     }
 
-    class CommunicationThread  implements Runnable {
+    class CommunicationThread implements Runnable {
 
         @Override
         public void run() {
@@ -59,57 +65,97 @@ public class SenderPickSocket {
                     doWeRepeat=false;
 
                     Boolean streamLoop=true;
+                    Boolean isInitialized=false;
 
                     while(streamLoop) {
-                        try {
-                            Log.d(TAG,"Object output stream started");
-                            ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
-                            UserInfoEntry readEntry = (UserInfoEntry) messageIn.readObject();
+                       // try {
+                            if (messageToSend!=null){
+                                //we send the message
+                                try {
+                                    /*ObjectOutputStream messageOut=new ObjectOutputStream(mSocket.getOutputStream());
+                                    messageOut.writeUTF(messageToSend);
+                                    messageOut.close();*/
+                                    Log.d(TAG,"we send the message");
+                                    DataOutputStream messageOut=new DataOutputStream(mSocket.getOutputStream());
+                                    messageOut.writeUTF(messageToSend);
+                                    messageOut.close();
+                                    messageToSend=null;
+                                    /*OutputStreamWriter writer=new OutputStreamWriter(mSocket.getOutputStream(),"UTF-8");
+                                    writer.write(messageToSend,0,messageToSend.length());
+                                    messageToSend=null;*/
+                                }catch (Exception e){
+                                    Log.d(TAG,"No output stream");
+                                    messageToSend=null;
+                                    //we show the dialog
+                                    socketHandler.post(new SenderPickSocket.updateUIThread("dialog",null));
+                                }
+                            }
 
-                            //set the right data
-                            mUserList.setAvatar(readEntry.getPickedAvatar());
-                            mUserList.setUsername(readEntry.getUsername());
+                            if(!isInitialized) {
+                                Log.d(TAG, "Object input stream started");
+                                try {
+                                    ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
+                                    UserInfoEntry readEntry = (UserInfoEntry) messageIn.readObject();
 
-                            socketHandler.post(new SenderPickSocket.updateUIThread(mUserList));
-                            streamLoop=false;
-                            doWeRepeat=false;
-                            mSocket.close();
-                        } catch (Exception e) {
-                            Log.d(TAG, "InputStream failed " + e.getMessage());
-                            streamLoop=true;
-                        }
+                                    //set the right data
+                                    mUserList.setAvatar(readEntry.getPickedAvatar());
+                                    mUserList.setUsername(readEntry.getUsername());
+                                    isInitialized=true;
+
+                                    socketHandler.post(new SenderPickSocket.updateUIThread("update", mUserList));
+                                } catch (Exception e) {
+                                    Log.d(TAG, "No input stream");
+                                }
+                            }
+
+                            //mSocket.close();
+                        //} catch (Exception e) {
+                           // Log.d(TAG, "InputStream failed " + e.getMessage());
+                           // streamLoop=true;
+                        //}
                     }
 
                 } catch (Exception e) {
                     Log.d(TAG, "the socket creation has failed" + e.getMessage());
+                    doWeRepeat=false;
                 }
             }
         }
     }
 
+    public void sendMessage(String message){
+        messageToSend=message;
+        Log.d(TAG,"Object output stream started");
+    }
+
     class updateUIThread implements Runnable{
 
         private UserSendEntry user;
-        public updateUIThread(UserSendEntry userList){
+        private String type;
+        public updateUIThread(String recType, UserSendEntry userList){
             //log the message
             user=userList;
+            type=recType;
         }
 
         @Override
         public void run() {
-            Log.d(TAG,"UpdateUIThread Message is:"+user.getUsername());
+            if (type == "update") {
+                Log.d(TAG,"UpdateUIThread Message is:"+user.getUsername());
 
-            //we send it back to the main activity via interface
-            mSenderInterface.updateUserDataSocket(user);
-
-            //we close the thread
-            destroySocket();
+                //we send it back to the main activity via interface
+                mSenderInterface.updateUserDataSocket(user);
+            }else{
+                //dialog
+                mSenderInterface.showErrorDialog();
+            }
         }
     }
 
     //interface
     public interface SocketSenderConnectionInterface{
         void updateUserDataSocket(UserSendEntry userSendEntry);
+        void showErrorDialog();
     }
 
     //kill the socket
@@ -118,11 +164,14 @@ public class SenderPickSocket {
         Log.d(TAG,"Trying to close socket");
         try {
             mSocket.close();
+            Log.d(TAG,"socket was closed "+mSocket.isClosed());
         }catch (Exception e){
             Log.d(TAG,"Cannot close socket "+e.getMessage());
         }
 
         //destroy the thread
         socketThread.interrupt();
+        mSocket=null;
+        mSenderInterface=null;
     }
 }

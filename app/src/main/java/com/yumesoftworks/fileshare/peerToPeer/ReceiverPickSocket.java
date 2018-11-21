@@ -8,8 +8,11 @@ import android.util.Log;
 import com.yumesoftworks.fileshare.SenderPickDestinationActivity;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 
+import java.io.DataInputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -50,29 +53,39 @@ public class ReceiverPickSocket {
                     Log.d(TAG, "Async:Waiting for the socket to be connected " + mServerSocket.getLocalPort());
 
                     mSocket = mServerSocket.accept();
-
-                    Log.d(TAG, "Async:Sending the user data");
-                    try {
-                        ObjectOutputStream messageOut = new ObjectOutputStream(mSocket.getOutputStream());
-                        messageOut.writeObject(mUserInfoEntry);
-                        messageOut.close();
-                        Log.d(TAG,"ObjectOutputSteamSent closed");
-                    } catch (Exception e) {
-                        Log.d(TAG, "Async:There is no output stream " + e.getMessage());
-                    }
-
-                    Log.d(TAG,"Async: Receiving the user data");
-                    try {
-                        ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
-                        String message = messageIn.readUTF();
-                        messageIn.close();
-                        Log.d(TAG,"ObjectInputStreamReceived closed");
-                        if (message == SenderPickDestinationActivity.MESSAGE_OPEN_ACTIVITY) {
-                            //we will open the new activity and wait for the connection via interface
-                            mReceiverInterface.openNexActivity();
+                    Boolean keepLooping=true;
+                    while (keepLooping){
+                        //Log.d(TAG, "Async:Sending the user data");
+                        try {
+                            ObjectOutputStream messageOut = new ObjectOutputStream(mSocket.getOutputStream());
+                            messageOut.writeObject(mUserInfoEntry);
+                            messageOut.close();
+                            Log.d(TAG,"ObjectOutputSteamSent closed");
+                        } catch (Exception e) {
+                            //Log.d(TAG, "Async:There is no output stream " + e.getMessage());
                         }
-                    } catch (Exception e) {
-                        Log.d(TAG, "Async:There is no input stream " + e.getMessage());
+
+                        //Log.d(TAG,"Async: Receiving the user data");
+                        try {
+                            DataInputStream messageIn=new DataInputStream(mSocket.getInputStream());
+                            String message=messageIn.readUTF();
+                            //messageIn.close();
+                            Log.d(TAG,"ObjectInputStreamReceived closed");
+                            if (message == SenderPickDestinationActivity.MESSAGE_OPEN_ACTIVITY) {
+                                //we will open the new activity and wait for the connection via interface
+                                mReceiverInterface.openNexActivity();
+                            }
+                            /*ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
+                            String message = messageIn.readUTF();
+                            messageIn.close();
+                            Log.d(TAG,"ObjectInputStreamReceived closed");
+                            if (message == SenderPickDestinationActivity.MESSAGE_OPEN_ACTIVITY) {
+                                //we will open the new activity and wait for the connection via interface
+                                mReceiverInterface.openNexActivity();
+                            }*/
+                        } catch (Exception e) {
+                            //Log.d(TAG, "Async:There is no input stream " + e.getMessage());
+                        }
                     }
                 } catch (Exception e) {
                     Log.d(TAG, "Async:the socket accept has failed");
