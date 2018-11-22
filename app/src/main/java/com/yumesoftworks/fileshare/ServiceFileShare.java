@@ -16,7 +16,7 @@ import android.util.Log;
 
 import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.FileListEntry;
-import com.yumesoftworks.fileshare.peerToPeer.ClientSocketTransfer;
+import com.yumesoftworks.fileshare.peerToPeer.ReceiverSocketTransfer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,7 +28,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 
-public class ServiceFileShare extends Service implements ClientSocketTransfer.ClientSocketTransferInterface {
+public class ServiceFileShare extends Service implements ReceiverSocketTransfer.ClientSocketTransferInterface {
     private static final String TAG="ServiceFileShare";
 
     //notification
@@ -41,7 +41,7 @@ public class ServiceFileShare extends Service implements ClientSocketTransfer.Cl
 
     //socket stuff
     private ServerSocket mServerSocket;
-    private ClientSocketTransfer mReceiverTransferSocket;
+    private ReceiverSocketTransfer mReceiverTransferSocket;
     private int mPort;
 
     @Override
@@ -136,7 +136,7 @@ public class ServiceFileShare extends Service implements ClientSocketTransfer.Cl
                 mServerSocket=new ServerSocket(mPort);
 
                 //create the listener
-                mReceiverTransferSocket=new ClientSocketTransfer(this,mServerSocket);
+                mReceiverTransferSocket=new ReceiverSocketTransfer(this,mServerSocket);
             }catch (IOException e){
                 Log.d(TAG,"There was an error registering the server socket "+e.getMessage());
             }

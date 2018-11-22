@@ -1,6 +1,6 @@
 package com.yumesoftworks.fileshare.peerToPeer;
 
-public class ServerSocketTransfer extends Thread{
+public class SenderSocketTransfer extends Thread{
 
 
 }
