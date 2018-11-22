@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
 
+import com.yumesoftworks.fileshare.TransferProgressActivity;
+import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.data.UserSendEntry;
 
@@ -15,6 +17,12 @@ import java.net.Socket;
 
 public class SenderPickSocket {
     private static final String TAG="SenderPickSocket";
+
+    //types of message
+    private static final String TYPE_UPDATE="typeUpdate";
+    private static final String TYPE_END="typeEnd";
+    private static final String TYPE_ERROR="typeError";
+
 
     //thread
     private Handler socketHandler;
@@ -69,50 +77,37 @@ public class SenderPickSocket {
 
                     while(streamLoop) {
                        // try {
-                            if (messageToSend!=null){
-                                //we send the message
-                                try {
-                                    /*ObjectOutputStream messageOut=new ObjectOutputStream(mSocket.getOutputStream());
-                                    messageOut.writeUTF(messageToSend);
-                                    messageOut.close();*/
-                                    Log.d(TAG,"we send the message");
-                                    DataOutputStream messageOut=new DataOutputStream(mSocket.getOutputStream());
-                                    messageOut.writeUTF(messageToSend);
-                                    messageOut.close();
-                                    messageToSend=null;
-                                    /*OutputStreamWriter writer=new OutputStreamWriter(mSocket.getOutputStream(),"UTF-8");
-                                    writer.write(messageToSend,0,messageToSend.length());
-                                    messageToSend=null;*/
-                                }catch (Exception e){
-                                    Log.d(TAG,"No output stream");
-                                    messageToSend=null;
-                                    //we show the dialog
-                                    socketHandler.post(new SenderPickSocket.updateUIThread("dialog",null));
-                                }
+                        if(!isInitialized) {
+                            Log.d(TAG, "Object input stream started");
+
+                            ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
+                            UserInfoEntry readEntry = (UserInfoEntry) messageIn.readObject();
+
+                            //set the right data
+                            mUserList.setAvatar(readEntry.getPickedAvatar());
+                            mUserList.setUsername(readEntry.getUsername());
+                            isInitialized=true;
+
+                            socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_UPDATE, mUserList));
+                        }
+
+                        if (messageToSend!=null) {
+                            //we send the message
+                            try {
+                                Log.d(TAG, "we send the message");
+
+                                TextInfoSendObject sendObject = new TextInfoSendObject(TransferProgressActivity.TYPE_END, messageToSend, "");
+                                ObjectOutputStream messageOut = new ObjectOutputStream(mSocket.getOutputStream());
+                                messageOut.writeObject(sendObject);
+                                messageToSend = null;
+
+                                //we open the next activity
+                                socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_END, null));
+                            }catch (Exception e){
+                                e.printStackTrace();
+                                socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_ERROR, null));
                             }
-
-                            if(!isInitialized) {
-                                Log.d(TAG, "Object input stream started");
-                                try {
-                                    ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
-                                    UserInfoEntry readEntry = (UserInfoEntry) messageIn.readObject();
-
-                                    //set the right data
-                                    mUserList.setAvatar(readEntry.getPickedAvatar());
-                                    mUserList.setUsername(readEntry.getUsername());
-                                    isInitialized=true;
-
-                                    socketHandler.post(new SenderPickSocket.updateUIThread("update", mUserList));
-                                } catch (Exception e) {
-                                    Log.d(TAG, "No input stream");
-                                }
-                            }
-
-                            //mSocket.close();
-                        //} catch (Exception e) {
-                           // Log.d(TAG, "InputStream failed " + e.getMessage());
-                           // streamLoop=true;
-                        //}
+                        }
                     }
 
                 } catch (Exception e) {
@@ -140,14 +135,23 @@ public class SenderPickSocket {
 
         @Override
         public void run() {
-            if (type == "update") {
-                Log.d(TAG,"UpdateUIThread Message is:"+user.getUsername());
+            switch (type){
+                case TYPE_UPDATE:
+                    Log.d(TAG,"UpdateUIThread Message is:"+user.getUsername());
 
-                //we send it back to the main activity via interface
-                mSenderInterface.updateUserDataSocket(user);
-            }else{
-                //dialog
-                mSenderInterface.showErrorDialog();
+                    //we send it back to the main activity via interface
+                    mSenderInterface.updateUserDataSocket(user);
+                    break;
+
+                case TYPE_ERROR:
+                    //dialog
+                    mSenderInterface.showErrorDialog();
+                    break;
+
+                case TYPE_END:
+                    //we open the next activity
+                    mSenderInterface.openNextActivity(mUserList);
+                    break;
             }
         }
     }
@@ -156,6 +160,7 @@ public class SenderPickSocket {
     public interface SocketSenderConnectionInterface{
         void updateUserDataSocket(UserSendEntry userSendEntry);
         void showErrorDialog();
+        void openNextActivity(UserSendEntry userList);
     }
 
     //kill the socket

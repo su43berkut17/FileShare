@@ -161,6 +161,9 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     @Override
     public void openNexActivity() {
+        //we close the socket
+        mReceiverSocket.destroySocket();
+
         //we open the next activity with the socket information
         //we call the activity that will start the service with the info
         Intent intent=new Intent(this,TransferProgressActivity.class);
@@ -170,7 +173,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
         //variables to be sent
         bundleSend.putString(TransferProgressActivity.EXTRA_TYPE_TRANSFER,TransferProgressActivity.FILES_SENDING);
-        //bundleSend.putString(TransferProgressActivity.LOCAL_IP,mServerSocket.getInetAddress().getHostAddress());
         bundleSend.putInt(TransferProgressActivity.LOCAL_PORT,mServerSocket.getLocalPort());
 
         intent.putExtras(bundleSend);

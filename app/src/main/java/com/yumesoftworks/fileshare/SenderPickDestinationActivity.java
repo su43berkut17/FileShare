@@ -91,7 +91,8 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         mAdView = findViewById(R.id.ad_view_sender_pick_destination);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);*/
-        //storing locla ip address
+
+        //storing local ip address
         WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         int ipAddress = wm.getConnectionInfo().getIpAddress();
         localIp = String.format("%d.%d.%d.%d", (ipAddress & 0xff),(ipAddress >> 8 & 0xff),(ipAddress >> 16 & 0xff),(ipAddress >> 24 & 0xff));
@@ -123,10 +124,6 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         //mNsdHelper.discoverServices();
 
         isFirstExecution=true;
-
-        //start process that checks every few seconds the updated list
-        //mHandler=new Handler();
-        //mDelayCheck=5*1000;
 
         //we set the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -244,33 +241,6 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     public void onItemClickListener(final int itemId) {
         //we send the message
          mSocketList.get(itemId).getSenderSocket().sendMessage(MESSAGE_OPEN_ACTIVITY);
-
-        /*if (messageSent) {
-            //we call the activity that will start the service with the info
-            Intent intent = new Intent(this, TransferProgressActivity.class);
-
-            //get the current entry
-            UserSendEntry sendEntry = mAdapter.getUserList().get(itemId);
-
-            //data to send on the intent
-            Bundle bundleSend = new Bundle();
-
-            //local ip and port
-            bundleSend.putString(TransferProgressActivity.EXTRA_TYPE_TRANSFER, TransferProgressActivity.FILES_SENDING);
-            bundleSend.putString(TransferProgressActivity.LOCAL_IP, mServerSocket.getInetAddress().toString());
-            bundleSend.putInt(TransferProgressActivity.LOCAL_PORT, mServerSocket.getLocalPort());
-            bundleSend.putString(TransferProgressActivity.REMOTE_IP, sendEntry.getIpAddress().getHostAddress());
-            bundleSend.putInt(TransferProgressActivity.REMOTE_PORT, sendEntry.getPort());
-
-            //we close the socket
-            mSocketList.get(itemId).getSenderSocket().destroySocket();
-            //open the activity
-            Log.d(TAG, "Opening new activity with socket");
-            intent.putExtras(bundleSend);
-            startActivity(intent);
-        } else {
-
-        }*/
     }
 
     @Override
@@ -288,6 +258,37 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         builder.show();
     }
 
+    @Override
+    public void openNextActivity(UserSendEntry sendEntry) {
+        //we call the activity that will start the service with the info
+        Intent intent = new Intent(this, TransferProgressActivity.class);
+
+        //data to send on the intent
+        Bundle bundleSend = new Bundle();
+
+        //local ip and port
+        bundleSend.putString(TransferProgressActivity.EXTRA_TYPE_TRANSFER, TransferProgressActivity.FILES_SENDING);
+        bundleSend.putString(TransferProgressActivity.LOCAL_IP, mServerSocket.getInetAddress().toString());
+        bundleSend.putInt(TransferProgressActivity.LOCAL_PORT, mServerSocket.getLocalPort());
+        bundleSend.putString(TransferProgressActivity.REMOTE_IP, sendEntry.getIpAddress().getHostAddress());
+        bundleSend.putInt(TransferProgressActivity.REMOTE_PORT, sendEntry.getPort());
+
+        //we close and destroy all the sockets
+        for (int i=0;i<mSocketList.size();i++){
+            mSocketList.get(i).getSenderSocket().destroySocket();
+        }
+
+        try {
+            mServerSocket.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        //open the activity
+        Log.d(TAG, "Opening new activity with socket");
+        intent.putExtras(bundleSend);
+        startActivity(intent);
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

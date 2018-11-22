@@ -44,6 +44,11 @@ FileTransferSent.OnFragmentInteractionListener{
     public static final String REMOTE_IP="RemoteIp";
     public static final String LOCAL_PORT="LocalPort";
     public static final String REMOTE_PORT="RemotePort";
+
+    //type of message sent on text object
+    public static final String TYPE_END="endConnection";
+    public static final String TYPE_FILE_PROGRESSS="fileProgress";
+
     private LinearLayout mProgressBarHide;
 
     //when sending
