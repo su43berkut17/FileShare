@@ -56,30 +56,42 @@ public class ReceiverPickSocket {
                     Log.d(TAG, "Async:Waiting for the socket to be connected " + mServerSocket.getLocalPort());
 
                     mSocket = mServerSocket.accept();
+
                     Boolean keepLooping=true;
+                    Boolean isInitialized=false;
                     while (keepLooping){
-                        //Log.d(TAG,"Async: Receiving the user data");
-
-                        ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
-                        TextInfoSendObject message =(TextInfoSendObject) messageIn.readObject();
-                        messageIn.close();
-
-                        Log.d(TAG,"ObjectInputStreamReceived closed");
-
-                        if (message.getMessageContent() == SenderPickDestinationActivity.MESSAGE_OPEN_ACTIVITY) {
-                            //we will open the new activity and wait for the connection via interface
-                            Log.d(TAG,"We will open the new intent");
-                            socketHandler.post(new ReceiverPickSocket.updateUIThread(TYPE_END));
-
-                            keepLooping=false;
-                            mSocket.close();
+                        //on 1st connection we send the data
+                        if (!isInitialized){
+                            try{
+                                Log.d(TAG, "Async:Sending the user data");
+                                ObjectOutputStream messageOut = new ObjectOutputStream(mSocket.getOutputStream());
+                                messageOut.writeObject(mUserInfoEntry);
+                                //messageOut.close();
+                                isInitialized=true;
+                            }catch (Exception e){
+                                Log.d(TAG,"Error"+e.getMessage());
+                            }
                         }
 
-                        //Log.d(TAG, "Async:Sending the user data");
-                        ObjectOutputStream messageOut = new ObjectOutputStream(mSocket.getOutputStream());
-                        messageOut.writeObject(mUserInfoEntry);
-                        messageOut.close();
-                        Log.d(TAG, "ObjectOutputSteamSent closed");
+                        //Log.d(TAG, "Async: Receiving the user data");
+                        try {
+                            ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
+                            TextInfoSendObject message = (TextInfoSendObject) messageIn.readObject();
+                            messageIn.close();
+
+                            Log.d(TAG, "ObjectInputStreamReceived closed, the message is "+message.getMessageContent());
+
+                            if (message.getMessageContent().equals(SenderPickDestinationActivity.MESSAGE_OPEN_ACTIVITY)) {
+                                //we will open the new activity and wait for the connection via interface
+                                Log.d(TAG, "We will open the new intent");
+                                socketHandler.post(new ReceiverPickSocket.updateUIThread(TYPE_END));
+
+                                keepLooping = false;
+                                mSocket.close();
+                            }
+                        } catch (Exception e) {
+                            //Log.d(TAG, "Error reading input stream");
+                        }
                     }
                 } catch (Exception e) {
                     Log.d(TAG, "Async:the socket accept has failed, trying again");
@@ -101,6 +113,7 @@ public class ReceiverPickSocket {
             //Log.d(TAG,"UpdateUIThread Message is:"+msg);
             switch (type){
                 case TYPE_END:
+                    destroySocket();
                     mReceiverInterface.openNexActivity();
                     break;
             }

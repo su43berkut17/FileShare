@@ -65,8 +65,6 @@ public class SenderPickSocket {
                     String hostAddress = mUserList.getIpAddress().getHostAddress();
                     int hostIp = mUserList.getPort();
 
-                    //Socket socket = new Socket(mUserList.get(mCurrentSocketItem).getIpAddress().getHostAddress(),mUserList.get(mCurrentSocketItem).getPort());
-                    //Socket socket = new Socket(mUserList.get(mCurrentSocketItem).getInfoToSend(),mUserList.get(mCurrentSocketItem).getPort());
                     mSocket = new Socket(hostAddress, hostIp);
 
                     Log.d(TAG, "Reading the user data");
@@ -79,9 +77,9 @@ public class SenderPickSocket {
                        // try {
                         if(!isInitialized) {
                             Log.d(TAG, "Object input stream started");
-
                             ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
                             UserInfoEntry readEntry = (UserInfoEntry) messageIn.readObject();
+                            //messageIn.close();
 
                             //set the right data
                             mUserList.setAvatar(readEntry.getPickedAvatar());
@@ -104,12 +102,13 @@ public class SenderPickSocket {
                                 //we open the next activity
                                 socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_END, null));
                             }catch (Exception e){
+                                Log.d(TAG,"Error sending message: "+messageToSend+" "+e.getMessage());
                                 e.printStackTrace();
+                                messageToSend=null;
                                 socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_ERROR, null));
                             }
                         }
                     }
-
                 } catch (Exception e) {
                     Log.d(TAG, "the socket creation has failed" + e.getMessage());
                     doWeRepeat=false;

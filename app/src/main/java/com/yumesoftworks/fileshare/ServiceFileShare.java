@@ -83,8 +83,11 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
         String ipAddress = receivedBundle.getString(TransferProgressActivity.REMOTE_IP);
         int port =receivedBundle.getInt(TransferProgressActivity.REMOTE_PORT);
 
+        int action=receivedBundle.getInt(TransferProgressActivity.ACTION_SERVICE);
+        Log.d(TAG,"the action is "+action);
+
         //we check if the intent is to send or to receive
-        if (intent.getAction().equals(TransferProgressActivity.FILES_SENDING)){
+        if (action==TransferProgressActivity.FILES_SENDING){
             //we are sending files
             //we read the database
             AppDatabase database=AppDatabase.getInstance(this.getApplication());

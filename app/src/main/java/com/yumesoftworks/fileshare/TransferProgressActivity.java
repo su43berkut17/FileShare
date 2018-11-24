@@ -53,8 +53,9 @@ FileTransferSent.OnFragmentInteractionListener{
 
 
     //constants for the actions
-    public static final String FILES_SENDING="SendingFiles";
-    public static final String FILES_RECEIVING="ReceivingFiles";
+    public static final int FILES_SENDING=2001;
+    public static final int FILES_RECEIVING=2002;
+    public static final String ACTION_SERVICE ="ReceivingFiles";
 
     //fragment parts
     private FileTransferProgress fragmentFileTransferProgress;
@@ -91,20 +92,20 @@ FileTransferSent.OnFragmentInteractionListener{
         //we check the intent with the information to start the service
         Intent intent=getIntent();
 
-        //get the data to see how do we start the service
-        String typeOfService=intent.getStringExtra(EXTRA_TYPE_TRANSFER);
-
         //intent
         Intent serviceIntent=new Intent(this,ServiceFileShare.class);
         Bundle extras=intent.getExtras();
 
+        //get the data to see how do we start the service
+        int typeOfService=extras.getInt(EXTRA_TYPE_TRANSFER);
+
         //choose data in the intent
         if (typeOfService==FILES_SENDING){
             //we start the services as sending stuff
-            serviceIntent.setAction(FILES_SENDING);
+            extras.putInt(ACTION_SERVICE,FILES_SENDING);
         }else if (typeOfService==FILES_RECEIVING){
             //we start the service as receiving stuff
-            serviceIntent.setAction(FILES_RECEIVING);
+            extras.putInt(ACTION_SERVICE,FILES_RECEIVING);
         }
 
         //start the service

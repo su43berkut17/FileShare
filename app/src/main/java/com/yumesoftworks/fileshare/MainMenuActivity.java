@@ -84,8 +84,8 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         switch (v.getId()){
             case R.id.mm_surf_sendFileArea:
                 //we open the file explorer
-                Intent intent=new Intent(this,FileBrowserAndQueueActivity.class);
-                //Intent intent=new Intent(this,SenderPickDestinationActivity.class);
+                //Intent intent=new Intent(this,FileBrowserAndQueueActivity.class);
+                Intent intent=new Intent(this,SenderPickDestinationActivity.class);
                 startActivity(intent);
                 break;
             case R.id.mm_surf_receiveArea:
