@@ -120,6 +120,12 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         rvAdapter.notifyDataSetChanged();
     }
 
+    //update the ui
+    public void updateData(Bundle bundle){
+        //we update the data
+
+    }
+
     @Override
     public void onQueueClickListener(int itemId) {
 

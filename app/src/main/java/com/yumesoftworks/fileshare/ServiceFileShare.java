@@ -16,7 +16,9 @@ import android.util.Log;
 
 import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.FileListEntry;
+import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 import com.yumesoftworks.fileshare.peerToPeer.ReceiverSocketTransfer;
+import com.yumesoftworks.fileshare.peerToPeer.SenderSocketTransfer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,6 +44,7 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
     //socket stuff
     private ServerSocket mServerSocket;
     private ReceiverSocketTransfer mReceiverTransferSocket;
+    private SenderSocketTransfer mSenderTransferSocket;
     private int mPort;
 
     @Override
@@ -90,7 +93,9 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
 
             //we start the socket for communication
             try{
-                Socket socket=new Socket(ipAddress,port);
+                mSenderTransferSocket = new SenderSocketTransfer();
+
+                /*Socket socket=new Socket(ipAddress,port);
 
                 //now we send the 1st data which is an object with the number of files to be transferred
                 //send the info to go to the next stage to wait
@@ -120,7 +125,7 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
 
                     out.close();
 
-                }
+                }*/
 
             }catch (Exception e){
                 Log.d(TAG,"There was an error");
@@ -128,19 +133,16 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
 
         }else if (intent.getAction().equals(TransferProgressActivity.FILES_RECEIVING)){
             //we are receiving files
-            //we start the server that will read the notification
-            //we start the server socket
             try{
                 //create the server socket
                 mPort=receivedBundle.getInt(TransferProgressActivity.LOCAL_PORT);
                 mServerSocket=new ServerSocket(mPort);
 
-                //create the listener
-                mReceiverTransferSocket=new ReceiverSocketTransfer(this,mServerSocket);
+                //we create the socket listener
+                mReceiverTransferSocket=new ReceiverSocketTransfer(this, mServerSocket);
             }catch (IOException e){
                 Log.d(TAG,"There was an error registering the server socket "+e.getMessage());
             }
-
         }
         return super.onStartCommand(intent, flags, startId);
     }
@@ -164,7 +166,7 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
 
     //client interfaces
     @Override
-    public void finishedProcessClient() {
+    public void finishedReceiveClient() {
         //the transfer is done, set dialog and go back to activity
         Intent intent=new Intent("finished");
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
@@ -173,5 +175,34 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
     @Override
     public void socketFailedClient() {
         //the socket failed
+
+    }
+
+    @Override
+    public void updateSendUI(TextInfoSendObject textInfoSendObject) {
+        //we process the data received
+        //name of file, current number and total number
+        String fileName=textInfoSendObject.getMessageContent();
+        String stringNumbers=textInfoSendObject.getAdditionalInfo();
+        String[] currentNumbers = stringNumbers.split(",");
+        String finalNotificationText=fileName+" "+currentNumbers[0]+" of "+currentNumbers[1];
+
+        //we change the member variables of the progress
+        mTotalFiles=Integer.parseInt(currentNumbers[1]);
+        mCurrentFile=Integer.parseInt(currentNumbers[0]);
+
+        //bundle
+        Bundle bundle=new Bundle();
+        bundle.putSerializable("",textInfoSendObject);
+
+        //we update the notification
+        manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
+                ,finalNotificationText
+                ,true).build());
+
+        //we update the UI
+        Intent intent=new Intent(TransferProgressActivity.ACTION_UPDATE_UI);
+        intent.putExtras(bundle);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 }

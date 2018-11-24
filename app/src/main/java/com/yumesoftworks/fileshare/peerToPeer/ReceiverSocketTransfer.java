@@ -6,6 +6,8 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.yumesoftworks.fileshare.SenderPickDestinationActivity;
+import com.yumesoftworks.fileshare.TransferProgressActivity;
+import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -15,6 +17,11 @@ import java.net.Socket;
 public class ReceiverSocketTransfer {
     private static final String TAG="ServiceClientSocket";
 
+    //actions
+    private static final int ACTION_SEND_MESSAGE=1001;
+    private static final int ACTION_RECEIVE_FILE=1002;
+    private static final int ACTION_RECEIVE_DETAILS=1003;
+
     //local server socket
     private ServerSocket mServerSocket;
     private Socket mSocket;
@@ -22,6 +29,13 @@ public class ReceiverSocketTransfer {
     //thread
     private Handler socketHandler;
     private Thread socketThread;
+
+    //current action
+    private int mCurrentAction;
+
+    //file numbers
+    private int mCurrentFile;
+    private int mTotalFiles;
 
     //interface
     private ClientSocketTransferInterface mReceiverInterface;
@@ -36,7 +50,6 @@ public class ReceiverSocketTransfer {
     }
 
     class CommunicationThread implements Runnable{
-
         @Override
         public void run() {
             while(true){
@@ -46,36 +59,61 @@ public class ReceiverSocketTransfer {
                     Log.d(TAG, "Waiting for the socket to be connected " + mServerSocket.getLocalPort());
 
                     mSocket = mServerSocket.accept();
+                    mCurrentAction=ACTION_RECEIVE_DETAILS;
 
                     //loop for sending and receiving
-
                     Boolean keepLoop=true;
                     while (keepLoop) {
 
-                        //we read the messages sent by sender
-
-
-                        try {
-                            ObjectOutputStream messageOut = new ObjectOutputStream(mSocket.getOutputStream());
-                            //messageOut.writeObject(mUserInfoEntry);
-                        } catch (Exception e) {
-                            Log.d(TAG, "There is no output stream " + e.getMessage());
+                        if (mCurrentAction==ACTION_SEND_MESSAGE) {
+                            //we read the messages sent by sender
+                            try {
+                                TextInfoSendObject textInfoSendObject=new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_TRANSFER_SUCCESS,"","");
+                                ObjectOutputStream messageOut = new ObjectOutputStream(mSocket.getOutputStream());
+                                messageOut.writeObject(textInfoSendObject);
+                                //reset action to receive details
+                                mCurrentAction=ACTION_RECEIVE_DETAILS;
+                            } catch (Exception e) {
+                                Log.d(TAG, "There is no output stream " + e.getMessage());
+                            }
                         }
 
-                        try {
-                            ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
-                            String message = messageIn.readUTF();
+                        //receiving
+                        if (mCurrentAction==ACTION_RECEIVE_DETAILS){
+                            //we read the object
+                            try {
+                                ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
+                                TextInfoSendObject message = (TextInfoSendObject) messageIn.readObject();
 
-                            if (message == SenderPickDestinationActivity.MESSAGE_OPEN_ACTIVITY) {
-                                //we will open the new activity and wait for the connection via interface
-                                //mReceiverInterface.openNexActivity();
+                                //update the ui
+                                mReceiverInterface.updateSendUI(message);
+                                /*if (message == SenderPickDestinationActivity.MESSAGE_OPEN_ACTIVITY) {
+                                    //we will open the new activity and wait for the connection via interface
+                                    //mReceiverInterface.openNexActivity();
+                                }*/
+                                //change the action to get ready to receive file
+                                mCurrentAction=ACTION_RECEIVE_FILE;
+
+                            } catch (Exception e) {
+                                Log.d(TAG, "There is no input stream " + e.getMessage());
                             }
-                        } catch (Exception e) {
-                            Log.d(TAG, "There is no input stream " + e.getMessage());
+                        }
+                        if (mCurrentAction==ACTION_RECEIVE_FILE){
+                            //we receive the bytes and then save it
+
+                            //we store the file
+                            mCurrentAction=ACTION_SEND_MESSAGE;
+                        }
+
+                        //we check if it is the last file and we finish
+                        if (mCurrentFile==mTotalFiles){
+                            //we call the finish
+                            mReceiverInterface.finishedReceiveClient();
                         }
                     }
                 } catch (Exception e) {
                     Log.d(TAG, "the socket accept has failed, try again");
+                    mReceiverInterface.socketFailedClient();
                 }
             }
         }
@@ -83,8 +121,9 @@ public class ReceiverSocketTransfer {
 
     //inerface
     public interface ClientSocketTransferInterface{
-        void finishedProcessClient();
+        void finishedReceiveClient();
         void socketFailedClient();
+        void updateSendUI(TextInfoSendObject textInfoSendObject);
     }
 
     //kill the socket

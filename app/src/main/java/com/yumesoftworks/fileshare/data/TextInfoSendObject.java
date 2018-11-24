@@ -4,20 +4,20 @@ import java.io.Serializable;
 
 public class TextInfoSendObject implements Serializable {
     private static final long serialversionUID = 129348938L;
-    private String messageType;
+    private int messageType;
     private String messageContent;
     private String additionalInfo;
 
-    public TextInfoSendObject(String messageType, String messageContent, String additionalInfo){
+    public TextInfoSendObject(int messageType, String messageContent, String additionalInfo){
         this.messageType=messageType;
         this.messageContent=messageContent;
         this.additionalInfo=additionalInfo;
     }
 
-    public String getMessageType() {
+    public int getMessageType() {
         return messageType;
     }
-    public void setMessageType(String messageType) {
+    public void setMessageType(int messageType) {
         this.messageType = messageType;
     }
 

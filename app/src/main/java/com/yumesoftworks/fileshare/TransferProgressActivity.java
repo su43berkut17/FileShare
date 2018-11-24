@@ -36,8 +36,13 @@ FileTransferSent.OnFragmentInteractionListener{
     public static final String REMOTE_PORT="RemotePort";
 
     //type of message sent on text object
-    public static final String TYPE_END="endConnection";
-    public static final String TYPE_FILE_PROGRESSS="fileProgress";
+    public static final int TYPE_END=1001;
+    public static final int TYPE_FILE_PROGRESSS=1002;
+    public static final int TYPE_FILE_TRANSFER_SUCCESS=1003;
+
+    //broadcast actions
+    public static final String ACTION_FINISHED_TRANSFER="finishedTransfer";
+    public static final String ACTION_UPDATE_UI="updateUI";
 
     private LinearLayout mProgressBarHide;
 
@@ -154,8 +159,18 @@ FileTransferSent.OnFragmentInteractionListener{
             String action=intent.getAction();
 
             //we check what to do depending on what the service needs to do
-            if (action==""){
+            switch (action){
+                case ACTION_UPDATE_UI:
+                    //update ui
+                    Bundle bundle=intent.getExtras();
 
+                    //send the data to the fragment
+                    fragmentFileTransferProgress.updateData(bundle);
+
+                    break;
+                case ACTION_FINISHED_TRANSFER:
+                    //we show dialog that transfer is done
+                    break;
             }
         }
     };
