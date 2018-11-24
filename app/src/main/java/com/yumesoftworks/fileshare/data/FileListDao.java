@@ -15,6 +15,9 @@ public interface FileListDao {
     @Query("SELECT * FROM FileList"+" ORDER BY id")
     LiveData<List<FileListEntry>> loadFileList();
 
+    @Query("SELECT * FROM FileList"+" ORDER BY id")
+    List<FileListEntry> loadFileListDirect();
+
     @Insert
     void insertFile(FileListEntry fileListEntry);
 

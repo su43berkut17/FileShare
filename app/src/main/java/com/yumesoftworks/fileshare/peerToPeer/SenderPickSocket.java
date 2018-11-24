@@ -23,7 +23,6 @@ public class SenderPickSocket {
     private static final String TYPE_END="typeEnd";
     private static final String TYPE_ERROR="typeError";
 
-
     //thread
     private Handler socketHandler;
     private Thread socketThread;

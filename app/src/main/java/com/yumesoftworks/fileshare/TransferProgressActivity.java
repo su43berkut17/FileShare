@@ -44,6 +44,9 @@ FileTransferSent.OnFragmentInteractionListener{
     public static final String ACTION_FINISHED_TRANSFER="finishedTransfer";
     public static final String ACTION_UPDATE_UI="updateUI";
 
+    //name of bundle objects coming from service
+    public static final String ACTION_UPDATE_UI_DATA="updateUIData";
+
     private LinearLayout mProgressBarHide;
 
     //when sending

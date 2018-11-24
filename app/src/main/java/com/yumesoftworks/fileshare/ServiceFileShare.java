@@ -4,12 +4,16 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -17,17 +21,12 @@ import android.util.Log;
 import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
+import com.yumesoftworks.fileshare.data.UserSendEntry;
 import com.yumesoftworks.fileshare.peerToPeer.ReceiverSocketTransfer;
 import com.yumesoftworks.fileshare.peerToPeer.SenderSocketTransfer;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.List;
 
 public class ServiceFileShare extends Service implements ReceiverSocketTransfer.ClientSocketTransferInterface {
@@ -47,9 +46,46 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
     private SenderSocketTransfer mSenderTransferSocket;
     private int mPort;
 
+    //loaded entry
+    private List<FileListEntry> mFileListEntry;
+
+    //counter
+    private Boolean mInitDatabase=false;
+    private Boolean mInitExtras=false;
+
     @Override
     public void onCreate() {
+
         super.onCreate();
+
+        //we read the database
+        AppDatabase database = AppDatabase.getInstance(this);
+        new saveDatabaseAsyncTask(database).execute();
+    }
+
+    private class saveDatabaseAsyncTask extends AsyncTask<Void,Void,Void> {
+        private AppDatabase database;
+
+        saveDatabaseAsyncTask(AppDatabase recDatabase){
+            database=recDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(final Void... params) {
+            mFileListEntry=database.fileListDao().loadFileListDirect();
+            Log.d(TAG,"Database loaded, file list entry is "+mFileListEntry);
+            mInitDatabase=true;
+            beginTransfer();
+            /*if (mInitDatabase==true && mInitExtras==true){
+                beginTransfer();
+            }*/
+            return null;
+        }
+    }
+
+    //we initiate the trasnfer
+    private void beginTransfer(){
+        Log.d(TAG,"database has been completed");
     }
 
     @Override
@@ -89,14 +125,15 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
         //we check if the intent is to send or to receive
         if (action==TransferProgressActivity.FILES_SENDING){
             //we are sending files
-            //we read the database
-            AppDatabase database=AppDatabase.getInstance(this.getApplication());
-            List<FileListEntry> fileListEntries =database.fileListDao().loadFileList().getValue();
-            mTotalFiles=fileListEntries.size();
+            //mFileListEntry=mFileListEntryLive;
+            Log.d(TAG,"the value of the files is "+mFileListEntry.size());
+            mTotalFiles=mFileListEntry.size();
 
             //we start the socket for communication
             try{
-                mSenderTransferSocket = new SenderSocketTransfer();
+                mSenderTransferSocket = new SenderSocketTransfer(getApplicationContext()
+                        ,receivedBundle.getString(TransferProgressActivity.REMOTE_IP),
+                        receivedBundle.getInt(TransferProgressActivity.REMOTE_PORT));
 
                 /*Socket socket=new Socket(ipAddress,port);
 
@@ -162,7 +199,7 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
         return new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
                     .setContentTitle(title)
                     .setContentText(filename)
-                    .setSmallIcon(R.id.iv_avatar_icon)
+                    .setSmallIcon(R.drawable.logo_128)
                     .setProgress(mTotalFiles, mCurrentFile, showProgress)
                     .setAutoCancel(true);
     }
@@ -196,7 +233,7 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
 
         //bundle
         Bundle bundle=new Bundle();
-        bundle.putSerializable("",textInfoSendObject);
+        bundle.putSerializable(TransferProgressActivity.ACTION_UPDATE_UI_DATA,textInfoSendObject);
 
         //we update the notification
         manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)

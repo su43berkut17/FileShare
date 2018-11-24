@@ -9,67 +9,39 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.yumesoftworks.fileshare.data.FileListEntry;
+import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 import com.yumesoftworks.fileshare.recyclerAdapters.QueueListAdapter;
 
 import java.util.List;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link FileTransferProgress.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link FileTransferProgress#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class FileTransferProgress extends Fragment implements QueueListAdapter.QueueClickListener {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     private OnFragmentInteractionListener mListener;
 
     //recycler view
     private RecyclerView rvFileList;
     private QueueListAdapter rvAdapter;
-    private static List<FileListEntry> fileList;
+
+    //ui
+    private TextView mTvFileName;
+    private TextView mTvOutOf;
+    private TextView mtvPercentage;
+    private ProgressBar mTvProgress;
 
     public FileTransferProgress() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FileTransferProgress.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static FileTransferProgress newInstance(String param1, String param2) {
-        FileTransferProgress fragment = new FileTransferProgress();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
 
     @Override
@@ -81,11 +53,17 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         rvFileList=fileProgressView.findViewById(R.id.rv_file_progress_queue);
         rvFileList.setLayoutManager(new LinearLayoutManager(getContext()));
 
-            rvAdapter=new QueueListAdapter(getContext(),this);
+        rvAdapter=new QueueListAdapter(getContext(),this);
 
-            //we set the adapter
-            rvFileList.setAdapter(rvAdapter);
-            rvAdapter.notifyDataSetChanged();
+        //we set the adapter
+        rvFileList.setAdapter(rvAdapter);
+        rvAdapter.notifyDataSetChanged();
+
+        //we get the ui objects
+        mTvFileName=fileProgressView.findViewById(R.id.tv_atp_filename);
+        mTvOutOf=fileProgressView.findViewById(R.id.tv_atp_files_out_of);
+        mtvPercentage=fileProgressView.findViewById(R.id.tv_atp_percentage);
+        mTvProgress=fileProgressView.findViewById(R.id.pro_bar_atp);
 
         return fileProgressView;
     }
@@ -122,8 +100,26 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
 
     //update the ui
     public void updateData(Bundle bundle){
-        //we update the data
+        //process data
+        TextInfoSendObject textInfoSendObject=(TextInfoSendObject) bundle.getSerializable(TransferProgressActivity.ACTION_UPDATE_UI_DATA);
 
+
+        //name of file, current number and total number
+        String fileName=textInfoSendObject.getMessageContent();
+        String stringNumbers=textInfoSendObject.getAdditionalInfo();
+        String[] currentNumbers = stringNumbers.split(",");
+        String finalTextNumbers=fileName+" "+currentNumbers[0]+" of "+currentNumbers[1];
+
+        //we change the member variables of the progress
+        int totalFiles=Integer.parseInt(currentNumbers[1]);
+        int currentFile=Integer.parseInt(currentNumbers[0]);
+        int percentage=currentFile*100/totalFiles;
+
+        //we update the data
+        mTvFileName.setText(textInfoSendObject.getMessageContent());
+        mTvOutOf.setText(finalTextNumbers);
+        mtvPercentage.setText(percentage);
+        mTvProgress.setProgress(percentage);
     }
 
     @Override
@@ -131,16 +127,7 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
 
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
+    //interface
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteractionProgress(Uri uri);
