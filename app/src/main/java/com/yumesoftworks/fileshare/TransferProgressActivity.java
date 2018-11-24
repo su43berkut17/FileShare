@@ -37,8 +37,9 @@ FileTransferSent.OnFragmentInteractionListener{
 
     //type of message sent on text object
     public static final int TYPE_END=1001;
-    public static final int TYPE_FILE_PROGRESSS=1002;
-    public static final int TYPE_FILE_TRANSFER_SUCCESS=1003;
+    public static final int TYPE_FILE_DETAILS=1002;
+    public static final int TYPE_FILE_BYTES=1003;
+    public static final int TYPE_FILE_TRANSFER_SUCCESS=1004;
 
     //broadcast actions
     public static final String ACTION_FINISHED_TRANSFER="finishedTransfer";
@@ -58,6 +59,7 @@ FileTransferSent.OnFragmentInteractionListener{
     //constants for the actions
     public static final int FILES_SENDING=2001;
     public static final int FILES_RECEIVING=2002;
+    public static final int RELAUNCH_APP=2003;
     public static final String ACTION_SERVICE ="ReceivingFiles";
 
     //fragment parts
@@ -102,29 +104,36 @@ FileTransferSent.OnFragmentInteractionListener{
         //get the data to see how do we start the service
         int typeOfService=extras.getInt(EXTRA_TYPE_TRANSFER);
 
-        //choose data in the intent
-        if (typeOfService==FILES_SENDING){
-            //we start the services as sending stuff
-            extras.putInt(ACTION_SERVICE,FILES_SENDING);
-        }else if (typeOfService==FILES_RECEIVING){
-            //we start the service as receiving stuff
-            extras.putInt(ACTION_SERVICE,FILES_RECEIVING);
+
+        if (typeOfService==RELAUNCH_APP){
+            //nothing happens since everything has been initialized
+
+        }else {
+            //first initialization
+            //choose data in the intent
+            if (typeOfService == FILES_SENDING) {
+                //we start the services as sending stuff
+                extras.putInt(ACTION_SERVICE, FILES_SENDING);
+            } else if (typeOfService == FILES_RECEIVING) {
+                //we start the service as receiving stuff
+                extras.putInt(ACTION_SERVICE, FILES_RECEIVING);
+            }
+
+            //start the service
+            serviceIntent.putExtras(extras);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent);
+            } else {
+                startService(serviceIntent);
+            }
+
+            //initialize fragments
+            initializeFragments();
+
+            //get the broadcast receivers for responses from the service
+            LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceived, new IntentFilter(LOCAL_BROADCAST_REC));
         }
-
-        //start the service
-        serviceIntent.putExtras(extras);
-
-        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent);
-        }else{
-            startService(serviceIntent);
-        }
-
-        //initialize fragments
-        initializeFragments();
-
-        //get the broadcast receivers for responses from the service
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceived,new IntentFilter(LOCAL_BROADCAST_REC));
     }
 
     private void initializeFragments(){

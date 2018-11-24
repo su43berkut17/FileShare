@@ -60,6 +60,8 @@ public class ReceiverSocketTransfer {
 
                     mSocket = mServerSocket.accept();
                     mCurrentAction=ACTION_RECEIVE_DETAILS;
+                    //we state the transfer has started on the database
+                    mReceiverInterface.startedReceiveTransfer();
 
                     //loop for sending and receiving
                     Boolean keepLoop=true;
@@ -86,7 +88,7 @@ public class ReceiverSocketTransfer {
                                 TextInfoSendObject message = (TextInfoSendObject) messageIn.readObject();
 
                                 //update the ui
-                                mReceiverInterface.updateSendUI(message);
+                                mReceiverInterface.updateReceiveSendUI(message);
                                 /*if (message == SenderPickDestinationActivity.MESSAGE_OPEN_ACTIVITY) {
                                     //we will open the new activity and wait for the connection via interface
                                     //mReceiverInterface.openNexActivity();
@@ -113,7 +115,7 @@ public class ReceiverSocketTransfer {
                     }
                 } catch (Exception e) {
                     Log.d(TAG, "the socket accept has failed, try again");
-                    mReceiverInterface.socketFailedClient();
+                    mReceiverInterface.socketReceiveFailedClient();
                 }
             }
         }
@@ -121,9 +123,10 @@ public class ReceiverSocketTransfer {
 
     //inerface
     public interface ClientSocketTransferInterface{
+        void startedReceiveTransfer();
         void finishedReceiveClient();
-        void socketFailedClient();
-        void updateSendUI(TextInfoSendObject textInfoSendObject);
+        void socketReceiveFailedClient();
+        void updateReceiveSendUI(TextInfoSendObject textInfoSendObject);
     }
 
     //kill the socket

@@ -4,8 +4,6 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -13,7 +11,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -21,7 +18,7 @@ import android.util.Log;
 import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
-import com.yumesoftworks.fileshare.data.UserSendEntry;
+import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.peerToPeer.ReceiverSocketTransfer;
 import com.yumesoftworks.fileshare.peerToPeer.SenderSocketTransfer;
 
@@ -29,7 +26,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.List;
 
-public class ServiceFileShare extends Service implements ReceiverSocketTransfer.ClientSocketTransferInterface {
+public class ServiceFileShare extends Service implements
+        ReceiverSocketTransfer.ClientSocketTransferInterface,
+        SenderSocketTransfer.SenderSocketTransferInterface {
     private static final String TAG="ServiceFileShare";
 
     //notification
@@ -46,12 +45,11 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
     private SenderSocketTransfer mSenderTransferSocket;
     private int mPort;
 
+    //database access
+    private AppDatabase database;
+
     //loaded entry
     private List<FileListEntry> mFileListEntry;
-
-    //counter
-    private Boolean mInitDatabase=false;
-    private Boolean mInitExtras=false;
 
     @Override
     public void onCreate() {
@@ -59,7 +57,7 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
         super.onCreate();
 
         //we read the database
-        AppDatabase database = AppDatabase.getInstance(this);
+        database = AppDatabase.getInstance(this);
         new saveDatabaseAsyncTask(database).execute();
     }
 
@@ -74,20 +72,11 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
         protected Void doInBackground(final Void... params) {
             mFileListEntry=database.fileListDao().loadFileListDirect();
             Log.d(TAG,"Database loaded, file list entry is "+mFileListEntry);
-            mInitDatabase=true;
-            beginTransfer();
-            /*if (mInitDatabase==true && mInitExtras==true){
-                beginTransfer();
-            }*/
             return null;
         }
     }
 
-    //we initiate the trasnfer
-    private void beginTransfer(){
-        Log.d(TAG,"database has been completed");
-    }
-
+    //start the transfer
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //check the API
@@ -115,10 +104,7 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
         //we get the bundle of extras
         Bundle receivedBundle=intent.getExtras();
 
-        //values
-        String ipAddress = receivedBundle.getString(TransferProgressActivity.REMOTE_IP);
-        int port =receivedBundle.getInt(TransferProgressActivity.REMOTE_PORT);
-
+        //get action
         int action=receivedBundle.getInt(TransferProgressActivity.ACTION_SERVICE);
         Log.d(TAG,"the action is "+action);
 
@@ -133,7 +119,8 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
             try{
                 mSenderTransferSocket = new SenderSocketTransfer(getApplicationContext()
                         ,receivedBundle.getString(TransferProgressActivity.REMOTE_IP),
-                        receivedBundle.getInt(TransferProgressActivity.REMOTE_PORT));
+                        receivedBundle.getInt(TransferProgressActivity.REMOTE_PORT),
+                        mFileListEntry);
 
                 /*Socket socket=new Socket(ipAddress,port);
 
@@ -151,24 +138,12 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
 
                     //we send the file
 
-                    File file=new File(fileListEntries.get(mCurrentFile).getPath());
-                    // Get the size of the file
-                    long length = file.length();
-                    byte[] bytes = new byte[16 * 1024];
-                    InputStream in = new FileInputStream(file);
-                    OutputStream out = socket.getOutputStream();
 
-                    int count;
-                    while ((count = in.read(bytes)) > 0) {
-                        out.write(bytes, 0, count);
-                    }
-
-                    out.close();
 
                 }*/
 
             }catch (Exception e){
-                Log.d(TAG,"There was an error");
+                Log.d(TAG,"There was an error creating the send client socket");
             }
 
         }else if (intent.getAction().equals(TransferProgressActivity.FILES_RECEIVING)){
@@ -179,7 +154,11 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
                 mServerSocket=new ServerSocket(mPort);
 
                 //we create the socket listener
-                mReceiverTransferSocket=new ReceiverSocketTransfer(this, mServerSocket);
+                try {
+                    mReceiverTransferSocket = new ReceiverSocketTransfer(this, mServerSocket);
+                }catch (Exception e){
+                    Log.d(TAG,"There was an error creating the receive server socket");
+                }
             }catch (IOException e){
                 Log.d(TAG,"There was an error registering the server socket "+e.getMessage());
             }
@@ -192,7 +171,6 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
         return null;
     }
 
-
     //notification build
     private NotificationCompat.Builder notificationBuilder(String title, String filename, boolean showProgress){
         //we set the notification
@@ -204,22 +182,74 @@ public class ServiceFileShare extends Service implements ReceiverSocketTransfer.
                     .setAutoCancel(true);
     }
 
-    //client interfaces
+    //dabatase stuff
+    private void switchTransfer(Boolean activateTransfer){
+        //we switch the transfer status to on or off
+        new updateDatabaseAsyncTask(database).execute(activateTransfer);
+    }
+
+    private class updateDatabaseAsyncTask extends AsyncTask<Boolean,Void,Void> {
+        private AppDatabase database;
+
+        updateDatabaseAsyncTask(AppDatabase recDatabase){
+            database=recDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(final Boolean... params) {
+            int status;
+            //we read the status
+            if (params[0]){
+                status=1;
+            }else{
+                status=0;
+            }
+
+            UserInfoEntry userInfoEntry=database.userInfoDao().loadUserWidget().get(0);
+            userInfoEntry.setIsTransferInProgress(status);
+            database.userInfoDao().updateTask(userInfoEntry);
+
+            return null;
+        }
+    }
+
+    //receive client interfaces
     @Override
+    public void startedReceiveTransfer(){
+        switchTransfer(true);
+    }
+
     public void finishedReceiveClient() {
+        //we deactivate the transfer status
+        switchTransfer(false);
         //the transfer is done, set dialog and go back to activity
         Intent intent=new Intent("finished");
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     @Override
-    public void socketFailedClient() {
+    public void socketReceiveFailedClient() {
         //the socket failed
-
     }
 
     @Override
-    public void updateSendUI(TextInfoSendObject textInfoSendObject) {
+    public void updateReceiveSendUI(TextInfoSendObject textInfoSendObject) {
+        updateGeneralUI(textInfoSendObject);
+    }
+
+    //sender client interface
+    @Override
+    public void startedSenderTransfer(){
+        switchTransfer(true);
+    }
+
+    @Override
+    public void updateSendSendUI(TextInfoSendObject textInfoSendObject) {
+        updateGeneralUI(textInfoSendObject);
+    }
+
+    //general methods
+    private void updateGeneralUI(TextInfoSendObject textInfoSendObject){
         //we process the data received
         //name of file, current number and total number
         String fileName=textInfoSendObject.getMessageContent();
