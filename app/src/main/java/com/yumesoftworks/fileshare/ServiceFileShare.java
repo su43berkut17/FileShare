@@ -122,28 +122,9 @@ public class ServiceFileShare extends Service implements
                         receivedBundle.getInt(TransferProgressActivity.REMOTE_PORT),
                         mFileListEntry);
 
-                /*Socket socket=new Socket(ipAddress,port);
-
-                //now we send the 1st data which is an object with the number of files to be transferred
-                //send the info to go to the next stage to wait
-                ObjectOutputStream messageOut=new ObjectOutputStream(socket.getOutputStream());
-                messageOut.writeInt(fileListEntries.size());
-
-                //cycle to send each file
-                Boolean isOver=false;
-
-                while(!isOver){
-                    //we check what is the client telling us
-
-
-                    //we send the file
-
-
-
-                }*/
-
             }catch (Exception e){
                 Log.d(TAG,"There was an error creating the send client socket");
+                connectionError();
             }
 
         }else if (intent.getAction().equals(TransferProgressActivity.FILES_RECEIVING)){
@@ -158,9 +139,11 @@ public class ServiceFileShare extends Service implements
                     mReceiverTransferSocket = new ReceiverSocketTransfer(this, mServerSocket);
                 }catch (Exception e){
                     Log.d(TAG,"There was an error creating the receive server socket");
+                    connectionError();
                 }
             }catch (IOException e){
                 Log.d(TAG,"There was an error registering the server socket "+e.getMessage());
+                connectionError();
             }
         }
         return super.onStartCommand(intent, flags, startId);
@@ -213,6 +196,20 @@ public class ServiceFileShare extends Service implements
         }
     }
 
+    //socket error
+    private void connectionError(){
+        //the socket failed
+        //we hide the notification
+        manager.cancel(NOTIFICATION_ID);
+
+        //we deactivate the transfer status
+        switchTransfer(false);
+
+        //set error dialog and go back to activity
+        Intent intent=new Intent(TransferProgressActivity.ACTION_SOCKET_ERROR);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
     //receive client interfaces
     @Override
     public void startedReceiveTransfer(){
@@ -232,16 +229,7 @@ public class ServiceFileShare extends Service implements
 
     @Override
     public void socketReceiveFailedClient() {
-        //the socket failed
-        //we hide the notification
-        manager.cancel(NOTIFICATION_ID);
-
-        //we deactivate the transfer status
-        switchTransfer(false);
-
-        //set error dialog and go back to activity
-        Intent intent=new Intent(TransferProgressActivity.ACTION_SOCKET_ERROR);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        connectionError();
     }
 
     @Override
@@ -275,16 +263,7 @@ public class ServiceFileShare extends Service implements
 
     @Override
     public void socketErrorSend() {
-        //the socket failed
-        //we hide the notification
-        manager.cancel(NOTIFICATION_ID);
-
-        //we deactivate the transfer status
-        switchTransfer(false);
-
-        //set error dialog and go back to activity
-        Intent intent=new Intent(TransferProgressActivity.ACTION_SOCKET_ERROR);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        connectionError();
     }
 
     @Override
