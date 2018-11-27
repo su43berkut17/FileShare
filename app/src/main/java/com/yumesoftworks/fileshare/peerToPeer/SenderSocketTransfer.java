@@ -133,7 +133,11 @@ public class SenderSocketTransfer{
 
                         //we check if it is the last file
                         if (mCurrentAction==ACTION_FINISHED_FILE_TRANSFER){
+                            //we set the file as transferred in the database
+                            mSenderInterface.updateSendSentFile(mFileList.get(mCurrentFile));
+
                             mCurrentFile++;
+                            mCurrentAction=ACTION_SEND_DETAIL;
                         }
 
                         // try {
@@ -170,9 +174,14 @@ public class SenderSocketTransfer{
                             }
                         }*/
                     }
+                    //it is over
+                    //we show a confirmation dialog
+                    mSenderInterface.finishedSendTransfer();
+
                 } catch (Exception e) {
                     Log.d(TAG, "the socket creation has failed" + e.getMessage());
                     doWeRepeat=false;
+                    mSenderInterface.socketErrorSend();
                 }
             }
         }
@@ -183,5 +192,8 @@ public class SenderSocketTransfer{
         //void updateUserDataSocket(UserSendEntry userSendEntry);
         void startedSenderTransfer();
         void updateSendSendUI(TextInfoSendObject textInfoSendObject);
+        void finishedSendTransfer();
+        void updateSendSentFile(FileListEntry fileListEntry);
+        void socketErrorSend();
     }
 }

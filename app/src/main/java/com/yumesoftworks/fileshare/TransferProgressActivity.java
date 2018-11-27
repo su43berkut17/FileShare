@@ -4,6 +4,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -11,6 +12,7 @@ import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.LinearLayout;
@@ -44,6 +46,7 @@ FileTransferSent.OnFragmentInteractionListener{
     //broadcast actions
     public static final String ACTION_FINISHED_TRANSFER="finishedTransfer";
     public static final String ACTION_UPDATE_UI="updateUI";
+    public static final String ACTION_SOCKET_ERROR="connectionError";
 
     //name of bundle objects coming from service
     public static final String ACTION_UPDATE_UI_DATA="updateUIData";
@@ -183,6 +186,35 @@ FileTransferSent.OnFragmentInteractionListener{
                     break;
                 case ACTION_FINISHED_TRANSFER:
                     //we show dialog that transfer is done
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    builder.setMessage(R.string.service_finished_transfer)
+                            .setCancelable(true)
+                            .setNeutralButton(R.string.gen_button_ok,
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            //we go to the main activity
+                                            Intent intent=new Intent(getApplicationContext(),WelcomeScreenActivity.class);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(intent);
+                                        }
+                                    });
+                    builder.show();
+                    break;
+                case ACTION_SOCKET_ERROR:
+                    //we show dialog that there was an error and return to the main menu
+                    AlertDialog.Builder builder2 = new AlertDialog.Builder(context);
+                    builder2.setMessage(R.string.service_socket_error)
+                            .setCancelable(true)
+                            .setNeutralButton(R.string.gen_button_ok,
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            //we go to the main activity
+                                            Intent intent=new Intent(getApplicationContext(),WelcomeScreenActivity.class);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(intent);
+                                        }
+                                    });
+                    builder2.show();
                     break;
             }
         }

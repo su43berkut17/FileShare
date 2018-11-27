@@ -220,16 +220,28 @@ public class ServiceFileShare extends Service implements
     }
 
     public void finishedReceiveClient() {
+        //we hide the notification
+        manager.cancel(NOTIFICATION_ID);
+
         //we deactivate the transfer status
         switchTransfer(false);
         //the transfer is done, set dialog and go back to activity
-        Intent intent=new Intent("finished");
+        Intent intent=new Intent(TransferProgressActivity.ACTION_FINISHED_TRANSFER);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     @Override
     public void socketReceiveFailedClient() {
         //the socket failed
+        //we hide the notification
+        manager.cancel(NOTIFICATION_ID);
+
+        //we deactivate the transfer status
+        switchTransfer(false);
+
+        //set error dialog and go back to activity
+        Intent intent=new Intent(TransferProgressActivity.ACTION_SOCKET_ERROR);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     @Override
@@ -246,6 +258,57 @@ public class ServiceFileShare extends Service implements
     @Override
     public void updateSendSendUI(TextInfoSendObject textInfoSendObject) {
         updateGeneralUI(textInfoSendObject);
+    }
+
+    @Override
+    public void finishedSendTransfer() {
+        //we hide the notification
+        manager.cancel(NOTIFICATION_ID);
+
+        //we set the database as not transferring so if they restart the app i goes to the main menu
+        switchTransfer(false);
+
+        //the transfer is done, set dialog and go back to activity
+        Intent intent=new Intent(TransferProgressActivity.ACTION_FINISHED_TRANSFER);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    @Override
+    public void socketErrorSend() {
+        //the socket failed
+        //we hide the notification
+        manager.cancel(NOTIFICATION_ID);
+
+        //we deactivate the transfer status
+        switchTransfer(false);
+
+        //set error dialog and go back to activity
+        Intent intent=new Intent(TransferProgressActivity.ACTION_SOCKET_ERROR);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    @Override
+    public void updateSendSentFile(FileListEntry fileListEntry) {
+        //set the file to is Transferred true
+        new updateDatabaseSentAsyncTask(database).execute(fileListEntry);
+    }
+
+    private class updateDatabaseSentAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
+        private AppDatabase database;
+
+        updateDatabaseSentAsyncTask(AppDatabase recDatabase){
+            database=recDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(final FileListEntry... params) {
+            //mFileListEntry=database.fileListDao().loadFileListDirect()
+            FileListEntry updateEntry=params[0];
+            database.fileListDao().updateFile(updateEntry);
+
+            Log.d(TAG,"Sent file entry changed to transferred "+mFileListEntry);
+            return null;
+        }
     }
 
     //general methods
