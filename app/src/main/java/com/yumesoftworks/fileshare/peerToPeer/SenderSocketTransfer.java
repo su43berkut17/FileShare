@@ -87,6 +87,12 @@ public class SenderSocketTransfer{
                     //we initialize the 1st action
                     mCurrentAction=ACTION_SEND_DETAIL;
 
+                    //initialize streams
+                    ObjectOutputStream messageOut;
+                    ObjectInputStream messageIn;
+                    InputStream fileInputStream;
+                    OutputStream fileOutputStream;
+
                     while(mCurrentFile<mTotalFiles) {
                         //we send the 1st file details
                         if (mCurrentAction==ACTION_SEND_DETAIL){
@@ -99,8 +105,9 @@ public class SenderSocketTransfer{
                                 String additionalInfo=String.valueOf(mCurrentFile)+","+String.valueOf(mTotalFiles);
 
                                 TextInfoSendObject sendObject = new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_DETAILS, messageToSend,additionalInfo);
-                                ObjectOutputStream messageOut = new ObjectOutputStream(mSocket.getOutputStream());
+                                messageOut = new ObjectOutputStream(mSocket.getOutputStream());
                                 messageOut.writeObject(sendObject);
+                                messageOut.flush();
                                 mCurrentAction=ACTION_SEND_FILE;
 
                                 //send to ui the current file to be sent
@@ -120,15 +127,16 @@ public class SenderSocketTransfer{
                                 // Get the size of the file
                                 long length = file.length();
                                 byte[] bytes = new byte[16 * 1024];
-                                InputStream in = new FileInputStream(file);
-                                OutputStream out = mSocket.getOutputStream();
+                                fileInputStream = new FileInputStream(file);
+                                fileOutputStream = mSocket.getOutputStream();
 
                                 int count;
-                                while ((count = in.read(bytes)) > 0) {
-                                    out.write(bytes, 0, count);
+                                while ((count = fileInputStream.read(bytes)) > 0) {
+                                    fileOutputStream.write(bytes, 0, count);
                                 }
 
-                                out.close();
+                                //fileOutputStream.close();
+
                                 Log.d(TAG, "File sent");
                                 mCurrentAction=ACTION_FINISHED_FILE_TRANSFER;
                             }catch (Exception e){
@@ -149,7 +157,7 @@ public class SenderSocketTransfer{
                         if (mCurrentAction==ACTION_WAITING_FILE_SUCCESS){
                             //we read the object
                             try{
-                                ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
+                                messageIn = new ObjectInputStream(mSocket.getInputStream());
                                 TextInfoSendObject message = (TextInfoSendObject) messageIn.readObject();
 
                                 //we check if the message is the success of the file so we can continue with the next file
