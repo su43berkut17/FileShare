@@ -15,6 +15,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.LinearLayout;
 
 import com.google.android.gms.ads.AdView;
@@ -177,6 +178,7 @@ FileTransferSent.OnFragmentInteractionListener{
             //we check what to do depending on what the service needs to do
             switch (action){
                 case ACTION_UPDATE_UI:
+                    mProgressBarHide.setVisibility(View.GONE);
                     //update ui
                     Bundle bundle=intent.getExtras();
 

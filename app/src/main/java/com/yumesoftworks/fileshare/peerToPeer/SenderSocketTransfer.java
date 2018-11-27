@@ -7,7 +7,6 @@ import android.util.Log;
 import com.yumesoftworks.fileshare.TransferProgressActivity;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
-import com.yumesoftworks.fileshare.data.UserInfoEntry;
 
 import java.io.File;
 import java.io.FileInputStream;

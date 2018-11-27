@@ -83,6 +83,12 @@ public class ReceiverSocketTransfer {
                                 ObjectOutputStream messageOut = new ObjectOutputStream(mSocket.getOutputStream());
                                 messageOut.writeObject(textInfoSendObject);
 
+                                //numbers
+                                String stringNumbers=textInfoSendObject.getAdditionalInfo();
+                                String[] currentNumbers = stringNumbers.split(",");
+                                mCurrentFile=Integer.parseInt(currentNumbers[0]);
+                                mTotalFiles=Integer.parseInt(currentNumbers[1]);
+
                                 //reset action to receive details
                                 mCurrentAction=ACTION_RECEIVE_DETAILS;
                             } catch (Exception e) {

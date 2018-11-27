@@ -124,10 +124,11 @@ public class ServiceFileShare extends Service implements
 
             }catch (Exception e){
                 Log.d(TAG,"There was an error creating the send client socket");
+                e.printStackTrace();
                 connectionError();
             }
 
-        }else if (intent.getAction().equals(TransferProgressActivity.FILES_RECEIVING)){
+        }else if (action==TransferProgressActivity.FILES_RECEIVING){
             //we are receiving files
             try{
                 //create the server socket
