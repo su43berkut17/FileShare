@@ -23,8 +23,9 @@ public class SenderSocketTransfer{
 
     //actions
     private static final int ACTION_SEND_DETAIL=4001;
-    private static final int ACTION_SEND_FILE=4001;
-    private static final int ACTION_FINISHED_FILE_TRANSFER=4001;
+    private static final int ACTION_SEND_FILE=4002;
+    private static final int ACTION_FINISHED_FILE_TRANSFER=4003;
+    private static final int ACTION_WAITING_FILE_SUCCESS=4004;
 
     //thread
     private Handler socketHandler;
@@ -114,21 +115,26 @@ public class SenderSocketTransfer{
 
                         //we send the 1st file
                         if (mCurrentAction==ACTION_SEND_FILE){
-                            File file=new File(mFileList.get(mCurrentFile).getPath());
-                            // Get the size of the file
-                            long length = file.length();
-                            byte[] bytes = new byte[16 * 1024];
-                            InputStream in = new FileInputStream(file);
-                            OutputStream out = mSocket.getOutputStream();
+                            try{
+                                Log.d(TAG, "we start sending the file");
+                                File file=new File(mFileList.get(mCurrentFile).getPath());
+                                // Get the size of the file
+                                long length = file.length();
+                                byte[] bytes = new byte[16 * 1024];
+                                InputStream in = new FileInputStream(file);
+                                OutputStream out = mSocket.getOutputStream();
 
-                            int count;
-                            while ((count = in.read(bytes)) > 0) {
-                                out.write(bytes, 0, count);
+                                int count;
+                                while ((count = in.read(bytes)) > 0) {
+                                    out.write(bytes, 0, count);
+                                }
+
+                                out.close();
+                                Log.d(TAG, "File sent");
+                                mCurrentAction=ACTION_FINISHED_FILE_TRANSFER;
+                            }catch (Exception e){
+                                e.printStackTrace();
                             }
-
-                            out.close();
-
-                            mCurrentAction=ACTION_FINISHED_FILE_TRANSFER;
                         }
 
                         //we check if it is the last file
@@ -137,7 +143,25 @@ public class SenderSocketTransfer{
                             mSenderInterface.updateSendSentFile(mFileList.get(mCurrentFile));
 
                             mCurrentFile++;
-                            mCurrentAction=ACTION_SEND_DETAIL;
+                            mCurrentAction=ACTION_WAITING_FILE_SUCCESS;
+                        }
+
+                        //we check if it is waiting, we read the object
+                        if (mCurrentAction==ACTION_WAITING_FILE_SUCCESS){
+                            //we read the object
+                            try{
+                                ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
+                                TextInfoSendObject message = (TextInfoSendObject) messageIn.readObject();
+
+                                //we check if the message is the success of the file so we can continue with the next file
+                                if (message.getMessageType()==TransferProgressActivity.TYPE_FILE_TRANSFER_SUCCESS){
+                                    //transfer is completed
+                                    Log.d(TAG,"the file has been transferred, we send the next detail");
+                                    mCurrentAction=ACTION_SEND_DETAIL;
+                                }
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
                         }
 
                         // try {

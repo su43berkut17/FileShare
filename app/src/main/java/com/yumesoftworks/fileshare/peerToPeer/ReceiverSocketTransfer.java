@@ -2,17 +2,23 @@ package com.yumesoftworks.fileshare.peerToPeer;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 
 import com.yumesoftworks.fileshare.SenderPickDestinationActivity;
 import com.yumesoftworks.fileshare.TransferProgressActivity;
+import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Date;
 
 public class ReceiverSocketTransfer {
     private static final String TAG="ServiceClientSocket";
@@ -36,6 +42,9 @@ public class ReceiverSocketTransfer {
     //file numbers
     private int mCurrentFile;
     private int mTotalFiles;
+
+    //current file
+    private TextInfoSendObject mTextInfoSendObject;
 
     //interface
     private ClientSocketTransferInterface mReceiverInterface;
@@ -73,6 +82,7 @@ public class ReceiverSocketTransfer {
                                 TextInfoSendObject textInfoSendObject=new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_TRANSFER_SUCCESS,"","");
                                 ObjectOutputStream messageOut = new ObjectOutputStream(mSocket.getOutputStream());
                                 messageOut.writeObject(textInfoSendObject);
+
                                 //reset action to receive details
                                 mCurrentAction=ACTION_RECEIVE_DETAILS;
                             } catch (Exception e) {
@@ -86,6 +96,7 @@ public class ReceiverSocketTransfer {
                             try {
                                 ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
                                 TextInfoSendObject message = (TextInfoSendObject) messageIn.readObject();
+                                mTextInfoSendObject=message;
 
                                 //update the ui
                                 mReceiverInterface.updateReceiveSendUI(message);
@@ -102,6 +113,28 @@ public class ReceiverSocketTransfer {
                         }
                         if (mCurrentAction==ACTION_RECEIVE_FILE){
                             //we receive the bytes and then save it
+                            //know the final name of the file
+                            String realName=mTextInfoSendObject.getMessageContent();
+                            String finalName=new Date().toString()+"-"+realName;
+
+                            //we create the file
+                            InputStream inputStream=mSocket.getInputStream();
+
+                            byte[] bytes = new byte[16 * 1024];
+                            FileOutputStream fileOutputStream=new FileOutputStream(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/" +finalName);
+                            BufferedOutputStream bufferedOutputStream=new BufferedOutputStream(fileOutputStream);
+                            int bytesRead=inputStream.read(bytes);
+                            int current=bytesRead;
+
+                            do {
+                                bytesRead=inputStream.read(bytes,current,(bytes.length-current));
+                                if (bytesRead>=0){
+                                    current+=bytesRead;
+                                }
+                            }while (bytesRead>-1);
+
+                            bufferedOutputStream.write(bytes,0,current);
+                            bufferedOutputStream.flush();
 
                             //we store the file
                             mCurrentAction=ACTION_SEND_MESSAGE;
