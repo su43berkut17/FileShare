@@ -162,7 +162,12 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
     @Override
     public void openNexActivity() {
         //we close the socket
-        mReceiverSocket.destroySocket();
+        Boolean test=mReceiverSocket.destroySocket();
+        try {
+            mServerSocket.close();
+        }catch(Exception e){
+            Log.d(TAG,"cant close server socket");
+        }
 
         //we open the next activity with the socket information
         //we call the activity that will start the service with the info

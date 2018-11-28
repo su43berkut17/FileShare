@@ -260,6 +260,13 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
     @Override
     public void openNextActivity(UserSendEntry sendEntry) {
+        //close the socket
+        try {
+            mServerSocket.close();
+        }catch (Exception e){
+            Log.d(TAG,"cannot close main socket");
+        }
+
         //we call the activity that will start the service with the info
         Intent intent = new Intent(this, TransferProgressActivity.class);
 

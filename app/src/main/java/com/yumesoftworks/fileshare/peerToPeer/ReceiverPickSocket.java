@@ -26,7 +26,6 @@ public class ReceiverPickSocket {
     private ServerSocket mServerSocket;
     private Socket mSocket;
     private UserInfoEntry mUserInfoEntry;
-    //private Boolean mAsyncCanRestart;
 
     //thread
     private Handler socketHandler;
@@ -49,7 +48,8 @@ public class ReceiverPickSocket {
 
         @Override
         public void run() {
-            while(true){
+            Boolean repeatSocketConnection=true;
+            while(repeatSocketConnection){
                 // Socket object
                 try {
                     //wait for a connection
@@ -77,7 +77,7 @@ public class ReceiverPickSocket {
                         try {
                             ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
                             TextInfoSendObject message = (TextInfoSendObject) messageIn.readObject();
-                            messageIn.close();
+                            //messageIn.close();
 
                             Log.d(TAG, "ObjectInputStreamReceived closed, the message is "+message.getMessageContent());
 
@@ -87,6 +87,7 @@ public class ReceiverPickSocket {
                                 socketHandler.post(new ReceiverPickSocket.updateUIThread(TYPE_END));
 
                                 keepLooping = false;
+                                repeatSocketConnection=false;
                                 mSocket.close();
                             }
                         } catch (Exception e) {
@@ -126,7 +127,7 @@ public class ReceiverPickSocket {
     }
 
     //kill the socket
-    public void destroySocket(){
+    public Boolean destroySocket(){
         //cancel socket
         Log.d(TAG,"Trying to close socket");
         try {
@@ -137,5 +138,7 @@ public class ReceiverPickSocket {
 
         //destroy the thread
         socketThread.interrupt();
+
+        return true;
     }
 }

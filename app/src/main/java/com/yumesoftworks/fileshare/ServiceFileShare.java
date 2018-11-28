@@ -117,7 +117,7 @@ public class ServiceFileShare extends Service implements
 
             //we start the socket for communication
             try{
-                mSenderTransferSocket = new SenderSocketTransfer(getApplicationContext()
+                mSenderTransferSocket = new SenderSocketTransfer(this
                         ,receivedBundle.getString(TransferProgressActivity.REMOTE_IP),
                         receivedBundle.getInt(TransferProgressActivity.REMOTE_PORT),
                         mFileListEntry);
@@ -134,16 +134,18 @@ public class ServiceFileShare extends Service implements
                 //create the server socket
                 mPort=receivedBundle.getInt(TransferProgressActivity.LOCAL_PORT);
                 mServerSocket=new ServerSocket(mPort);
+                mServerSocket.setReuseAddress(true);
 
                 //we create the socket listener
                 try {
                     mReceiverTransferSocket = new ReceiverSocketTransfer(this, mServerSocket);
                 }catch (Exception e){
                     Log.d(TAG,"There was an error creating the receive server socket");
-                    connectionError();
+                   // connectionError();
                 }
             }catch (IOException e){
                 Log.d(TAG,"There was an error registering the server socket "+e.getMessage());
+                e.printStackTrace();
                 connectionError();
             }
         }

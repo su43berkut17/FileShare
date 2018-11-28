@@ -15,6 +15,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -174,6 +175,7 @@ FileTransferSent.OnFragmentInteractionListener{
         @Override
         public void onReceive(Context context, Intent intent) {
             String action=intent.getAction();
+            Log.d(TAG,"Received message from service "+action);
 
             //we check what to do depending on what the service needs to do
             switch (action){

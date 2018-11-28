@@ -97,6 +97,7 @@ public class SenderPickSocket {
                                 ObjectOutputStream messageOut = new ObjectOutputStream(mSocket.getOutputStream());
                                 messageOut.writeObject(sendObject);
                                 messageToSend = null;
+                                doWeRepeat=false;
 
                                 //we open the next activity
                                 socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_END, null));
