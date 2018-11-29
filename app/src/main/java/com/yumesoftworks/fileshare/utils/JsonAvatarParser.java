@@ -6,7 +6,6 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.yumesoftworks.fileshare.WelcomeScreenActivity;
 import com.yumesoftworks.fileshare.data.AvatarAndVersion;
 import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
 
