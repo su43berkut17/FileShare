@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.yumesoftworks.fileshare.WelcomeScreenActivity;
+
 public class JsonAvatarParser {
     private AvatarAndVersion avatarAndVersion;
     private Context context;
