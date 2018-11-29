@@ -55,6 +55,9 @@ FileTransferSent.OnFragmentInteractionListener{
 
     private LinearLayout mProgressBarHide;
 
+    //this activity context
+    private Context thisActivity;
+
     //when sending
 
 
@@ -84,6 +87,8 @@ FileTransferSent.OnFragmentInteractionListener{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer_progress);
+
+        thisActivity=this;
 
         //analytics
         /*mFireAnalytics=FirebaseAnalytics.getInstance(this);
@@ -137,7 +142,12 @@ FileTransferSent.OnFragmentInteractionListener{
             initializeFragments();
 
             //get the broadcast receivers for responses from the service
-            LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceived, new IntentFilter(LOCAL_BROADCAST_REC));
+            IntentFilter intentFilter=new IntentFilter(LOCAL_BROADCAST_REC);
+            intentFilter.addAction(ACTION_FINISHED_TRANSFER);
+            intentFilter.addAction(ACTION_SOCKET_ERROR);
+            intentFilter.addAction(ACTION_UPDATE_UI);
+            intentFilter.addAction(ACTION_UPDATE_UI_DATA);
+            LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceived, intentFilter);
         }
     }
 
@@ -206,7 +216,7 @@ FileTransferSent.OnFragmentInteractionListener{
                     break;
                 case ACTION_SOCKET_ERROR:
                     //we show dialog that there was an error and return to the main menu
-                    AlertDialog.Builder builder2 = new AlertDialog.Builder(context);
+                    AlertDialog.Builder builder2 = new AlertDialog.Builder(thisActivity);
                     builder2.setMessage(R.string.service_socket_error)
                             .setCancelable(true)
                             .setNeutralButton(R.string.gen_button_ok,

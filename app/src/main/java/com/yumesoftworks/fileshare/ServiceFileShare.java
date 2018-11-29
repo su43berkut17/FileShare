@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.List;
 
+import com.yumesoftworks.fileshare.TransferProgressActivity;
+
 public class ServiceFileShare extends Service implements
         ReceiverSocketTransfer.ClientSocketTransferInterface,
         SenderSocketTransfer.SenderSocketTransferInterface {

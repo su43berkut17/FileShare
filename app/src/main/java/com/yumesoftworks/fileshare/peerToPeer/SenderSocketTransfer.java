@@ -91,7 +91,7 @@ public class SenderSocketTransfer{
                     ObjectOutputStream messageOut;
                     ObjectInputStream messageIn;
                     InputStream fileInputStream;
-                    OutputStream fileOutputStream;
+                    OutputStream fileOutputStream=mSocket.getOutputStream();
 
                     while(mCurrentFile<mTotalFiles) {
                         //we send the 1st file details
@@ -125,21 +125,29 @@ public class SenderSocketTransfer{
                                 Log.d(TAG, "we start sending the file");
                                 File file=new File(mFileList.get(mCurrentFile).getPath());
                                 // Get the size of the file
+
                                 long length = file.length();
+                                Log.d(TAG, "File: getting the length "+length);
                                 byte[] bytes = new byte[16 * 1024];
                                 fileInputStream = new FileInputStream(file);
-                                fileOutputStream = mSocket.getOutputStream();
+                                Log.d(TAG, "File: getting the file input stream "+fileInputStream.toString());
+                                //fileOutputStream = mSocket.getOutputStream();
 
                                 int count;
                                 while ((count = fileInputStream.read(bytes)) > 0) {
+                                    Log.d(TAG, "File: reading the bytes "+count);
                                     fileOutputStream.write(bytes, 0, count);
+                                    Log.d(TAG, "File: wroute the bytes");
                                 }
+                                fileOutputStream.flush();
+                                Log.d(TAG, "File: flusshed "+length);
 
                                 //fileOutputStream.close();
 
                                 Log.d(TAG, "File sent");
                                 mCurrentAction=ACTION_FINISHED_FILE_TRANSFER;
                             }catch (Exception e){
+                                Log.d(TAG,"There was en exception when sending file "+e.getMessage());
                                 e.printStackTrace();
                             }
                         }

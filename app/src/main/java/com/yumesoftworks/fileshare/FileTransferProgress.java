@@ -103,7 +103,6 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         //process data
         TextInfoSendObject textInfoSendObject=(TextInfoSendObject) bundle.getSerializable(TransferProgressActivity.ACTION_UPDATE_UI_DATA);
 
-
         //name of file, current number and total number
         String fileName=textInfoSendObject.getMessageContent();
         String stringNumbers=textInfoSendObject.getAdditionalInfo();
@@ -118,8 +117,8 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         //we update the data
         mTvFileName.setText(textInfoSendObject.getMessageContent());
         mTvOutOf.setText(finalTextNumbers);
-        mtvPercentage.setText(percentage);
-        mTvProgress.setProgress(percentage);
+        //mtvPercentage.setText(percentage);
+        //mTvProgress.setProgress(percentage);
     }
 
     @Override
