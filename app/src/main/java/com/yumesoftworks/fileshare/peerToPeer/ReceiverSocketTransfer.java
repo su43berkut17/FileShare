@@ -74,9 +74,9 @@ public class ReceiverSocketTransfer {
                     mReceiverInterface.startedReceiveTransfer();
 
                     //we initalize the stream objects
-                    ObjectOutputStream messageOut;
-                    ObjectInputStream messageIn;
-                    InputStream fileInputStream;
+                    ObjectOutputStream messageOut=new ObjectOutputStream(mSocket.getOutputStream());
+                    ObjectInputStream messageIn=new ObjectInputStream(mSocket.getInputStream());
+                    InputStream fileInputStream=mSocket.getInputStream();
                     FileOutputStream fileOutputStream;
 
                     //loop for sending and receiving
@@ -87,7 +87,7 @@ public class ReceiverSocketTransfer {
                             //we send message that the trasnfer has been succesful
                             try {
                                 TextInfoSendObject textInfoSendObject=new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_TRANSFER_SUCCESS,"","");
-                                messageOut = new ObjectOutputStream(mSocket.getOutputStream());
+                                //messageOut = new ObjectOutputStream(mSocket.getOutputStream());
                                 messageOut.writeObject(textInfoSendObject);
 
                                 //numbers
@@ -107,7 +107,7 @@ public class ReceiverSocketTransfer {
                         if (mCurrentAction==ACTION_RECEIVE_DETAILS){
                             //we read the object
                             try {
-                                messageIn = new ObjectInputStream(mSocket.getInputStream());
+                                //messageIn = new ObjectInputStream(mSocket.getInputStream());
                                 TextInfoSendObject message = (TextInfoSendObject) messageIn.readObject();
                                 mTextInfoSendObject=message;
 
@@ -131,7 +131,7 @@ public class ReceiverSocketTransfer {
                             String finalName=new Date().toString()+"-"+realName;
 
                             //we create the file
-                            fileInputStream=mSocket.getInputStream();
+                            //fileInputStream=mSocket.getInputStream();
 
                             byte[] bytes = new byte[16 * 1024];
                             fileOutputStream=new FileOutputStream(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/" +finalName);
@@ -148,6 +148,8 @@ public class ReceiverSocketTransfer {
 
                             bufferedOutputStream.write(bytes,0,current);
                             bufferedOutputStream.flush();
+                            bufferedOutputStream.close();
+                            fileOutputStream.close();
 
                             //we store the file
                             mCurrentAction=ACTION_SEND_MESSAGE;

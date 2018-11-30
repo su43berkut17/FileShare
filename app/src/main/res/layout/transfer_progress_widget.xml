@@ -78,6 +78,7 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        android:layout_margin="@dimen/default_padding"
         android:background="@color/colorWidgetBackground">
         <TextView
             android:id="@+id/tv_widget_number_of_transfers"
@@ -99,7 +100,6 @@
                 android:id="@+id/tv_widget_title_transfer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/default_padding"
                 android:layout_weight=".3"
                 android:contentDescription="@string/widget_tv_title"
                 android:text="@string/widget_tv_title"
@@ -108,7 +108,6 @@
                 android:id="@+id/tv_widget_current_file"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/default_padding"
                 android:layout_weight=".3"
                 android:contentDescription="@string/widget_tv_filename"
                 android:text="@string/widget_tv_filename"
@@ -119,7 +118,6 @@
                 style="@style/AppThemeProgressBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/default_padding"
                 android:layout_weight=".3"
                 android:progress="20"/>
 

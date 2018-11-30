@@ -88,8 +88,8 @@ public class SenderSocketTransfer{
                     mCurrentAction=ACTION_SEND_DETAIL;
 
                     //initialize streams
-                    ObjectOutputStream messageOut;
-                    ObjectInputStream messageIn;
+                    ObjectOutputStream messageOut=new ObjectOutputStream(mSocket.getOutputStream());
+                    ObjectInputStream messageIn=new ObjectInputStream(mSocket.getInputStream());
                     InputStream fileInputStream;
                     OutputStream fileOutputStream=mSocket.getOutputStream();
 
@@ -105,7 +105,7 @@ public class SenderSocketTransfer{
                                 String additionalInfo=String.valueOf(mCurrentFile)+","+String.valueOf(mTotalFiles);
 
                                 TextInfoSendObject sendObject = new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_DETAILS, messageToSend,additionalInfo);
-                                messageOut = new ObjectOutputStream(mSocket.getOutputStream());
+                                //messageOut = new ObjectOutputStream(mSocket.getOutputStream());
                                 messageOut.writeObject(sendObject);
                                 messageOut.flush();
                                 mCurrentAction=ACTION_SEND_FILE;
@@ -140,6 +140,7 @@ public class SenderSocketTransfer{
                                     Log.d(TAG, "File: wroute the bytes");
                                 }
                                 fileOutputStream.flush();
+                                fileInputStream.close();
                                 Log.d(TAG, "File: flusshed "+length);
 
                                 //fileOutputStream.close();
@@ -165,7 +166,7 @@ public class SenderSocketTransfer{
                         if (mCurrentAction==ACTION_WAITING_FILE_SUCCESS){
                             //we read the object
                             try{
-                                messageIn = new ObjectInputStream(mSocket.getInputStream());
+                                //messageIn = new ObjectInputStream(mSocket.getInputStream());
                                 TextInfoSendObject message = (TextInfoSendObject) messageIn.readObject();
 
                                 //we check if the message is the success of the file so we can continue with the next file
