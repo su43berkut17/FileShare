@@ -49,7 +49,7 @@ public class SendFileUserListAdapter extends RecyclerView.Adapter<SendFileUserLi
         //we create the path
         if (userInfoEntry.getAvatar()<8){
             //it is a drawable
-            path="avatar_"+String.valueOf(userInfoEntry.getAvatar());
+            path="avatar_"+String.valueOf(userInfoEntry.getAvatar()+1);
         }else{
             //it is a url
             path="https://www.yumesoftworks.com/fileshare/avatars/avatar_" +String.valueOf(userInfoEntry.getAvatar())+".png";

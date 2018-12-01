@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.yumesoftworks.fileshare.SenderPickDestinationActivity;
@@ -53,7 +54,7 @@ public class ReceiverSocketTransfer {
         mServerSocket = serverSocketPort;
         mReceiverInterface=(ClientSocketTransferInterface) context;
 
-        socketHandler=new Handler();
+        socketHandler=new Handler(Looper.getMainLooper());
         socketThread=new Thread(new CommunicationThread());
         socketThread.start();
     }
@@ -79,6 +80,8 @@ public class ReceiverSocketTransfer {
                     InputStream fileInputStream=mSocket.getInputStream();
                     FileOutputStream fileOutputStream;
 
+                    Log.d(TAG,"Socket has connected successfully");
+
                     //loop for sending and receiving
                     Boolean keepLoop=true;
                     while (keepLoop) {
@@ -98,6 +101,7 @@ public class ReceiverSocketTransfer {
 
                                 //reset action to receive details
                                 mCurrentAction=ACTION_RECEIVE_DETAILS;
+                                Log.d(TAG,"Transfer successful");
                             } catch (Exception e) {
                                 Log.d(TAG, "There is no output stream " + e.getMessage());
                             }
@@ -119,6 +123,7 @@ public class ReceiverSocketTransfer {
                                 }*/
                                 //change the action to get ready to receive file
                                 mCurrentAction=ACTION_RECEIVE_FILE;
+                                Log.d(TAG,"We get the details of the file");
 
                             } catch (Exception e) {
                                 Log.d(TAG, "There is no input stream " + e.getMessage());
@@ -126,6 +131,7 @@ public class ReceiverSocketTransfer {
                         }
                         if (mCurrentAction==ACTION_RECEIVE_FILE){
                             //we receive the bytes and then save it
+                            Log.d(TAG,"Starting stream of the file");
                             //know the final name of the file
                             String realName=mTextInfoSendObject.getMessageContent();
                             String finalName=new Date().toString()+"-"+realName;
@@ -139,17 +145,28 @@ public class ReceiverSocketTransfer {
                             int bytesRead=fileInputStream.read(bytes);
                             int current=bytesRead;
 
+                            /*while (bytesRead!=-1){
+
+                                bufferedOutputStream.write(bytes,0,);
+
+                                bytesRead=fileInputStream.read(bytes,current,bytes.length);
+                            }*/
+                            Log.d(TAG,"Reading bytes");
                             do {
+
                                 bytesRead=fileInputStream.read(bytes,current,(bytes.length-current));
+                                Log.d(TAG,"value of bytes read "+bytesRead);
                                 if (bytesRead>=0){
                                     current+=bytesRead;
                                 }
-                            }while (bytesRead>-1);
-
+                            }while (bytesRead>0);
                             bufferedOutputStream.write(bytes,0,current);
                             bufferedOutputStream.flush();
                             bufferedOutputStream.close();
+                            fileOutputStream.flush();
                             fileOutputStream.close();
+
+                            Log.d(TAG,"File finished transfer");
 
                             //we store the file
                             mCurrentAction=ACTION_SEND_MESSAGE;

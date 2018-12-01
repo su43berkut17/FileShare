@@ -137,11 +137,12 @@ public class SenderSocketTransfer{
                                 while ((count = fileInputStream.read(bytes)) > 0) {
                                     Log.d(TAG, "File: reading the bytes "+count);
                                     fileOutputStream.write(bytes, 0, count);
-                                    Log.d(TAG, "File: wroute the bytes");
+                                    //Log.d(TAG, "File: wrote the bytes");
                                 }
+
                                 fileOutputStream.flush();
                                 fileInputStream.close();
-                                Log.d(TAG, "File: flusshed "+length);
+                                Log.d(TAG, "File: flushed "+length);
 
                                 //fileOutputStream.close();
 
@@ -176,7 +177,8 @@ public class SenderSocketTransfer{
                                     mCurrentAction=ACTION_SEND_DETAIL;
                                 }
                             }catch (Exception e){
-                                e.printStackTrace();
+                                Log.d(TAG,"Waiting for the file to be stored at destination");
+                                //e.printStackTrace();
                             }
                         }
 
@@ -220,8 +222,8 @@ public class SenderSocketTransfer{
 
                 } catch (Exception e) {
                     Log.d(TAG, "the socket creation has failed" + e.getMessage());
-                    doWeRepeat=false;
-                    mSenderInterface.socketErrorSend();
+                    //doWeRepeat=false;
+                    //mSenderInterface.socketErrorSend();
                 }
             }
         }

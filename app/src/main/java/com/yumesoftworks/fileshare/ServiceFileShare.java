@@ -53,6 +53,9 @@ public class ServiceFileShare extends Service implements
     //loaded entry
     private List<FileListEntry> mFileListEntry;
 
+    //intent stuff
+    private Bundle receivedBundle;
+
     @Override
     public void onCreate() {
 
@@ -74,6 +77,8 @@ public class ServiceFileShare extends Service implements
         protected Void doInBackground(final Void... params) {
             mFileListEntry=database.fileListDao().loadFileListDirect();
             Log.d(TAG,"Database loaded, file list entry is "+mFileListEntry);
+
+            initializeSockets();
             return null;
         }
     }
@@ -92,66 +97,76 @@ public class ServiceFileShare extends Service implements
             channel.setLightColor(Color.BLUE);
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             manager.createNotificationChannel(channel);
+            Notification notification=new NotificationCompat.Builder(getApplicationContext(),NOTIFICATION_CHANNEL)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText(getString(R.string.service_notification_text_initialize)).build();
+            startForeground(NOTIFICATION_ID,notification);
+        }else{
+            manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
+                    ,getString(R.string.service_notification_text_initialize)
+                    ,false).build());
         }
 
         //we initialize the files
         mTotalFiles=0;
         mCurrentFile=0;
 
-        //initialize the notification
-        manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
-                ,getString(R.string.service_notification_text_initialize)
-                ,false).build());
-
         //we get the bundle of extras
-        Bundle receivedBundle=intent.getExtras();
+        receivedBundle=intent.getExtras();
 
-        //get action
-        int action=receivedBundle.getInt(TransferProgressActivity.ACTION_SERVICE);
-        Log.d(TAG,"the action is "+action);
+        //we call the initialize sockets
+        initializeSockets();
 
-        //we check if the intent is to send or to receive
-        if (action==TransferProgressActivity.FILES_SENDING){
-            //we are sending files
-            //mFileListEntry=mFileListEntryLive;
-            Log.d(TAG,"the value of the files is "+mFileListEntry.size());
-            mTotalFiles=mFileListEntry.size();
+        return super.onStartCommand(intent, flags, startId);
+    }
 
-            //we start the socket for communication
-            try{
-                mSenderTransferSocket = new SenderSocketTransfer(this
-                        ,receivedBundle.getString(TransferProgressActivity.REMOTE_IP),
-                        receivedBundle.getInt(TransferProgressActivity.REMOTE_PORT),
-                        mFileListEntry);
+    //initialize sockets
+    //should only work when database has been loaded and after receiving the intents
+    private void initializeSockets(){
+        if (mFileListEntry!=null && receivedBundle!=null){
+            //do stuff
+            //get action
+            int action=receivedBundle.getInt(TransferProgressActivity.ACTION_SERVICE);
+            Log.d(TAG,"the action is "+action);
 
-            }catch (Exception e){
-                Log.d(TAG,"There was an error creating the send client socket");
-                e.printStackTrace();
-                connectionError();
-            }
+            //we check if the intent is to send or to receive
+            if (action==TransferProgressActivity.FILES_SENDING){
+                //we are sending files
+                //mFileListEntry=mFileListEntryLive;
+                Log.d(TAG,"the value of the files is "+mFileListEntry.size());
+                mTotalFiles=mFileListEntry.size();
 
-        }else if (action==TransferProgressActivity.FILES_RECEIVING){
-            //we are receiving files
-            try{
-                //create the server socket
-                mPort=receivedBundle.getInt(TransferProgressActivity.LOCAL_PORT);
-                mServerSocket=new ServerSocket(mPort);
-                mServerSocket.setReuseAddress(true);
+                //we start the socket for communication
+                try{
+                    mSenderTransferSocket = new SenderSocketTransfer(this
+                            ,receivedBundle.getString(TransferProgressActivity.REMOTE_IP),
+                            receivedBundle.getInt(TransferProgressActivity.REMOTE_PORT),
+                            mFileListEntry);
 
-                //we create the socket listener
-                try {
-                    mReceiverTransferSocket = new ReceiverSocketTransfer(this, mServerSocket);
                 }catch (Exception e){
-                    Log.d(TAG,"There was an error creating the receive server socket");
-                   // connectionError();
+                    Log.d(TAG,"There was an error creating the send client socket");
+                    e.printStackTrace();
+                    connectionError();
                 }
-            }catch (IOException e){
-                Log.d(TAG,"There was an error registering the server socket "+e.getMessage());
-                e.printStackTrace();
-                connectionError();
+
+            }else if (action==TransferProgressActivity.FILES_RECEIVING){
+                //we are receiving files
+                try{
+                    //create the server socket
+                    mPort=receivedBundle.getInt(TransferProgressActivity.LOCAL_PORT);
+                    mServerSocket=new ServerSocket(mPort);
+                    mServerSocket.setReuseAddress(true);
+
+                    //we create the socket listener
+                    mReceiverTransferSocket = new ReceiverSocketTransfer(this, mServerSocket);
+
+                }catch (IOException e){
+                    Log.d(TAG,"There was an error registering the server socket "+e.getMessage());
+                    e.printStackTrace();
+                    connectionError();
+                }
             }
         }
-        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
@@ -213,6 +228,7 @@ public class ServiceFileShare extends Service implements
         //set error dialog and go back to activity
         Intent intent=new Intent(TransferProgressActivity.ACTION_SOCKET_ERROR);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        stopSelf();
     }
 
     //receive client interfaces

@@ -18,6 +18,8 @@ import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
 import com.yumesoftworks.fileshare.peerToPeer.ReceiverPickSocket;
 
+import com.yumesoftworks.fileshare.TransferProgressActivity;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.List;
@@ -165,6 +167,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         Boolean test=mReceiverSocket.destroySocket();
         try {
             mServerSocket.close();
+            Log.d(TAG,"server socket is closed "+mServerSocket.isClosed());
         }catch(Exception e){
             Log.d(TAG,"cant close server socket");
         }
