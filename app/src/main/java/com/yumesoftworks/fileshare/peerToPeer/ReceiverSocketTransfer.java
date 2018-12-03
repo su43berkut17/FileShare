@@ -194,7 +194,7 @@ public class ReceiverSocketTransfer {
                     }
 
                     doWeRepeat=false;
-                     mReceiverInterface.finishedReceiveTransfer();
+                    mReceiverInterface.finishedReceiveTransfer();
                 } catch (Exception e) {
                     Log.d(TAG, "the socket accept has failed, try again");
                     currentSocketRetries++;
@@ -216,37 +216,48 @@ public class ReceiverSocketTransfer {
 
     //kill the socket
     public Boolean destroy(){
+        Log.d(TAG,"Destroy sockets");
         mReceiverInterface=null;
         socketThread.interrupt();
 
         int bothClosed=0;
 
         //cancel socket
-        if (mSocket.isClosed()){
-            bothClosed++;
-        }else {
-            try {
-                mSocket.close();
+        if (mSocket!=null) {
+            if (mSocket.isClosed()) {
                 bothClosed++;
-            } catch (Exception e) {
-                Log.d(TAG, "Cannot close socket " + e.getMessage());
+            } else {
+                try {
+                    mSocket.close();
+                    bothClosed++;
+                } catch (Exception e) {
+                    Log.d(TAG, "Cannot close socket " + e.getMessage());
+                }
             }
+        }else{
+            bothClosed++;
         }
 
-        if (mServerSocket.isClosed()){
-            bothClosed++;
-        }else{
-            try{
-                mServerSocket.close();
+        if (mServerSocket!=null) {
+            if (mServerSocket.isClosed()) {
                 bothClosed++;
-            }catch (Exception e){
-                Log.d(TAG,"Cannot close server socket "+e.getMessage());
+            } else {
+                try {
+                    mServerSocket.close();
+                    bothClosed++;
+                } catch (Exception e) {
+                    Log.d(TAG, "Cannot close server socket " + e.getMessage());
+                }
             }
+        }else{
+            bothClosed++;
         }
 
         if (bothClosed==2){
+            Log.d(TAG,"Sockets have been destroyed succesfully");
             return true;
         }else{
+            Log.d(TAG,"Could not destroy sockets");
             return false;
         }
     }

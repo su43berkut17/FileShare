@@ -225,6 +225,30 @@ public class ServiceFileShare extends Service implements
         }
     }
 
+    private void addSuccessfulTransferCounter(){
+        new updateDatabaseCounterAsyncTask(database).execute();
+    }
+
+    //save transfer
+    private class updateDatabaseCounterAsyncTask extends AsyncTask<Void,Void,Void> {
+        private AppDatabase database;
+
+        updateDatabaseCounterAsyncTask(AppDatabase recDatabase){
+            database=recDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(final Void... params) {
+            UserInfoEntry userInfoEntry=database.userInfoDao().loadUserWidget().get(0);
+            int currentCount=userInfoEntry.getNumberFilesTransferred();
+            currentCount++;
+            userInfoEntry.setNumberFilesTransferred(currentCount);
+            database.userInfoDao().updateTask(userInfoEntry);
+
+            return null;
+        }
+    }
+
     //socket error
     private void connectionError(){
         //the socket failed
@@ -255,6 +279,7 @@ public class ServiceFileShare extends Service implements
         //the transfer is done, set dialog and go back to activity
         Intent intent=new Intent(TransferProgressActivity.ACTION_FINISHED_TRANSFER);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        stopSelf();
     }
 
     @Override
@@ -265,6 +290,11 @@ public class ServiceFileShare extends Service implements
     @Override
     public void updateReceiveSendUI(TextInfoSendObject textInfoSendObject) {
         updateGeneralUI(textInfoSendObject);
+    }
+
+    @Override
+    public void addReceivedCounter() {
+        addSuccessfulTransferCounter();
     }
 
     //sender client interface
@@ -289,6 +319,7 @@ public class ServiceFileShare extends Service implements
         //the transfer is done, set dialog and go back to activity
         Intent intent=new Intent(TransferProgressActivity.ACTION_FINISHED_TRANSFER);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        stopSelf();
     }
 
     @Override
@@ -300,6 +331,11 @@ public class ServiceFileShare extends Service implements
     public void updateSendSentFile(FileListEntry fileListEntry) {
         //set the file to is Transferred true
         new updateDatabaseSentAsyncTask(database).execute(fileListEntry);
+    }
+
+    @Override
+    public void addSentCounter() {
+        addSuccessfulTransferCounter();
     }
 
     private class updateDatabaseSentAsyncTask extends AsyncTask<FileListEntry,Void,Void> {

@@ -114,7 +114,6 @@ FileTransferSent.OnFragmentInteractionListener{
         //get the data to see how do we start the service
         int typeOfService=extras.getInt(EXTRA_TYPE_TRANSFER);
 
-
         if (typeOfService==RELAUNCH_APP){
             //nothing happens since everything has been initialized
 
@@ -200,7 +199,7 @@ FileTransferSent.OnFragmentInteractionListener{
                     break;
                 case ACTION_FINISHED_TRANSFER:
                     //we show dialog that transfer is done
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
                     builder.setMessage(R.string.service_finished_transfer)
                             .setCancelable(true)
                             .setNeutralButton(R.string.gen_button_ok,

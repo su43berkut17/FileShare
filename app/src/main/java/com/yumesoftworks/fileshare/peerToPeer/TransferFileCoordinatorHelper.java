@@ -13,10 +13,10 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
     private static final String TAG="CoordinatorHelper";
     private static final int TOTAL_LIMIT=999999;
 
-    Context mContext;
+    private Context mContext;
 
     private List<FileListEntry> mFileList;
-    private int mcurrentFile;
+    private int mCurrentFile;
     private int mTotalFiles;
 
     private int typeOfTransfer;
@@ -39,7 +39,7 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
 
         //initalize values
         mFileList=recFileList;
-        mcurrentFile=0;
+        mCurrentFile=0;
         mTotalFiles = recFileList.size();
 
         mPort=recPort;
@@ -58,7 +58,7 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
         typeOfTransfer=recType;
 
         Log.d(TAG,"initializing files");
-        mcurrentFile=0;
+        mCurrentFile=0;
         mTotalFiles=TOTAL_LIMIT;
 
         Log.d(TAG,"initializing port");
@@ -71,14 +71,14 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
     }
 
     private void startTransfer(){
-        if (mcurrentFile<mTotalFiles) {
+        if (mCurrentFile<mTotalFiles) {
             //we continue with the transfer
             if (typeOfTransfer == TransferProgressActivity.FILES_RECEIVING) {
                 //create a receiver socket object
                 mReceiverSocketTransfer=new ReceiverSocketTransfer(this, mPort);
             } else {
                 //create a sender socket object
-                mSenderSocketTransfer=new SenderSocketTransfer(this, mIpAddress, mPort, mFileList.get(mcurrentFile),mcurrentFile,mTotalFiles);
+                mSenderSocketTransfer=new SenderSocketTransfer(this, mIpAddress, mPort, mFileList.get(mCurrentFile),mCurrentFile,mTotalFiles);
             }
         }else{
             //we finish everything
@@ -109,7 +109,10 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
     @Override
     public void finishedReceiveTransfer() {
         //we finished receiving the object
-        mcurrentFile++;
+        mCurrentFile++;
+
+        //we call the counter to add a new transferred file
+        mReceiverInterface.addReceivedCounter();
 
         //destroy socket
         Boolean canWeContinue=false;
@@ -135,7 +138,10 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
     @Override
     public void finishedSendTransfer() {
         //we finished sending the object
-        mcurrentFile++;
+        mCurrentFile++;
+
+        //add the sent counter
+        mSenderInterface.addSentCounter();
 
         //destroy socket
         Boolean canWeContinue=false;
@@ -163,6 +169,7 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
         void startedSenderTransfer();
         void updateSendSendUI(TextInfoSendObject textInfoSendObject);
         void updateSendSentFile(FileListEntry fileListEntry);
+        void addSentCounter();
         void finishedSendTransfer();
         void socketSendFailedClient();
     }
@@ -170,6 +177,7 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
     public interface ReceiverSocketTransferInterfaceCoor{
         void startedReceiveTransfer();
         void updateReceiveSendUI(TextInfoSendObject textInfoSendObject);
+        void addReceivedCounter();
         void finishedReceiveTransfer();
         void socketReceiveFailedClient();
     }
