@@ -42,7 +42,7 @@ FileTransferSent.OnFragmentInteractionListener{
     //type of message sent on text object
     public static final int TYPE_END=1001;
     public static final int TYPE_FILE_DETAILS=1002;
-    public static final int TYPE_FILE_BYTES=1003;
+    public static final int TYPE_FILE_DETAILS_SUCCESS=1003;
     public static final int TYPE_FILE_TRANSFER_SUCCESS=1004;
 
     //broadcast actions

@@ -1,15 +1,12 @@
 package com.yumesoftworks.fileshare.peerToPeer;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.yumesoftworks.fileshare.SenderPickDestinationActivity;
 import com.yumesoftworks.fileshare.TransferProgressActivity;
-import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 
 import java.io.BufferedOutputStream;
@@ -20,6 +17,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class ReceiverSocketTransfer {
     private static final String TAG="ServiceClientSocket";
@@ -28,31 +26,31 @@ public class ReceiverSocketTransfer {
     private static final int ACTION_SEND_MESSAGE=1001;
     private static final int ACTION_RECEIVE_FILE=1002;
     private static final int ACTION_RECEIVE_DETAILS=1003;
+    private static final int ACTION_CONFIRM_DETAILS=1004;
+    private static final int ACTION_NEXT_ACTION=1005;
 
     //local server socket
     private ServerSocket mServerSocket;
     private Socket mSocket;
+    private int mPort;
 
     //thread
     private Handler socketHandler;
     private Thread socketThread;
 
     //current action
-    private int mCurrentAction;
-
-    //file numbers
-    private int mCurrentFile;
-    private int mTotalFiles;
+       private int mCurrentAction;
 
     //current file
     private TextInfoSendObject mTextInfoSendObject;
 
     //interface
-    private ClientSocketTransferInterface mReceiverInterface;
+    private ReceiverSocketTransferInterface mReceiverInterface;
 
-    public ReceiverSocketTransfer(Context context, ServerSocket serverSocketPort){
-        mServerSocket = serverSocketPort;
-        mReceiverInterface=(ClientSocketTransferInterface) context;
+    public ReceiverSocketTransfer(TransferFileCoordinatorHelper context, int port){
+        mPort=port;
+        //mReceiverInterface=(ReceiverSocketTransferInterface) context;
+        mReceiverInterface=(ReceiverSocketTransferInterface) context;
 
         socketHandler=new Handler(Looper.getMainLooper());
         socketThread=new Thread(new CommunicationThread());
@@ -62,46 +60,58 @@ public class ReceiverSocketTransfer {
     class CommunicationThread implements Runnable{
         @Override
         public void run() {
-            while(true){
+            Boolean doWeRepeat=true;//to retry if needed
+            int totalSocketRetries=20;
+            int currentSocketRetries=0;
+
+            while(doWeRepeat){
                 // Socket object
                 try {
                     //wait for a connection
+                    mServerSocket=new ServerSocket(mPort);
+                    mServerSocket.setReuseAddress(true);
+
                     Log.d(TAG, "Waiting for the socket to be connected " + mServerSocket.getLocalPort());
 
                     mSocket = mServerSocket.accept();
+
+                    Log.d(TAG,"Socket has connected successfully");
+
+                    //we reset the retries
+                    currentSocketRetries = 0;
+
+                    //we initialize the 1st action
                     mCurrentAction=ACTION_RECEIVE_DETAILS;
 
-                    //we state the transfer has started on the database
-                    mReceiverInterface.startedReceiveTransfer();
-
-                    //we initalize the stream objects
+                    //we initialize the stream objects
                     ObjectOutputStream messageOut=new ObjectOutputStream(mSocket.getOutputStream());
                     ObjectInputStream messageIn=new ObjectInputStream(mSocket.getInputStream());
                     InputStream fileInputStream=mSocket.getInputStream();
                     FileOutputStream fileOutputStream;
 
-                    Log.d(TAG,"Socket has connected successfully");
-
                     //loop for sending and receiving
-                    Boolean keepLoop=true;
-                    while (keepLoop) {
-
-                        if (mCurrentAction==ACTION_SEND_MESSAGE) {
-                            //we send message that the trasnfer has been succesful
+                    do{
+                        if (mCurrentAction==ACTION_SEND_MESSAGE || mCurrentAction==ACTION_CONFIRM_DETAILS) {
+                            //we send message that the transfer has been successful
                             try {
-                                TextInfoSendObject textInfoSendObject=new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_TRANSFER_SUCCESS,"","");
-                                //messageOut = new ObjectOutputStream(mSocket.getOutputStream());
-                                messageOut.writeObject(textInfoSendObject);
+                                if (mCurrentAction==ACTION_SEND_MESSAGE) {
+                                    TextInfoSendObject textInfoSendObject = new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_TRANSFER_SUCCESS, "", "");
+                                    //messageOut = new ObjectOutputStream(mSocket.getOutputStream());
+                                    messageOut.writeObject(textInfoSendObject);
 
-                                //numbers
-                                String stringNumbers=textInfoSendObject.getAdditionalInfo();
-                                String[] currentNumbers = stringNumbers.split(",");
-                                mCurrentFile=Integer.parseInt(currentNumbers[0]);
-                                mTotalFiles=Integer.parseInt(currentNumbers[1]);
+                                    //reset action to next file
+                                    mCurrentAction=ACTION_NEXT_ACTION;
 
-                                //reset action to receive details
-                                mCurrentAction=ACTION_RECEIVE_DETAILS;
-                                Log.d(TAG,"Transfer successful");
+                                    Log.d(TAG,"File transfer successful");
+                                }else if(mCurrentAction==ACTION_CONFIRM_DETAILS){
+                                    Log.d(TAG,"confirming sent details");
+                                    TextInfoSendObject textInfoSendObject = new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_DETAILS_SUCCESS, "", "");
+                                    messageOut.writeObject(textInfoSendObject);
+
+                                    //reset action to receive file
+                                    mCurrentAction=ACTION_RECEIVE_FILE;
+                                }
+
                             } catch (Exception e) {
                                 Log.d(TAG, "There is no output stream " + e.getMessage());
                             }
@@ -111,6 +121,7 @@ public class ReceiverSocketTransfer {
                         if (mCurrentAction==ACTION_RECEIVE_DETAILS){
                             //we read the object
                             try {
+                                Log.d(TAG,"receiving details");
                                 //messageIn = new ObjectInputStream(mSocket.getInputStream());
                                 TextInfoSendObject message = (TextInfoSendObject) messageIn.readObject();
                                 mTextInfoSendObject=message;
@@ -122,13 +133,14 @@ public class ReceiverSocketTransfer {
                                     //mReceiverInterface.openNexActivity();
                                 }*/
                                 //change the action to get ready to receive file
-                                mCurrentAction=ACTION_RECEIVE_FILE;
-                                Log.d(TAG,"We get the details of the file");
+                                mCurrentAction=ACTION_CONFIRM_DETAILS;
+                                Log.d(TAG,"We got the details of the file, confirm with sender");
 
                             } catch (Exception e) {
                                 Log.d(TAG, "There is no input stream " + e.getMessage());
                             }
                         }
+
                         if (mCurrentAction==ACTION_RECEIVE_FILE){
                             //we receive the bytes and then save it
                             Log.d(TAG,"Starting stream of the file");
@@ -142,25 +154,14 @@ public class ReceiverSocketTransfer {
                             byte[] bytes = new byte[16 * 1024];
                             fileOutputStream=new FileOutputStream(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/" +finalName);
                             BufferedOutputStream bufferedOutputStream=new BufferedOutputStream(fileOutputStream);
-                            int bytesRead=fileInputStream.read(bytes);
-                            int current=bytesRead;
 
-                            /*while (bytesRead!=-1){
-
-                                bufferedOutputStream.write(bytes,0,);
-
-                                bytesRead=fileInputStream.read(bytes,current,bytes.length);
-                            }*/
                             Log.d(TAG,"Reading bytes");
-                            do {
 
-                                bytesRead=fileInputStream.read(bytes,current,(bytes.length-current));
-                                Log.d(TAG,"value of bytes read "+bytesRead);
-                                if (bytesRead>=0){
-                                    current+=bytesRead;
-                                }
-                            }while (bytesRead>0);
-                            bufferedOutputStream.write(bytes,0,current);
+                            int count;
+                            while((count=fileInputStream.read(bytes))>0){
+                                bufferedOutputStream.write(bytes,0,count);
+                            }
+
                             bufferedOutputStream.flush();
                             bufferedOutputStream.close();
                             fileOutputStream.flush();
@@ -169,43 +170,90 @@ public class ReceiverSocketTransfer {
                             Log.d(TAG,"File finished transfer");
 
                             //we store the file
-                            mCurrentAction=ACTION_SEND_MESSAGE;
+                            //mCurrentAction=ACTION_SEND_MESSAGE;
+                            mCurrentAction=ACTION_NEXT_ACTION;
                         }
 
-                        //we check if it is the last file and we finish
-                        if (mCurrentFile==mTotalFiles){
-                            //we call the finish
-                            mReceiverInterface.finishedReceiveClient();
+                    }while (mCurrentAction!=ACTION_NEXT_ACTION);
+
+                    //close the socket
+                    if (!mSocket.isClosed()) {
+                        try {
+                            mSocket.close();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Failed to close the socket");
                         }
                     }
+
+                    if (!mServerSocket.isClosed()){
+                        try{
+                            mServerSocket.close();
+                        }catch (Exception e){
+                            Log.e(TAG, "Failed to close the server socket");
+                        }
+                    }
+
+                    doWeRepeat=false;
+                     mReceiverInterface.finishedReceiveTransfer();
                 } catch (Exception e) {
                     Log.d(TAG, "the socket accept has failed, try again");
-                    mReceiverInterface.socketReceiveFailedClient();
+                    currentSocketRetries++;
+
+                    if (currentSocketRetries==totalSocketRetries) {
+                        doWeRepeat=false;
+                        mReceiverInterface.socketReceiveFailedClient();
+                    }else{
+                        try{
+                            TimeUnit.SECONDS.sleep(1);
+                        }catch (InterruptedException exe){
+                            Log.d(TAG,"couldn't interrupt "+exe.getMessage());
+                        }
+                    }
                 }
             }
         }
     }
 
-    //inerface
-    public interface ClientSocketTransferInterface{
-        void startedReceiveTransfer();
-        void finishedReceiveClient();
-        void socketReceiveFailedClient();
-        void updateReceiveSendUI(TextInfoSendObject textInfoSendObject);
-    }
-
     //kill the socket
-    public void destroySocket(){
+    public Boolean destroy(){
+        mReceiverInterface=null;
+        socketThread.interrupt();
+
+        int bothClosed=0;
+
         //cancel socket
-        Log.d(TAG,"Trying to close socket");
-        try {
-            mSocket.close();
-        }catch (Exception e){
-            Log.d(TAG,"Cannot close socket "+e.getMessage());
+        if (mSocket.isClosed()){
+            bothClosed++;
+        }else {
+            try {
+                mSocket.close();
+                bothClosed++;
+            } catch (Exception e) {
+                Log.d(TAG, "Cannot close socket " + e.getMessage());
+            }
         }
 
-        //destroy thread
-        socketThread.interrupt();
+        if (mServerSocket.isClosed()){
+            bothClosed++;
+        }else{
+            try{
+                mServerSocket.close();
+                bothClosed++;
+            }catch (Exception e){
+                Log.d(TAG,"Cannot close server socket "+e.getMessage());
+            }
+        }
+
+        if (bothClosed==2){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public interface ReceiverSocketTransferInterface{
+        void updateReceiveSendUI(TextInfoSendObject textInfoSendObject);
+        void finishedReceiveTransfer();
+        void socketReceiveFailedClient();
     }
 }
-

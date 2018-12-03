@@ -87,7 +87,11 @@ public class TransferProgressWidget extends AppWidgetProvider {
                 views.setTextViewText(R.id.tv_widget_number_of_transfers,String.valueOf(mCurrentNumberOfFiles)+" of "+String.valueOf(mTotalNumberOfFiles));
 
                 //calculate the percentage
-                mPercentage=mCurrentNumberOfFiles/mTotalNumberOfFiles;
+                try {
+                    mPercentage = mCurrentNumberOfFiles / mTotalNumberOfFiles;
+                }catch (Exception e){
+                    mPercentage=0;
+                }
 
                 //update the progress bar
                 views.setProgressBar(R.id.pb_widget_progress,1,mPercentage,false);

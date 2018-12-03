@@ -27,10 +27,11 @@ import java.net.ServerSocket;
 import java.util.List;
 
 import com.yumesoftworks.fileshare.TransferProgressActivity;
+import com.yumesoftworks.fileshare.peerToPeer.TransferFileCoordinatorHelper;
 
 public class ServiceFileShare extends Service implements
-        ReceiverSocketTransfer.ClientSocketTransferInterface,
-        SenderSocketTransfer.SenderSocketTransferInterface {
+        TransferFileCoordinatorHelper.ReceiverSocketTransferInterfaceCoor,
+        TransferFileCoordinatorHelper.SenderSocketTransferInterfaceCoor {
     private static final String TAG="ServiceFileShare";
 
     //notification
@@ -45,6 +46,7 @@ public class ServiceFileShare extends Service implements
     private ServerSocket mServerSocket;
     private ReceiverSocketTransfer mReceiverTransferSocket;
     private SenderSocketTransfer mSenderTransferSocket;
+    private TransferFileCoordinatorHelper mTransferFileCoordinatorHelper;
     private int mPort;
 
     //database access
@@ -138,10 +140,15 @@ public class ServiceFileShare extends Service implements
 
                 //we start the socket for communication
                 try{
-                    mSenderTransferSocket = new SenderSocketTransfer(this
+                    mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,
+                            receivedBundle.getString(TransferProgressActivity.REMOTE_IP),
+                            receivedBundle.getInt(TransferProgressActivity.REMOTE_PORT),
+                            mFileListEntry,action);
+
+                    /*mSenderTransferSocket = new SenderSocketTransfer(this
                             ,receivedBundle.getString(TransferProgressActivity.REMOTE_IP),
                             receivedBundle.getInt(TransferProgressActivity.REMOTE_PORT),
-                            mFileListEntry);
+                            mFileListEntry);*/
 
                 }catch (Exception e){
                     Log.d(TAG,"There was an error creating the send client socket");
@@ -154,14 +161,16 @@ public class ServiceFileShare extends Service implements
                 try{
                     //create the server socket
                     mPort=receivedBundle.getInt(TransferProgressActivity.LOCAL_PORT);
-                    mServerSocket=new ServerSocket(mPort);
-                    mServerSocket.setReuseAddress(true);
 
-                    //we create the socket listener
-                    mReceiverTransferSocket = new ReceiverSocketTransfer(this, mServerSocket);
+                    /*mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,
+                            "",
+                            mPort,
+                            mFileListEntry,action);*/
 
-                }catch (IOException e){
-                    Log.d(TAG,"There was an error registering the server socket "+e.getMessage());
+                    mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,mPort,action);
+
+                }catch (Exception e){
+                    Log.d(TAG,"There was an error creating the receive client socket"+e.getMessage());
                     e.printStackTrace();
                     connectionError();
                 }
@@ -237,7 +246,7 @@ public class ServiceFileShare extends Service implements
         switchTransfer(true);
     }
 
-    public void finishedReceiveClient() {
+    public void finishedReceiveTransfer() {
         //we hide the notification
         manager.cancel(NOTIFICATION_ID);
 
@@ -283,7 +292,7 @@ public class ServiceFileShare extends Service implements
     }
 
     @Override
-    public void socketErrorSend() {
+    public void socketSendFailedClient() {
         connectionError();
     }
 
