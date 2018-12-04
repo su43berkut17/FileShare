@@ -23,6 +23,7 @@ import com.google.android.gms.ads.AdView;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TransferProgressActivity extends AppCompatActivity implements FileTransferProgress.OnFragmentInteractionListener,
@@ -80,13 +81,31 @@ FileTransferSent.OnFragmentInteractionListener{
 
     //viewmodel
     private FileTransferViewModel fileTransferViewModel;
+
     private AdView mAdView;
 
+    //type
+    private int typeOfService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_transfer_progress);
+
+        //we check the intent with the information to start the service
+        Intent intent=getIntent();
+
+        //intent
+        Intent serviceIntent=new Intent(this,ServiceFileShare.class);
+        Bundle extras=intent.getExtras();
+
+        //get the data to see how do we start the service
+        typeOfService=extras.getInt(EXTRA_TYPE_TRANSFER);
+
+        if (typeOfService==FILES_SENDING) {
+            setContentView(R.layout.activity_transfer_progress);
+        }else{
+            setContentView(R.layout.activity_transfer_progress_sent_only);
+        }
 
         thisActivity=this;
 
@@ -103,16 +122,6 @@ FileTransferSent.OnFragmentInteractionListener{
 
         //we get the instance of the indeterminate progress bar
         mProgressBarHide=findViewById(R.id.pb_atp_waitingForConnection);
-
-        //we check the intent with the information to start the service
-        Intent intent=getIntent();
-
-        //intent
-        Intent serviceIntent=new Intent(this,ServiceFileShare.class);
-        Bundle extras=intent.getExtras();
-
-        //get the data to see how do we start the service
-        int typeOfService=extras.getInt(EXTRA_TYPE_TRANSFER);
 
         if (typeOfService==RELAUNCH_APP){
             //nothing happens since everything has been initialized
@@ -156,13 +165,21 @@ FileTransferSent.OnFragmentInteractionListener{
 
         //fragments
         fragmentFileTransferProgress=new FileTransferProgress();
-        fragmentFileTransferSent=new FileTransferSent();
 
-        //transaction
-        fragmentManager.beginTransaction()
-                .add(R.id.frag_atp_transfer_progress,fragmentFileTransferProgress)
-                .add(R.id.frag_atp_transfer_sent,fragmentFileTransferSent)
-                .commit();
+        if (typeOfService==FILES_SENDING) {
+            fragmentFileTransferSent = new FileTransferSent();
+
+            //transaction
+            fragmentManager.beginTransaction()
+                    .add(R.id.frag_atp_transfer_progress,fragmentFileTransferProgress)
+                    .add(R.id.frag_atp_transfer_sent,fragmentFileTransferSent)
+                    .commit();
+        }else if(typeOfService==FILES_RECEIVING){
+            //transaction
+            fragmentManager.beginTransaction()
+                    .add(R.id.frag_atp_transfer_progress,fragmentFileTransferProgress)
+                    .commit();
+        }
 
         //we get the file model to populate the stuff
         fileTransferViewModel=ViewModelProviders.of(this).get(FileTransferViewModel.class);
@@ -174,8 +191,24 @@ FileTransferSent.OnFragmentInteractionListener{
         @Override
         public void onChanged(@Nullable List<FileListEntry> fileListEntries) {
             //we create a list for the not transferred and one for the transferred
-            fragmentFileTransferProgress.updateRV(fileListEntries);
-            fragmentFileTransferSent.updateRV(fileListEntries);
+
+            List<FileListEntry> tempSent=new ArrayList<>();
+            List<FileListEntry> tempNotSent=new ArrayList<>();
+
+            for (int i=0;i<fileListEntries.size();i++){
+                if (fileListEntries.get(i).getIsTransferred()==0){
+                    tempNotSent.add(fileListEntries.get(i));
+                }else{
+                    tempSent.add(fileListEntries.get(i));
+                }
+            }
+
+            if (typeOfService==FILES_SENDING) {
+                fragmentFileTransferProgress.updateRV(tempNotSent);
+                fragmentFileTransferSent.updateRV(tempSent);
+            }else{
+                fragmentFileTransferProgress.updateRV(tempSent);
+            }
         }
     };
 

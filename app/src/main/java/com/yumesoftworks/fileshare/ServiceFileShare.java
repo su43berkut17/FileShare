@@ -349,6 +349,7 @@ public class ServiceFileShare extends Service implements
         protected Void doInBackground(final FileListEntry... params) {
             //mFileListEntry=database.fileListDao().loadFileListDirect()
             FileListEntry updateEntry=params[0];
+            updateEntry.setIsTransferred(1);
             database.fileListDao().updateFile(updateEntry);
 
             Log.d(TAG,"Sent file entry changed to transferred "+mFileListEntry);
