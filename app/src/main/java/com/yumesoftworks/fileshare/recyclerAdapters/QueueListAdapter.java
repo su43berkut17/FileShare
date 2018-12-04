@@ -64,23 +64,31 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
                 Picasso.get()
                         .load(uri)
                         .placeholder(tempUri)
+                        .resize(200, 200)
+                        .centerCrop()
                         .into(queueListViewHolder.iv_icon);
             } else if (fileListEntry.getMimeType().startsWith("video")){
                 int tempUri = mContext.getResources().getIdentifier("icon_video_128","drawable",mContext.getPackageName());
                 Picasso.get()
                         .load(tempUri)
+                        .resize(200, 200)
+                        .centerCrop()
                         .placeholder(placeholderUri)
                         .into(queueListViewHolder.iv_icon);
             }else if (fileListEntry.getMimeType().startsWith("audio")){
                 int tempUri = mContext.getResources().getIdentifier("icon_music_128","drawable",mContext.getPackageName());
                 Picasso.get()
                         .load(tempUri)
+                        .resize(200, 200)
+                        .centerCrop()
                         .placeholder(placeholderUri)
                         .into(queueListViewHolder.iv_icon);
             }else {
                 int tempUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
                 Picasso.get()
                         .load(tempUri)
+                        .resize(200, 200)
+                        .centerCrop()
                         .placeholder(placeholderUri)
                         .into(queueListViewHolder.iv_icon);
             }
