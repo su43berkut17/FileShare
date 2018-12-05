@@ -107,6 +107,11 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
     }
 
     @Override
+    public void updateReceiveReceivedFile(FileListEntry fileListEntry) {
+        mReceiverInterface.updateReceivedFile(fileListEntry);
+    }
+
+    @Override
     public void finishedReceiveTransfer() {
         //we finished receiving the object
         mCurrentFile++;
@@ -177,6 +182,7 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
     public interface ReceiverSocketTransferInterfaceCoor{
         void startedReceiveTransfer();
         void updateReceiveSendUI(TextInfoSendObject textInfoSendObject);
+        void updateReceivedFile(FileListEntry fileListEntry);
         void addReceivedCounter();
         void finishedReceiveTransfer();
         void socketReceiveFailedClient();
