@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -19,9 +20,9 @@ import java.util.List;
  */
 public class TransferProgressWidget extends AppWidgetProvider {
     //states of widget
+    private static final String TAG="AppWidgetProvider";
     public static final String STATE_NORMAL="stateNormal";
     public static final String STATE_TRANSFER="stateTransfer";
-
 
     //we create the variables
     private static String mCurrentState;
@@ -41,18 +42,21 @@ public class TransferProgressWidget extends AppWidgetProvider {
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.transfer_progress_widget);
 
-        //database
-        //we load the database
-        AppDatabase database=AppDatabase.getInstance(context);
-        List<UserInfoEntry> listUser=database.userInfoDao().loadUserWidget();
-        UserInfoEntry user=listUser.get(0);
-
         mCurrentState=currentState;
 
         //set the values
         if (mCurrentState==STATE_NORMAL) {
 
+            //database
+            //AppDatabase database=AppDatabase.getInstance(context);
 
+           //new AsyncLoadService().execute(context);
+            //we load the database
+            AppDatabase database=AppDatabase.getInstance(context);
+            List<UserInfoEntry> listUser=database.userInfoDao().loadUserWidget();
+            UserInfoEntry user=listUser.get(0);
+
+            Log.d(TAG,"The number if transfers is "+user +" "+user.getNumberFilesTransferred());
             mTotalNumberOfTransfers=user.getNumberFilesTransferred();
         }else if (mCurrentState==STATE_TRANSFER){
 
@@ -68,7 +72,7 @@ public class TransferProgressWidget extends AppWidgetProvider {
                 views.setViewVisibility(R.id.widget_transfer_state, View.GONE);
 
                 //update the texts
-                views.setTextViewText(R.id.tv_widget_number_of_transfers,String.valueOf(mTotalNumberOfTransfers));
+                views.setTextViewText(R.id.tv_widget_total_number,String.valueOf(mTotalNumberOfTransfers));
 
                 //we set the pending intent to launch the main app when the widget is in its default mode
                 Intent intent = new Intent(context, WelcomeScreenActivity.class);
