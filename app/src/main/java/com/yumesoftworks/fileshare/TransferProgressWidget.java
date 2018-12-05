@@ -10,6 +10,7 @@ import android.widget.RemoteViews;
 
 import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
+import com.yumesoftworks.fileshare.TransferProgressActivity;
 
 import java.util.List;
 
@@ -29,16 +30,12 @@ public class TransferProgressWidget extends AppWidgetProvider {
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId,
                                 String currentState,
-                                int totalNumberOfTransfers,
                                 String nameOfCurrentFile,
                                 int totalNumberOfFiles,
                                 int currentNumberOfFiles) {
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.transfer_progress_widget);
-
-        //set the values
-        //mCurrentState=currentState;
 
         //database
         //we load the database
@@ -116,18 +113,20 @@ public class TransferProgressWidget extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
-        updateWidgetService.startActionUpdateWidget(context,mCurrentState,mTotalNumberOfTransfers,mNameOfCurrentFile,mTotalNumberOfFiles,mCurrentNumberOfFiles);
+        updateWidgetService.startActionUpdateWidget(context,mCurrentState,mNameOfCurrentFile,mTotalNumberOfFiles,mCurrentNumberOfFiles);
     }
 
     //method that updates all; the widgets since it is only 1 widget for all
-    public static void updateAllWidgets(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds, String currentState,
-                                 int totalNumberOfTransfers,
-                                 String nameOfCurrentFile,
-                                 int totalNumberOfFiles,
-                                 int currentNumberOfFiles){
+    public static void updateAllWidgets(Context context,
+                                        AppWidgetManager appWidgetManager,
+                                        int[] appWidgetIds,
+                                        String currentState,
+                                         String nameOfCurrentFile,
+                                         int totalNumberOfFiles,
+                                         int currentNumberOfFiles){
         // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, currentState,totalNumberOfTransfers,nameOfCurrentFile,totalNumberOfFiles,currentNumberOfFiles);
+            updateAppWidget(context, appWidgetManager, appWidgetId, currentState,nameOfCurrentFile,totalNumberOfFiles,currentNumberOfFiles);
         }
     }
 

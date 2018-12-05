@@ -19,11 +19,7 @@ import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
-import com.yumesoftworks.fileshare.peerToPeer.ReceiverSocketTransfer;
-import com.yumesoftworks.fileshare.peerToPeer.SenderSocketTransfer;
 
-import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.List;
 
 import com.yumesoftworks.fileshare.TransferProgressActivity;
@@ -43,9 +39,6 @@ public class ServiceFileShare extends Service implements
     private int mCurrentFile;
 
     //socket stuff
-    private ServerSocket mServerSocket;
-    private ReceiverSocketTransfer mReceiverTransferSocket;
-    private SenderSocketTransfer mSenderTransferSocket;
     private TransferFileCoordinatorHelper mTransferFileCoordinatorHelper;
     private int mPort;
 
@@ -145,11 +138,6 @@ public class ServiceFileShare extends Service implements
                             receivedBundle.getInt(TransferProgressActivity.REMOTE_PORT),
                             mFileListEntry,action);
 
-                    /*mSenderTransferSocket = new SenderSocketTransfer(this
-                            ,receivedBundle.getString(TransferProgressActivity.REMOTE_IP),
-                            receivedBundle.getInt(TransferProgressActivity.REMOTE_PORT),
-                            mFileListEntry);*/
-
                 }catch (Exception e){
                     Log.d(TAG,"There was an error creating the send client socket");
                     e.printStackTrace();
@@ -161,11 +149,6 @@ public class ServiceFileShare extends Service implements
                 try{
                     //create the server socket
                     mPort=receivedBundle.getInt(TransferProgressActivity.LOCAL_PORT);
-
-                    /*mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,
-                            "",
-                            mPort,
-                            mFileListEntry,action);*/
 
                     mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,mPort,action);
 
@@ -245,6 +228,7 @@ public class ServiceFileShare extends Service implements
             currentCount++;
             userInfoEntry.setNumberFilesTransferred(currentCount);
             database.userInfoDao().updateTask(userInfoEntry);
+            Log.d(TAG,"We add a number more to the total transfers: "+currentCount);
 
             return null;
         }
@@ -409,5 +393,8 @@ public class ServiceFileShare extends Service implements
         Intent intent=new Intent(TransferProgressActivity.ACTION_UPDATE_UI);
         intent.putExtras(bundle);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
+        //update the widget
+        updateWidgetService.startActionUpdateWidget(this,updateWidgetService.ACTION_UPDATE_APP,fileName,mTotalFiles,mCurrentFile);
     }
 }

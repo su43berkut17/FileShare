@@ -31,7 +31,6 @@ public class updateWidgetService extends IntentService {
 
     //we create the variables
     private static String mCurrentState;
-    private static int mTotalNumberOfTransfers;
     private static String mNameOfCurrentFile;
     private static int mTotalNumberOfFiles;
     private static int mCurrentNumberOfFiles;
@@ -97,11 +96,11 @@ public class updateWidgetService extends IntentService {
         AppWidgetManager appWidgetManager=AppWidgetManager.getInstance(this);
         int[] appWidgetsIds = appWidgetManager.getAppWidgetIds(new ComponentName(this,TransferProgressWidget.class));
 
-        TransferProgressWidget.updateAllWidgets(this,appWidgetManager,appWidgetsIds, mCurrentState,mTotalNumberOfTransfers,mNameOfCurrentFile,mTotalNumberOfFiles,mCurrentNumberOfFiles);
+        TransferProgressWidget.updateAllWidgets(this,appWidgetManager,appWidgetsIds, mCurrentState,mNameOfCurrentFile,mTotalNumberOfFiles,mCurrentNumberOfFiles);
     }
 
-    public static void startActionUpdateWidget(Context context,String recCurrentState,
-                                               int recTotalNumberOfTransfers,
+    public static void startActionUpdateWidget(Context context,
+                                               String recCurrentState,
                                                String recNameOfCurrentFile,
                                                int recTotalNumberOfFiles,
                                                int recCurrentNumberOfFiles){
@@ -111,7 +110,6 @@ public class updateWidgetService extends IntentService {
 
         if (recCurrentState!=null) {
             mCurrentState=recCurrentState;
-            mTotalNumberOfTransfers=recTotalNumberOfTransfers;
             mNameOfCurrentFile=recNameOfCurrentFile;
             mTotalNumberOfFiles=recTotalNumberOfFiles;
             mCurrentNumberOfFiles=recCurrentNumberOfFiles;
