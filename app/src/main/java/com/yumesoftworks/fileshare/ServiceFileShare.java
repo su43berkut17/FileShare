@@ -225,6 +225,7 @@ public class ServiceFileShare extends Service implements
         }
     }
 
+    //successful sent
     private void addSuccessfulTransferCounter(){
         new updateDatabaseCounterAsyncTask(database).execute();
     }
@@ -293,6 +294,31 @@ public class ServiceFileShare extends Service implements
     }
 
     @Override
+    public void updateReceivedFile(FileListEntry fileListEntry) {
+        new updateDatabaseReceivedAsyncTask(database).execute(fileListEntry);
+    }
+
+    private class updateDatabaseReceivedAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
+        private AppDatabase database;
+
+        updateDatabaseReceivedAsyncTask(AppDatabase recDatabase){
+            database=recDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(final FileListEntry... params) {
+            //mFileListEntry=database.fileListDao().loadFileListDirect()
+            /*FileListEntry updateEntry=params[0];
+            updateEntry.setIsTransferred(1);
+            database.fileListDao().updateFile(updateEntry);*/
+            database.fileListDao().insertFile(params[0]);
+
+            Log.d(TAG,"Received file entry changed to transferred "+mFileListEntry);
+            return null;
+        }
+    }
+
+    @Override
     public void addReceivedCounter() {
         addSuccessfulTransferCounter();
     }
@@ -328,14 +354,14 @@ public class ServiceFileShare extends Service implements
     }
 
     @Override
-    public void updateSendSentFile(FileListEntry fileListEntry) {
-        //set the file to is Transferred true
-        new updateDatabaseSentAsyncTask(database).execute(fileListEntry);
+    public void addSentCounter() {
+        addSuccessfulTransferCounter();
     }
 
     @Override
-    public void addSentCounter() {
-        addSuccessfulTransferCounter();
+    public void updateSendSentFile(FileListEntry fileListEntry) {
+        //set the file to is Transferred true
+        new updateDatabaseSentAsyncTask(database).execute(fileListEntry);
     }
 
     private class updateDatabaseSentAsyncTask extends AsyncTask<FileListEntry,Void,Void> {

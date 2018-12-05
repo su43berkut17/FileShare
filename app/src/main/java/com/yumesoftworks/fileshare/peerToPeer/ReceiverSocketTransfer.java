@@ -1,15 +1,19 @@
 package com.yumesoftworks.fileshare.peerToPeer;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import com.yumesoftworks.fileshare.TransferProgressActivity;
+import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -169,6 +173,29 @@ public class ReceiverSocketTransfer {
 
                             Log.d(TAG,"File finished transfer");
 
+                            //store the sent file in the database
+                            File tempFile=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/" +finalName);
+
+                            //get the mime type
+                            //we get the mime type
+                            Uri uri = Uri.fromFile(tempFile);
+
+                            String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+                                    .toString());
+                            String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                                    fileExtension.toLowerCase());
+
+                            FileListEntry tempEntry=new FileListEntry(tempFile.getAbsolutePath(),
+                                    tempFile.getName(),
+                                    0,
+                                    tempFile.getParent(),
+                                    0,
+                                    mimeType,
+                                    tempFile.isDirectory());
+
+                            //send it
+                            mReceiverInterface.updateReceiveReceivedFile(tempEntry);
+
                             //we store the file
                             //mCurrentAction=ACTION_SEND_MESSAGE;
                             mCurrentAction=ACTION_NEXT_ACTION;
@@ -264,6 +291,7 @@ public class ReceiverSocketTransfer {
 
     public interface ReceiverSocketTransferInterface{
         void updateReceiveSendUI(TextInfoSendObject textInfoSendObject);
+        void updateReceiveReceivedFile(FileListEntry fileListEntry);
         void finishedReceiveTransfer();
         void socketReceiveFailedClient();
     }
