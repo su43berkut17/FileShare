@@ -117,7 +117,10 @@ public class updateWidgetService extends IntentService {
             Log.i(TAG,"updates received on the service");
         }else{
             //it is null so it is probably from normal update so we need to read it from the database
-            mCurrentState="INITIAL_STATE";
+            mCurrentState=TransferProgressWidget.STATE_NORMAL;
+            mNameOfCurrentFile="";
+            mTotalNumberOfFiles=0;
+            mCurrentNumberOfFiles=0;
 
             //read it from the database
             Log.d(TAG,"update current state is null so it is scheduled update");

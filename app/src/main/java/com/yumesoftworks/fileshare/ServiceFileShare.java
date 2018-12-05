@@ -203,6 +203,7 @@ public class ServiceFileShare extends Service implements
             UserInfoEntry userInfoEntry=database.userInfoDao().loadUserWidget().get(0);
             userInfoEntry.setIsTransferInProgress(status);
             database.userInfoDao().updateTask(userInfoEntry);
+            Log.d(TAG,"The transfer file status activation is: "+status);
 
             return null;
         }
@@ -261,6 +262,10 @@ public class ServiceFileShare extends Service implements
 
         //we deactivate the transfer status
         switchTransfer(false);
+
+        //set the widget on its initial state
+        updateWidgetService.startActionUpdateWidget(this,TransferProgressWidget.STATE_NORMAL,"",0,0);
+
         //the transfer is done, set dialog and go back to activity
         Intent intent=new Intent(TransferProgressActivity.ACTION_FINISHED_TRANSFER);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
@@ -325,6 +330,9 @@ public class ServiceFileShare extends Service implements
 
         //we set the database as not transferring so if they restart the app i goes to the main menu
         switchTransfer(false);
+
+        //set the widget on its initial state
+        updateWidgetService.startActionUpdateWidget(this,TransferProgressWidget.STATE_NORMAL,"",0,0);
 
         //the transfer is done, set dialog and go back to activity
         Intent intent=new Intent(TransferProgressActivity.ACTION_FINISHED_TRANSFER);
@@ -395,6 +403,6 @@ public class ServiceFileShare extends Service implements
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
         //update the widget
-        updateWidgetService.startActionUpdateWidget(this,updateWidgetService.ACTION_UPDATE_APP,fileName,mTotalFiles,mCurrentFile);
+        updateWidgetService.startActionUpdateWidget(this,TransferProgressWidget.STATE_TRANSFER,fileName,mTotalFiles,mCurrentFile);
     }
 }

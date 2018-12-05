@@ -18,6 +18,10 @@ import java.util.List;
  * Implementation of App Widget functionality.
  */
 public class TransferProgressWidget extends AppWidgetProvider {
+    //states of widget
+    public static final String STATE_NORMAL="stateNormal";
+    public static final String STATE_TRANSFER="stateTransfer";
+
 
     //we create the variables
     private static String mCurrentState;
@@ -43,13 +47,14 @@ public class TransferProgressWidget extends AppWidgetProvider {
         List<UserInfoEntry> listUser=database.userInfoDao().loadUserWidget();
         UserInfoEntry user=listUser.get(0);
 
+        mCurrentState=currentState;
+
         //set the values
-        if (user.getIsTransferInProgress()==0) {
-            mCurrentState = "DEFAULT_STATE";
+        if (mCurrentState==STATE_NORMAL) {
+
 
             mTotalNumberOfTransfers=user.getNumberFilesTransferred();
-        }else{
-            mCurrentState="TRANSFER_IN_PROGRESS";
+        }else if (mCurrentState==STATE_TRANSFER){
 
             mNameOfCurrentFile=nameOfCurrentFile;
             mTotalNumberOfFiles=totalNumberOfFiles;
@@ -57,7 +62,7 @@ public class TransferProgressWidget extends AppWidgetProvider {
         }
         //depending on the state we hide or show the layouts
         switch (mCurrentState){
-            case "DEFAULT_STATE":
+            case STATE_NORMAL:
                 //We hide the stuff
                 views.setViewVisibility(R.id.widget_default_state, View.VISIBLE);
                 views.setViewVisibility(R.id.widget_transfer_state, View.GONE);
@@ -74,7 +79,7 @@ public class TransferProgressWidget extends AppWidgetProvider {
 
                 break;
 
-            case "TRANSFER_IN_PROGRESS":
+            case STATE_TRANSFER:
                 //we hide the stuff
                 views.setViewVisibility(R.id.widget_default_state, View.GONE);
                 views.setViewVisibility(R.id.widget_transfer_state, View.VISIBLE);
@@ -85,7 +90,7 @@ public class TransferProgressWidget extends AppWidgetProvider {
 
                 //calculate the percentage
                 try {
-                    mPercentage = mCurrentNumberOfFiles / mTotalNumberOfFiles;
+                    mPercentage = mCurrentNumberOfFiles *100 / mTotalNumberOfFiles;
                 }catch (Exception e){
                     mPercentage=0;
                 }
