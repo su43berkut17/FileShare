@@ -175,6 +175,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         //we open the next activity with the socket information
         //we call the activity that will start the service with the info
         Intent intent=new Intent(this,TransferProgressActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 
         //data to send on the intent
         Bundle bundleSend=new Bundle();
@@ -185,6 +186,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
         intent.putExtras(bundleSend);
         startActivity(intent);
+        finish();
     }
 
     @Override

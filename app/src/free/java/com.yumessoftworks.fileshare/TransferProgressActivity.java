@@ -92,6 +92,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         Intent serviceIntent=new Intent(this,ServiceFileShare.class);
         Bundle extras=intent.getExtras();
 
+
         //get the data to see how do we start the service
         typeOfService=extras.getInt(EXTRA_TYPE_TRANSFER);
 
@@ -152,7 +153,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         fragmentManager=getSupportFragmentManager();
 
         //fragments
-        fragmentFileTransferProgress=new FileTransferProgress(typeOfService);
+        fragmentFileTransferProgress=new FileTransferProgress();
 
         Bundle bundleFrag=new Bundle();
         bundleFrag.putInt(EXTRA_TYPE_TRANSFER,typeOfService);
@@ -202,7 +203,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
             if (typeOfService==FILES_SENDING) {
                 fragmentFileTransferProgress.updateRV(tempNotSent);
             }else{
-                fragmentFileTransferProgress.updateRV(tempSent);
+                fragmentFileTransferProgress.updateRV(fileListEntries);
             }
         }
     };
@@ -233,18 +234,12 @@ public class TransferProgressActivity extends AppCompatActivity implements
                             .setNeutralButton(R.string.gen_button_ok,
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
-                                            //we go to the main activity
-                                            Intent intent=new Intent(getApplicationContext(),WelcomeScreenActivity.class);
-                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                            startActivity(intent);
                                         }
                                     });
                     builder.show();
-                    break;
-                case ACTION_SOCKET_ERROR:
-                    //we show dialog that there was an error and return to the main menu
-                    AlertDialog.Builder builder2 = new AlertDialog.Builder(thisActivity);
-                    builder2.setMessage(R.string.service_socket_error)
+                    //change button to ok
+                    fragmentFileTransferProgress.changeButton();
+                    /*builder.setMessage(R.string.service_finished_transfer)
                             .setCancelable(true)
                             .setNeutralButton(R.string.gen_button_ok,
                                     new DialogInterface.OnClickListener() {
@@ -255,14 +250,49 @@ public class TransferProgressActivity extends AppCompatActivity implements
                                             startActivity(intent);
                                         }
                                     });
+                    builder.show();*/
+                    break;
+                case ACTION_SOCKET_ERROR:
+                    //we show dialog that there was an error and return to the main menu
+                    AlertDialog.Builder builder2 = new AlertDialog.Builder(thisActivity);
+                    builder2.setMessage(R.string.service_socket_error)
+                            .setCancelable(true)
+                            .setNeutralButton(R.string.gen_button_ok,
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                        }
+                                    });
+
+                    /*builder2.setMessage(R.string.service_socket_error)
+                            .setCancelable(true)
+                            .setNeutralButton(R.string.gen_button_ok,
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            //we go to the main activity
+                                            Intent intent=new Intent(getApplicationContext(),WelcomeScreenActivity.class);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(intent);
+                                        }
+                                    });*/
                     builder2.show();
+                    //change button to ok
+                    fragmentFileTransferProgress.changeButton();
                     break;
             }
         }
     };
 
     @Override
-    public void onFragmentInteractionProgress(Uri uri){
+    public void buttonOkCancel(String received){
+        //we check if it ended or if we are cancelling it
+        if(received==getResources().getString(R.string.gen_button_cancel)){
+            Intent serviceIntent=new Intent(this,ServiceFileShare.class);
+            stopService(serviceIntent);
+        }
 
+        Intent intent=new Intent(getApplicationContext(),WelcomeScreenActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

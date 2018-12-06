@@ -151,7 +151,6 @@ public class ServiceFileShare extends Service implements
                     mPort=receivedBundle.getInt(TransferProgressActivity.LOCAL_PORT);
 
                     mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,mPort,action);
-
                 }catch (Exception e){
                     Log.d(TAG,"There was an error creating the receive client socket"+e.getMessage());
                     e.printStackTrace();
@@ -325,6 +324,10 @@ public class ServiceFileShare extends Service implements
 
     @Override
     public void finishedSendTransfer() {
+        //we update the ui as successful
+        TextInfoSendObject endObject=new TextInfoSendObject(TransferProgressActivity.TYPE_END,getResources().getString(R.string.service_success),String.valueOf(mTotalFiles)+","+String.valueOf(mTotalFiles));
+        updateGeneralUI(endObject);
+
         //we hide the notification
         manager.cancel(NOTIFICATION_ID);
 

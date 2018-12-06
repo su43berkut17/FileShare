@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -20,7 +21,7 @@ import com.yumesoftworks.fileshare.TransferProgressActivity;
 import java.util.List;
 
 
-public class FileTransferProgress extends Fragment implements QueueListAdapter.QueueClickListener {
+public class FileTransferProgress extends Fragment implements QueueListAdapter.QueueClickListener, View.OnClickListener {
 
     private OnFragmentInteractionListener mListener;
 
@@ -34,6 +35,7 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
     private TextView mtvPercentage;
     private ProgressBar mTvProgress;
     private TextView mTitleQueue;
+    private Button mButton;
 
     private int mType;
 
@@ -72,22 +74,19 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         mTvOutOf=fileProgressView.findViewById(R.id.tv_atp_files_out_of);
         mtvPercentage=fileProgressView.findViewById(R.id.tv_atp_percentage);
         mTvProgress=fileProgressView.findViewById(R.id.pro_bar_atp);
+        mButton=fileProgressView.findViewById(R.id.btn_atp_cancelOk);
 
         //get the text depending on the type
         if (mType==TransferProgressActivity.FILES_RECEIVING){
-            mTitleQueue.setText(R.string.atp_tv_files_in_queue);
-        }else if (mType==TransferProgressActivity.FILES_SENDING){
             mTitleQueue.setText(R.string.ats_tv_received_files);
+        }else if (mType==TransferProgressActivity.FILES_SENDING){
+            mTitleQueue.setText(R.string.atp_tv_files_in_queue);
         }
+
+        //listener of he button
+        mButton.setOnClickListener(this);
 
         return fileProgressView;
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteractionProgress(uri);
-        }
     }
 
     @Override
@@ -136,14 +135,30 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         mTvProgress.setProgress(percentage);
     }
 
+    public void changeButton(){
+        mButton.setText(R.string.gen_button_ok);
+    }
+
     @Override
     public void onQueueClickListener(int itemId) {
         //see if we can open it
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.btn_atp_cancelOk:
+                //we exit
+                mListener.buttonOkCancel(mButton.getText().toString());
+                break;
+            default:
+                break;
+        }
     }
 
     //interface
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteractionProgress(Uri uri);
+        void buttonOkCancel(String text);
     }
 }
