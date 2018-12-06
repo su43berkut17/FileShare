@@ -1,5 +1,6 @@
 package com.yumesoftworks.fileshare;
 
+import android.app.ActivityOptions;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.DialogInterface;
@@ -134,9 +135,6 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                 }else{
                     //we go to the next activity if it is not settings
                     if (mIsThisSettings){
-                        //this is settings so we feed the saved information to the UI
-                        //mAvatarAdapter.setSelectedAvatar(userInfoEntries.get(0).getId());
-
                         //we change the go button text to save changes
                         buttonGo.setText(R.string.aws_button_save);
 
@@ -158,7 +156,16 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                             Bundle extras=new Bundle();
                             extras.putInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER,TransferProgressActivity.RELAUNCH_APP);
                             intent.putExtras(extras);
-                            startActivity(intent);*/
+
+                            //basic transition to main menu
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                                Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle();
+                                startActivity(intent, bundle);
+                            } else {
+                                startActivity(intent);
+                            }
+
+                            */
                             //for debug we open the activity for now
                             goMainActivity();
                         }else {
@@ -172,7 +179,14 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
     private void goMainActivity(){
         Intent mainMenuActivity=new Intent(getApplicationContext(), MainMenuActivity.class);
-        startActivity(mainMenuActivity);
+
+        //basic transition to main menu
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle();
+            startActivity(mainMenuActivity, bundle);
+        } else {
+            startActivity(mainMenuActivity);
+        }
     }
 
     @Override
