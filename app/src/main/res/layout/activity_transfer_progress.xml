@@ -17,12 +17,6 @@
             android:layout_weight=".5"
             android:id="@+id/frag_atp_transfer_progress"/>
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight=".5"
-            android:id="@+id/frag_atp_transfer_sent"/>
-
         <com.google.android.gms.ads.AdView
             xmlns:ads="http://schemas.android.com/apk/res-auto"
             android:id="@+id/ad_view_transfer_progress"

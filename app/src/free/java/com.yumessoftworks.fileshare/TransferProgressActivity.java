@@ -26,8 +26,8 @@ import com.yumesoftworks.fileshare.data.FileListEntry;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TransferProgressActivity extends AppCompatActivity implements FileTransferProgress.OnFragmentInteractionListener,
-FileTransferSent.OnFragmentInteractionListener{
+public class TransferProgressActivity extends AppCompatActivity implements
+        FileTransferProgress.OnFragmentInteractionListener{
 
     private static final String TAG="TransferProgressAct";
 
@@ -59,12 +59,6 @@ FileTransferSent.OnFragmentInteractionListener{
     //this activity context
     private Context thisActivity;
 
-    //when sending
-
-
-    //when receiving, the list
-
-
     //constants for the actions
     public static final int FILES_SENDING=2001;
     public static final int FILES_RECEIVING=2002;
@@ -73,7 +67,6 @@ FileTransferSent.OnFragmentInteractionListener{
 
     //fragment parts
     private FileTransferProgress fragmentFileTransferProgress;
-    private FileTransferSent fragmentFileTransferSent;
     private FragmentManager fragmentManager;
 
     //analytics and admob
@@ -90,6 +83,7 @@ FileTransferSent.OnFragmentInteractionListener{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_transfer_progress);
 
         //we check the intent with the information to start the service
         Intent intent=getIntent();
@@ -100,12 +94,6 @@ FileTransferSent.OnFragmentInteractionListener{
 
         //get the data to see how do we start the service
         typeOfService=extras.getInt(EXTRA_TYPE_TRANSFER);
-
-        if (typeOfService==FILES_SENDING) {
-            setContentView(R.layout.activity_transfer_progress);
-        }else{
-            setContentView(R.layout.activity_transfer_progress_sent_only);
-        }
 
         thisActivity=this;
 
@@ -164,22 +152,30 @@ FileTransferSent.OnFragmentInteractionListener{
         fragmentManager=getSupportFragmentManager();
 
         //fragments
-        fragmentFileTransferProgress=new FileTransferProgress();
+        fragmentFileTransferProgress=new FileTransferProgress(typeOfService);
 
-        if (typeOfService==FILES_SENDING) {
+        Bundle bundleFrag=new Bundle();
+        bundleFrag.putInt(EXTRA_TYPE_TRANSFER,typeOfService);
+        fragmentFileTransferProgress.setArguments(bundleFrag);
+
+        //transaction
+        fragmentManager.beginTransaction()
+                .add(R.id.frag_atp_transfer_progress,fragmentFileTransferProgress)
+                .commit();
+
+        /*if (typeOfService==FILES_SENDING) {
             fragmentFileTransferSent = new FileTransferSent();
 
             //transaction
             fragmentManager.beginTransaction()
                     .add(R.id.frag_atp_transfer_progress,fragmentFileTransferProgress)
-                    .add(R.id.frag_atp_transfer_sent,fragmentFileTransferSent)
                     .commit();
         }else if(typeOfService==FILES_RECEIVING){
             //transaction
             fragmentManager.beginTransaction()
                     .add(R.id.frag_atp_transfer_progress,fragmentFileTransferProgress)
                     .commit();
-        }
+        }*/
 
         //we get the file model to populate the stuff
         fileTransferViewModel=ViewModelProviders.of(this).get(FileTransferViewModel.class);
@@ -205,7 +201,6 @@ FileTransferSent.OnFragmentInteractionListener{
 
             if (typeOfService==FILES_SENDING) {
                 fragmentFileTransferProgress.updateRV(tempNotSent);
-                fragmentFileTransferSent.updateRV(tempSent);
             }else{
                 fragmentFileTransferProgress.updateRV(tempSent);
             }
@@ -265,12 +260,6 @@ FileTransferSent.OnFragmentInteractionListener{
             }
         }
     };
-
-
-    @Override
-    public void onFragmentInteractionSent(Uri uri) {
-
-    }
 
     @Override
     public void onFragmentInteractionProgress(Uri uri){

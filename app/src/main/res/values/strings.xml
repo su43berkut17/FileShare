@@ -54,9 +54,9 @@
     <string name="atp_tv_filename">Filename</string>
     <string name="atp_tv_out_of">Number of files transferred</string>
     <string name="atp_tv_percentage">Percentage</string>
-    <string name="atp_tv_files_in_queue">Files in queue:</string>
+    <string name="atp_tv_files_in_queue">Files to be sent:</string>
     <string name="ats_tv_sent_files">Files sent</string>
-    <string name="ats_tv_received_files">Files received</string>
+    <string name="ats_tv_received_files">Files received:</string>
     <string name="ats_try_again_dialog">Cannot connect to device. Try again?</string>
 
     <!-- TODO: Remove or change this placeholder text -->

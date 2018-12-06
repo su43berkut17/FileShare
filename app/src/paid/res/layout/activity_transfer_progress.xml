@@ -17,12 +17,6 @@
             android:layout_weight=".5"
             android:id="@+id/frag_atp_transfer_progress"/>
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight=".5"
-            android:id="@+id/frag_atp_transfer_sent"/>
-
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"

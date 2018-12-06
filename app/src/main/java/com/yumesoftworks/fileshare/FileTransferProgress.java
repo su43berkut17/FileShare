@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 import com.yumesoftworks.fileshare.recyclerAdapters.QueueListAdapter;
+import com.yumesoftworks.fileshare.TransferProgressActivity;
 
 import java.util.List;
 
@@ -32,11 +33,12 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
     private TextView mTvOutOf;
     private TextView mtvPercentage;
     private ProgressBar mTvProgress;
+    private TextView mTitleQueue;
 
-    public FileTransferProgress() {
-        // Required empty public constructor
+    private int mType;
+
+    public FileTransferProgress(){
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,8 +52,14 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         //create the view
         View fileProgressView=inflater.inflate(R.layout.fragment_file_transfer_progress, container,false);
 
+        //get the type via arguments
+        Bundle bundle=getArguments();
+        mType=bundle.getInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER);
+
         rvFileList=fileProgressView.findViewById(R.id.rv_file_progress_queue);
         rvFileList.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        mTitleQueue=fileProgressView.findViewById(R.id.tv_atp_files_queue);
 
         rvAdapter=new QueueListAdapter(getContext(),this);
 
@@ -64,6 +72,13 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         mTvOutOf=fileProgressView.findViewById(R.id.tv_atp_files_out_of);
         mtvPercentage=fileProgressView.findViewById(R.id.tv_atp_percentage);
         mTvProgress=fileProgressView.findViewById(R.id.pro_bar_atp);
+
+        //get the text depending on the type
+        if (mType==TransferProgressActivity.FILES_RECEIVING){
+            mTitleQueue.setText(R.string.atp_tv_files_in_queue);
+        }else if (mType==TransferProgressActivity.FILES_SENDING){
+            mTitleQueue.setText(R.string.ats_tv_received_files);
+        }
 
         return fileProgressView;
     }
@@ -123,7 +138,7 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
 
     @Override
     public void onQueueClickListener(int itemId) {
-
+        //see if we can open it
     }
 
     //interface
