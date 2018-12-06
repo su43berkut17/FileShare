@@ -21,6 +21,8 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
+import com.yumesoftworks.fileshare.MainMenuActivity;
+import com.yumesoftworks.fileshare.SenderPickDestinationActivity;
 
 import java.util.List;
 
@@ -288,7 +290,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             initializeVariables();
         }else{
             //go back to main activity
-            Intent intent=new Intent(this,MainMenuActivity.class);
+            Intent intent=new Intent(this, MainMenuActivity.class);
             startActivity(intent);
         }
     }
@@ -366,7 +368,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     @Override
     public void onButtonSendClicked() {
         //we go to the send activity
-        Intent intent=new Intent(this,SenderPickDestinationActivity.class);
+        Intent intent=new Intent(this, SenderPickDestinationActivity.class);
         startActivity(intent);
 
         //this is a test to open directly the file progress

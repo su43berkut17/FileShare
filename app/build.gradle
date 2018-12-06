@@ -70,7 +70,7 @@ dependencies {
     annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
 
     //firebase analytics and admob
-    implementation 'com.google.firebase:firebase-ads:17.0.0'
+    freeImplementation 'com.google.firebase:firebase-ads:17.0.0'
     implementation 'com.google.firebase:firebase-core:16.0.4'
 
     //crashlytics

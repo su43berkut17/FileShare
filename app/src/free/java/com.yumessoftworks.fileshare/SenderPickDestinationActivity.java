@@ -64,15 +64,15 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         setContentView(R.layout.activity_sender_pick_destination);
 
         //analytics
-        //mFireAnalytics=FirebaseAnalytics.getInstance(this);
+        mFireAnalytics=FirebaseAnalytics.getInstance(this);
 
         //ads
-        /* MobileAds.initialize(this,
+         MobileAds.initialize(this,
                 "ca-app-pub-3940256099942544/6300978111");
 
         mAdView = findViewById(R.id.ad_view_sender_pick_destination);
         AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);*/
+        mAdView.loadAd(adRequest);
 
         //storing local ip address
         WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);

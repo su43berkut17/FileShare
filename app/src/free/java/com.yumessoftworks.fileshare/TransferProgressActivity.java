@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
@@ -19,7 +18,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 
@@ -99,7 +100,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         thisActivity=this;
 
         //analytics
-        /*mFireAnalytics=FirebaseAnalytics.getInstance(this);
+        mFireAnalytics=FirebaseAnalytics.getInstance(this);
 
         //ads
         MobileAds.initialize(this,
@@ -107,7 +108,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
         mAdView = findViewById(R.id.ad_view_transfer_progress);
         AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);*/
+        mAdView.loadAd(adRequest);
 
         //we get the instance of the indeterminate progress bar
         mProgressBarHide=findViewById(R.id.pb_atp_waitingForConnection);

@@ -5,7 +5,6 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -13,14 +12,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
+import com.yumesoftworks.fileshare.MainMenuActivity;
+import com.yumesoftworks.fileshare.SenderPickDestinationActivity;
 
 import java.util.List;
 
@@ -38,7 +37,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private int mCurrentFragment;
     private static final String CURRENT_FRAGMENT_TAG="currentFragmentTag";
 
-    //analytics
+    //analytics and admob
     private FirebaseAnalytics mFireAnalytics;
 
     //fragment parts
@@ -279,7 +278,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             initializeVariables();
         }else{
             //go back to main activity
-            Intent intent=new Intent(this,MainMenuActivity.class);
+            Intent intent=new Intent(this, MainMenuActivity.class);
             startActivity(intent);
         }
     }
@@ -357,7 +356,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     @Override
     public void onButtonSendClicked() {
         //we go to the send activity
-        Intent intent=new Intent(this,SenderPickDestinationActivity.class);
+        Intent intent=new Intent(this, SenderPickDestinationActivity.class);
         startActivity(intent);
 
         //this is a test to open directly the file progress

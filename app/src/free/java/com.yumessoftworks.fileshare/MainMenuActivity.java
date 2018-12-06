@@ -10,8 +10,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
+
+import com.yumesoftworks.fileshare.FileBrowserAndQueueActivity;
+import com.yumesoftworks.fileshare.ReceiverPickDestinationActivity;
 
 public class MainMenuActivity extends AppCompatActivity implements View.OnClickListener{
     //buttons
@@ -31,7 +36,7 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_main_menu);
 
         //analytics
-        /*mFireAnalytics=FirebaseAnalytics.getInstance(this);
+        mFireAnalytics=FirebaseAnalytics.getInstance(this);
 
         //ads
         MobileAds.initialize(this,
@@ -39,7 +44,7 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
 
         mAdView = findViewById(R.id.ad_view_main_menu);
         AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);*/
+        mAdView.loadAd(adRequest);
 
         //we set the values of the constraint layouts
         sendFilesButton=(ConstraintLayout)findViewById(R.id.mm_surf_sendFileArea);
@@ -82,7 +87,7 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         switch (v.getId()){
             case R.id.mm_surf_sendFileArea:
                 //we open the file explorer
-                Intent intent=new Intent(this,FileBrowserAndQueueActivity.class);
+                Intent intent=new Intent(this, FileBrowserAndQueueActivity.class);
                 //Intent intent=new Intent(this,SenderPickDestinationActivity.class);
                 startActivity(intent);
                 break;

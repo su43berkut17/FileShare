@@ -15,6 +15,8 @@ import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
 import com.yumesoftworks.fileshare.peerToPeer.ReceiverPickSocket;
 
+import com.yumesoftworks.fileshare.TransferProgressActivity;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.List;
@@ -23,7 +25,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     private static final String TAG="ReceiverDesActivity";
 
-    //analytics
+    //analytics and admob
     private FirebaseAnalytics mFireAnalytics;
 
     //nds vars
@@ -48,7 +50,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         setContentView(R.layout.activity_receiver_pick_destination);
 
         //analytics
-        // mFireAnalytics=FirebaseAnalytics.getInstance(this);
+        mFireAnalytics=FirebaseAnalytics.getInstance(this);
 
         //we reset the execution
         isFirstExecution=true;
@@ -131,8 +133,8 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
                 //we check if the receiver socket is null
                 //if (mReceiverSocket == null) {
-                    Log.d(TAG, "recreating socket");
-                    mReceiverSocket = new ReceiverPickSocket(this, mServerSocket, mUserInfoEntry);
+                Log.d(TAG, "recreating socket");
+                mReceiverSocket = new ReceiverPickSocket(this, mServerSocket, mUserInfoEntry);
                 //}
             }
         }
@@ -154,6 +156,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         Boolean test=mReceiverSocket.destroySocket();
         try {
             mServerSocket.close();
+            Log.d(TAG,"server socket is closed "+mServerSocket.isClosed());
         }catch(Exception e){
             Log.d(TAG,"cant close server socket");
         }
@@ -161,6 +164,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         //we open the next activity with the socket information
         //we call the activity that will start the service with the info
         Intent intent=new Intent(this,TransferProgressActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 
         //data to send on the intent
         Bundle bundleSend=new Bundle();
@@ -171,6 +175,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
         intent.putExtras(bundleSend);
         startActivity(intent);
+        finish();
     }
 
     @Override

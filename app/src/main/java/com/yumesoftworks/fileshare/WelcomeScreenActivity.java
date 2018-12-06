@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
+
 import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.AvatarAndVersion;
 import com.yumesoftworks.fileshare.data.AvatarDefaultImages;
@@ -23,6 +24,7 @@ import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.recyclerAdapters.AvatarAdapter;
 import com.yumesoftworks.fileshare.utils.JsonAvatarParser;
+import com.yumesoftworks.fileshare.MainMenuActivity;
 
 import java.util.List;
 
@@ -63,7 +65,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         setContentView(R.layout.activity_welcome_screen);
 
         //analytics
-        //mFireAnalytics=FirebaseAnalytics.getInstance(this);
+        mFireAnalytics=FirebaseAnalytics.getInstance(this);
 
         //rotation values
         if (savedInstanceState==null){
