@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
@@ -93,6 +94,10 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         //mNsdHelper.discoverServices();
 
         isFirstExecution=true;
+
+        //toolbar
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.afv_toolbar);
+        setSupportActionBar(myToolbar);
 
         //we set the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

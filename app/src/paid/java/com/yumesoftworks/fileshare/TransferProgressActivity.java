@@ -14,6 +14,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -134,6 +135,10 @@ public class TransferProgressActivity extends AppCompatActivity implements
             intentFilter.addAction(ACTION_UPDATE_UI_DATA);
             LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceived, intentFilter);
         }
+
+        //toolbar
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.afv_toolbar);
+        setSupportActionBar(myToolbar);
     }
 
     private void initializeFragments(){

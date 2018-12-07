@@ -13,6 +13,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
@@ -77,6 +78,10 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
         //we check for the permissions
         askForFilePermission();
+
+        //toolbar
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.afv_toolbar);
+        setSupportActionBar(myToolbar);
 
         //we set the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
