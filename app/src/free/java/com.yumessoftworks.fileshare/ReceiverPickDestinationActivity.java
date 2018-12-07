@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
@@ -70,6 +71,10 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         //we will use livedata for user
         mDb=AppDatabase.getInstance(getApplicationContext());
         setupViewModel();
+
+        //toolbar
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.rpd_toolbar);
+        setSupportActionBar(myToolbar);
 
         //we set the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

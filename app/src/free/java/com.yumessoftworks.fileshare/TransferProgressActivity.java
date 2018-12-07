@@ -14,6 +14,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -93,7 +94,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
         Intent serviceIntent=new Intent(this,ServiceFileShare.class);
         Bundle extras=intent.getExtras();
 
-
         //get the data to see how do we start the service
         typeOfService=extras.getInt(EXTRA_TYPE_TRANSFER);
 
@@ -147,6 +147,10 @@ public class TransferProgressActivity extends AppCompatActivity implements
             intentFilter.addAction(ACTION_UPDATE_UI_DATA);
             LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceived, intentFilter);
         }
+
+        //toolbar
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.tp_toolbar);
+        setSupportActionBar(myToolbar);
     }
 
     private void initializeFragments(){
@@ -164,20 +168,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
         fragmentManager.beginTransaction()
                 .add(R.id.frag_atp_transfer_progress,fragmentFileTransferProgress)
                 .commit();
-
-        /*if (typeOfService==FILES_SENDING) {
-            fragmentFileTransferSent = new FileTransferSent();
-
-            //transaction
-            fragmentManager.beginTransaction()
-                    .add(R.id.frag_atp_transfer_progress,fragmentFileTransferProgress)
-                    .commit();
-        }else if(typeOfService==FILES_RECEIVING){
-            //transaction
-            fragmentManager.beginTransaction()
-                    .add(R.id.frag_atp_transfer_progress,fragmentFileTransferProgress)
-                    .commit();
-        }*/
 
         //we get the file model to populate the stuff
         fileTransferViewModel=ViewModelProviders.of(this).get(FileTransferViewModel.class);

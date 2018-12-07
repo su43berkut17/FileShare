@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -105,6 +106,10 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
         mDb=AppDatabase.getInstance(getApplicationContext());
         setupViewModel();
+
+        //toolbar
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.aws_toolbar);
+        setSupportActionBar(myToolbar);
 
         //navigation bar settings
         if (mIsThisSettings==false) {

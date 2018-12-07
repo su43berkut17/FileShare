@@ -1,113 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary">
+    android:orientation="vertical">
 
-    <android.support.constraint.ConstraintLayout
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/aws_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        tools:context=".WelcomeScreenActivity">
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-        <ImageView
-            android:id="@+id/image_aws_logo"
-            android:layout_width="@dimen/welcome_icon_size"
-            android:layout_height="@dimen/welcome_icon_size"
-            android:layout_marginTop="@dimen/default_padding"
-            android:contentDescription="@string/app_name"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/logo_white" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorPrimary">
 
-        <LinearLayout
-            android:id="@+id/aws_layout_container"
+        <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/default_padding"
-            android:layout_marginLeft="@dimen/default_padding"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="@dimen/default_padding"
-            android:layout_marginRight="@dimen/default_padding"
-            android:background="@color/common_google_signin_btn_text_dark_default"
-            android:contentDescription="@string/app_name"
-            android:orientation="vertical"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/image_aws_logo">
+            android:background="@color/colorPrimary"
+            tools:context=".WelcomeScreenActivity">
 
-            <TextView
-                android:id="@+id/tv_aws_pick_avatar"
+            <ImageView
+                android:id="@+id/image_aws_logo"
+                android:layout_width="@dimen/welcome_icon_size"
+                android:layout_height="@dimen/welcome_icon_size"
+                android:layout_marginTop="@dimen/default_padding"
+                android:contentDescription="@string/app_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/logo_white" />
+
+            <LinearLayout
+                android:id="@+id/aws_layout_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/default_padding"
-                android:text="@string/aws_pick_avatar"
-                android:textStyle="bold" />
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/rv_aws_avatars"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/default_padding">
-
-            </android.support.v7.widget.RecyclerView>
-
-            <TextView
-                android:id="@+id/tv_aws_username"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/default_padding"
-                android:text="@string/aws_username"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/tv_aws_input_username"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/default_padding"
-                android:ems="10"
-                android:hint="@string/aws_input_username_hint"
-                android:inputType="text"
-                android:digits="@string/aws_username_digits"
-                android:text="@string/aws_input_username" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/default_padding"
-            android:layout_marginLeft="@dimen/default_padding"
-            android:layout_marginTop="@dimen/default_padding"
-            android:layout_marginEnd="@dimen/default_padding"
-            android:layout_marginRight="@dimen/default_padding"
-            android:orientation="horizontal"
-            android:gravity="center_horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/aws_layout_container">
-
-            <Button
-                android:id="@+id/button_go"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/default_padding"
-                android:layout_marginEnd="@dimen/default_padding"
-                android:text="@string/aws_button_go"
-                android:contentDescription="@string/aws_button_go"
-                android:layout_gravity="center_horizontal"/>
-            <Button
-                android:id="@+id/button_cancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/default_padding"
                 android:layout_marginStart="@dimen/default_padding"
-                android:text="@string/gen_button_cancel"
-                android:contentDescription="@string/gen_button_cancel"
-                android:layout_gravity="center_horizontal"/>
-        </LinearLayout>
+                android:layout_marginLeft="@dimen/default_padding"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="@dimen/default_padding"
+                android:layout_marginRight="@dimen/default_padding"
+                android:background="@color/common_google_signin_btn_text_dark_default"
+                android:contentDescription="@string/app_name"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image_aws_logo">
 
-    </android.support.constraint.ConstraintLayout>
-</ScrollView>
+                <TextView
+                    android:id="@+id/tv_aws_pick_avatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/default_padding"
+                    android:text="@string/aws_pick_avatar"
+                    android:textStyle="bold" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rv_aws_avatars"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/default_padding">
+
+                </android.support.v7.widget.RecyclerView>
+
+                <TextView
+                    android:id="@+id/tv_aws_username"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/default_padding"
+                    android:text="@string/aws_username"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/tv_aws_input_username"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/default_padding"
+                    android:ems="10"
+                    android:hint="@string/aws_input_username_hint"
+                    android:inputType="text"
+                    android:digits="@string/aws_username_digits"
+                    android:text="@string/aws_input_username" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/default_padding"
+                android:layout_marginLeft="@dimen/default_padding"
+                android:layout_marginTop="@dimen/default_padding"
+                android:layout_marginEnd="@dimen/default_padding"
+                android:layout_marginRight="@dimen/default_padding"
+                android:orientation="horizontal"
+                android:gravity="center_horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/aws_layout_container">
+
+                <Button
+                    android:id="@+id/button_go"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/default_padding"
+                    android:layout_marginEnd="@dimen/default_padding"
+                    android:text="@string/aws_button_go"
+                    android:contentDescription="@string/aws_button_go"
+                    android:layout_gravity="center_horizontal"/>
+                <Button
+                    android:id="@+id/button_cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/default_padding"
+                    android:layout_marginStart="@dimen/default_padding"
+                    android:text="@string/gen_button_cancel"
+                    android:contentDescription="@string/gen_button_cancel"
+                    android:layout_gravity="center_horizontal"/>
+            </LinearLayout>
+
+        </android.support.constraint.ConstraintLayout>
+    </ScrollView>
+</LinearLayout>

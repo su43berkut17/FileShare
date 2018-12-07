@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -57,6 +58,10 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         //we empty the stored database
         fileViewerViewModel= ViewModelProviders.of(this).get(FileViewerViewModel.class);
         fileViewerViewModel.deleteTable();
+
+        //toolbar
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.mm_toolbar);
+        setSupportActionBar(myToolbar);
     }
 
     @Override
