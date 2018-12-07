@@ -1,114 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainMenuActivity">
+    android:layout_height="match_parent">
 
-
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/mm_surf_sendFileArea"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/mm_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginStart="@dimen/zero_padding"
-        android:layout_marginTop="@dimen/zero_padding"
-        android:layout_marginEnd="@dimen/zero_padding"
-        android:background="@color/colorGreen"
-        android:foreground="?android:attr/selectableItemBackground"
-        app:layout_constraintBottom_toTopOf="@+id/mm_surf_receiveArea"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-        <ImageView
-            android:id="@+id/iv_mm_send"
-            android:layout_width="169dp"
-            android:layout_height="142dp"
-            android:layout_marginStart="@dimen/default_padding"
-            android:layout_marginLeft="@dimen/default_padding"
-            android:layout_marginTop="@dimen/default_padding"
-            android:layout_marginBottom="@dimen/default_padding"
-            android:contentDescription="@string/mm_send_des"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/tv_mm_send"
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".MainMenuActivity">
+
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/mm_surf_sendFileArea"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="@dimen/zero_padding"
+            android:layout_marginTop="@dimen/zero_padding"
+            android:layout_marginEnd="@dimen/zero_padding"
+            android:background="@color/colorGreen"
+            android:foreground="?android:attr/selectableItemBackground"
+            app:layout_constraintBottom_toTopOf="@+id/mm_surf_receiveArea"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintHorizontal_chainStyle="spread"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/icon_send" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/tv_mm_send"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/default_padding"
-            android:layout_marginEnd="@dimen/default_padding"
-            android:layout_marginRight="@dimen/default_padding"
-            android:layout_marginBottom="@dimen/default_padding"
-            android:contentDescription="@string/mm_send_des"
-            android:text="@string/mm_send"
-            android:textColor="@color/colorWidgetText"
-            android:textSize="@dimen/medium_text"
-            android:textStyle="bold"
+            <ImageView
+                android:id="@+id/iv_mm_send"
+                android:layout_width="169dp"
+                android:layout_height="142dp"
+                android:layout_marginStart="@dimen/default_padding"
+                android:layout_marginLeft="@dimen/default_padding"
+                android:layout_marginTop="@dimen/default_padding"
+                android:layout_marginBottom="@dimen/default_padding"
+                android:contentDescription="@string/mm_send_des"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/tv_mm_send"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/icon_send" />
+
+            <TextView
+                android:id="@+id/tv_mm_send"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_padding"
+                android:layout_marginEnd="@dimen/default_padding"
+                android:layout_marginRight="@dimen/default_padding"
+                android:layout_marginBottom="@dimen/default_padding"
+                android:contentDescription="@string/mm_send_des"
+                android:text="@string/mm_send"
+                android:textColor="@color/colorWidgetText"
+                android:textSize="@dimen/medium_text"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/iv_mm_send"
+                app:layout_constraintTop_toTopOf="parent" />
+        </android.support.constraint.ConstraintLayout>
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/mm_surf_receiveArea"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="@dimen/zero_padding"
+            android:layout_marginTop="@dimen/zero_padding"
+            android:layout_marginEnd="@dimen/zero_padding"
+            android:background="@color/colorPrimary"
+            android:foreground="?android:attr/selectableItemBackground"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/iv_mm_send"
-            app:layout_constraintTop_toTopOf="parent" />
-    </android.support.constraint.ConstraintLayout>
-
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/mm_surf_receiveArea"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginStart="@dimen/zero_padding"
-        android:layout_marginTop="@dimen/zero_padding"
-        android:layout_marginEnd="@dimen/zero_padding"
-        android:background="@color/colorPrimary"
-        android:foreground="?android:attr/selectableItemBackground"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mm_surf_sendFileArea">
-
-        <ImageView
-            android:id="@+id/iv_mm_receive"
-            android:layout_width="169dp"
-            android:layout_height="142dp"
-            android:layout_marginStart="@dimen/default_padding"
-            android:layout_marginLeft="@dimen/default_padding"
-            android:layout_marginTop="@dimen/default_padding"
-            android:layout_marginBottom="@dimen/default_padding"
-            android:contentDescription="@string/mm_receive_des"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/tv_mm_receive"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintHorizontal_chainStyle="spread"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/icon_receive" />
+            app:layout_constraintTop_toBottomOf="@+id/mm_surf_sendFileArea">
 
-        <TextView
-            android:id="@+id/tv_mm_receive"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/default_padding"
-            android:layout_marginEnd="@dimen/default_padding"
-            android:layout_marginRight="@dimen/default_padding"
-            android:layout_marginBottom="@dimen/default_padding"
-            android:contentDescription="@string/mm_receive_des"
-            android:text="@string/mm_receive"
-            android:textColor="@color/colorWidgetText"
-            android:textSize="@dimen/medium_text"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/iv_mm_receive"
-            app:layout_constraintTop_toTopOf="parent" />
+            <ImageView
+                android:id="@+id/iv_mm_receive"
+                android:layout_width="169dp"
+                android:layout_height="142dp"
+                android:layout_marginStart="@dimen/default_padding"
+                android:layout_marginLeft="@dimen/default_padding"
+                android:layout_marginTop="@dimen/default_padding"
+                android:layout_marginBottom="@dimen/default_padding"
+                android:contentDescription="@string/mm_receive_des"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/tv_mm_receive"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/icon_receive" />
+
+            <TextView
+                android:id="@+id/tv_mm_receive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_padding"
+                android:layout_marginEnd="@dimen/default_padding"
+                android:layout_marginRight="@dimen/default_padding"
+                android:layout_marginBottom="@dimen/default_padding"
+                android:contentDescription="@string/mm_receive_des"
+                android:text="@string/mm_receive"
+                android:textColor="@color/colorWidgetText"
+                android:textSize="@dimen/medium_text"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/iv_mm_receive"
+                app:layout_constraintTop_toTopOf="parent" />
+        </android.support.constraint.ConstraintLayout>
+
     </android.support.constraint.ConstraintLayout>
-
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>
