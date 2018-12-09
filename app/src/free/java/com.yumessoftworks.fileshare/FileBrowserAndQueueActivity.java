@@ -88,15 +88,15 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             mTwoPanel = false;
         }
 
-        //we check for the permissions
-        askForFilePermission();
-
         //toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.afv_toolbar);
         setSupportActionBar(myToolbar);
 
         //we set the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        //we check for the permissions
+        askForFilePermission();
     }
 
     @Override

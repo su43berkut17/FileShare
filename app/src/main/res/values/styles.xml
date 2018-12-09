@@ -8,6 +8,13 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <!-- Toolbar -->
+    <style name="ToolbarWhite" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
+        <item name="actionMenuTextColor">@android:color/white</item>
+    </style>
+
     <style name="AppThemeProgressBar" parent="Base.Widget.AppCompat.ProgressBar.Horizontal">
         <item name="android:progressTint">@color/colorCardWhite</item>
         <item name="android:progressBackgroundTint">@color/colorPrimaryDark</item>
