@@ -48,23 +48,19 @@ public class FileViewerViewModel extends AndroidViewModel {
     }
 
     public void refreshData(String path){
-        Log.d(TAG,"File Viewer View Model refresh data");
-        ReadFileList s=new ReadFileList();
-        //data=s.loadList(path,this.getApplication().getApplicationContext());
-        //data.setValue(s.loadList(path,this.getApplication().getApplicationContext()).getValue());
-        mPath.postValue(path);
-        try{
-            data.postValue(s.loadList(path, this.getApplication().getApplicationContext()).getValue());
-        }catch (Exception e){
-            Log.d(TAG,"error null");
-        }
-       // data.postValue(getData().getValue());
-        //data=s.loadList("/storage/emulated/0",this.getApplication().getApplicationContext());
-        //Log.d(TAG,"new data is updated, the length is "+data.getValue());
+        //lets check is the path is readable
+        File tempFile=new File(path);
+        if (tempFile.canRead()) {
+            Log.d(TAG, "File Viewer View Model refresh data");
+            ReadFileList s = new ReadFileList();
 
-        //Log.d(TAG,"data is updated, the length is "+this.getData().getValue());
-        //data.setValue(s.loadList("/storage/emulated/0",this.getApplication().getApplicationContext()).);
-        //data.setValue(this.getData().);
+            mPath.postValue(path);
+            try {
+                data.postValue(s.loadList(path, this.getApplication().getApplicationContext()).getValue());
+            } catch (Exception e) {
+                Log.d(TAG, "error null");
+            }
+        }
     }
 
     public void saveFile(FileListEntry fileListEntry){
