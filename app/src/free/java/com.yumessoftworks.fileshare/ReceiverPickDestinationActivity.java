@@ -1,12 +1,12 @@
 package com.yumesoftworks.fileshare;
 
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
@@ -18,8 +18,6 @@ import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
 import com.yumesoftworks.fileshare.peerToPeer.ReceiverPickSocket;
-
-import com.yumesoftworks.fileshare.TransferProgressActivity;
 
 import java.io.IOException;
 import java.net.ServerSocket;

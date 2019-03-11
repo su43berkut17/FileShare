@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/tp_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
@@ -31,7 +31,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight=".5"
                 android:id="@+id/frag_atp_transfer_progress"/>
-
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"

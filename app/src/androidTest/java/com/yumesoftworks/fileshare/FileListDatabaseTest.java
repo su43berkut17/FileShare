@@ -1,6 +1,6 @@
 package com.yumesoftworks.fileshare;
 
-import android.arch.persistence.room.Room;
+import androidx.room.Room;
 import android.content.Context;
 
 import com.yumesoftworks.fileshare.data.AppDatabase;

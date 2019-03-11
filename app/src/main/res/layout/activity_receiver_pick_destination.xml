@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/rpd_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
@@ -15,7 +15,7 @@
         android:theme="@style/ToolbarWhite"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ReceiverPickDestinationActivity">
@@ -60,5 +60,5 @@
             ads:adSize="BANNER"
             ads:adUnitId="ca-app-pub-3940256099942544/6300978111" />
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>

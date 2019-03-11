@@ -1,11 +1,11 @@
 package com.yumesoftworks.fileshare;
 
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.support.constraint.ConstraintLayout;
-import android.support.v7.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -48,7 +48,7 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         fileViewerViewModel.deleteTable();
 
         //toolbar
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.afv_toolbar);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.mm_toolbar);
         setSupportActionBar(myToolbar);
     }
 

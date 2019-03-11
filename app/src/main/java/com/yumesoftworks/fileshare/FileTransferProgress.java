@@ -1,11 +1,10 @@
 package com.yumesoftworks.fileshare;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,10 +15,8 @@ import android.widget.TextView;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 import com.yumesoftworks.fileshare.recyclerAdapters.QueueListAdapter;
-import com.yumesoftworks.fileshare.TransferProgressActivity;
 
 import java.util.List;
-
 
 public class FileTransferProgress extends Fragment implements QueueListAdapter.QueueClickListener, View.OnClickListener {
 

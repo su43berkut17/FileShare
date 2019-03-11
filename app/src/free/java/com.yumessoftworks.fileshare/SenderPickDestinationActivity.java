@@ -4,12 +4,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiManager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
@@ -23,7 +23,6 @@ import com.yumesoftworks.fileshare.data.UserSendEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
 import com.yumesoftworks.fileshare.peerToPeer.SenderPickSocket;
 import com.yumesoftworks.fileshare.recyclerAdapters.SendFileUserListAdapter;
-import com.yumesoftworks.fileshare.TransferProgressActivity;
 
 import java.io.IOException;
 import java.net.ServerSocket;

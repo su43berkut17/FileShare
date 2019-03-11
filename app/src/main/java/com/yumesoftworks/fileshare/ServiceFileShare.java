@@ -11,8 +11,8 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.yumesoftworks.fileshare.data.AppDatabase;
@@ -22,7 +22,6 @@ import com.yumesoftworks.fileshare.data.UserInfoEntry;
 
 import java.util.List;
 
-import com.yumesoftworks.fileshare.TransferProgressActivity;
 import com.yumesoftworks.fileshare.peerToPeer.TransferFileCoordinatorHelper;
 
 public class ServiceFileShare extends Service implements

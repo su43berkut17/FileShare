@@ -1,13 +1,12 @@
 package com.yumesoftworks.fileshare;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.persistence.room.Room;
+import androidx.lifecycle.LiveData;
+import androidx.room.Room;
 import android.content.Context;
 
 import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.FileListDao;
 import com.yumesoftworks.fileshare.data.FileListEntry;
-import com.yumesoftworks.fileshare.data.UserInfoEntry;
 
 import org.junit.After;
 import org.junit.Before;

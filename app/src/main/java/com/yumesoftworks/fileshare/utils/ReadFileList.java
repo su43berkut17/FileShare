@@ -1,10 +1,9 @@
 package com.yumesoftworks.fileshare.utils;
 
-import android.arch.lifecycle.MutableLiveData;
-import android.content.ContentResolver;
+import androidx.lifecycle.MutableLiveData;
+
 import android.content.Context;
 import android.net.Uri;
-import android.os.Environment;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 

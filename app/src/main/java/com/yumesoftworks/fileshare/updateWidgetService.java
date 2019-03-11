@@ -5,20 +5,14 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.appwidget.AppWidgetManager;
-import android.arch.persistence.room.Database;
+import androidx.room.Database;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
-import android.support.v4.app.NotificationCompat;
+import androidx.core.app.NotificationCompat;
 import android.util.Log;
-
-import com.yumesoftworks.fileshare.data.AppDatabase;
-import com.yumesoftworks.fileshare.data.UserInfoDao;
-import com.yumesoftworks.fileshare.data.UserInfoEntry;
-
-import java.util.List;
 
 public class updateWidgetService extends IntentService {
 
