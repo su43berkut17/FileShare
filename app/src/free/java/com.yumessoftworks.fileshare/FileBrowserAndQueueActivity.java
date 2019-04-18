@@ -182,8 +182,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                     fragmentQueueViewer = (QueueViewer) fragmentManager.findFragmentById(mainId);
                 }
 
-                //we cteate the file one from scratch
-                fragmentFileViewer=new FileViewer();
+                //we create the file one from scratch
+                fragmentFileViewer = new FileViewer();
             }
         }
 
@@ -250,7 +250,9 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         @Override
         public void onChanged(@Nullable String recPath) {
             //we update the path
-            fragmentFileViewer.updatePath(recPath);
+            if (fragmentFileViewer.isResumed()) {
+                fragmentFileViewer.updatePath(recPath);
+            }
         }
     };
 
@@ -385,38 +387,43 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         //return super.onOptionsItemSelected(item);
         switch (item.getItemId()) {
             case android.R.id.home:
-                //if we are in 1 or 2 panel mode
-                if (mTwoPanel){
-                    //we go back
-                    onBackPressed();
-                }else {
-                    //we check the current fragment
-                    if (mCurrentFragment == QUEUE_FRAGMENT) {
-                        Log.d(TAG,"current is queue fragment so we reload the file fragment");
-
-                        //we reload the  fragment
-                        fragmentManager.beginTransaction()
-                                .replace(R.id.frag_afv_main, fragmentFileViewer)
-                                .commit();
-
-                        //we reattach the observer
-                        fileViewerViewModel.getData().observe(this, fileViewerViewModelObserver);
-                        fileViewerViewModel.getPath().observe(this,fileViewerViewModelObserverPath);
-
-                        //we update the data and path
-                        fileFragmentRequestUpdate();
-
-                        //we set the current fragment
-                        mCurrentFragment=FILE_FRAGMENT;
-                        changeActionBarName("FileShare - Send Files");
-                    } else {
-                        //we are on the 1st fragment so we can go back
-                        onBackPressed();
-                    }
-                }
+                onBackPressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        //if we are in 1 or 2 panel mode
+        if (mTwoPanel){
+            //we go back
+            super.onBackPressed();
+        }else {
+            //we check the current fragment
+            if (mCurrentFragment == QUEUE_FRAGMENT) {
+                Log.d(TAG,"current is queue fragment so we reload the file fragment");
+
+                //we reload the  fragment
+                fragmentManager.beginTransaction()
+                        .replace(R.id.frag_afv_main, fragmentFileViewer)
+                        .commit();
+
+                //we reattach the observer
+                fileViewerViewModel.getData().observe(this, fileViewerViewModelObserver);
+                fileViewerViewModel.getPath().observe(this,fileViewerViewModelObserverPath);
+
+                //we update the data and path
+                fileFragmentRequestUpdate();
+
+                //we set the current fragment
+                mCurrentFragment=FILE_FRAGMENT;
+                changeActionBarName("FileShare - Send Files");
+            } else {
+                //we are on the 1st fragment so we can go back
+                super.onBackPressed();
+            }
         }
     }
 

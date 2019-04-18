@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.recyclerAdapters.FileListAdapter;
@@ -137,7 +138,9 @@ public class FileViewer extends Fragment implements
 
     //update the path
     public void updatePath(String path){
-        textPath.setText(path);
+        if (textPath!=null) {
+            textPath.setText(path);
+        }
     }
 
     //hide the button here
@@ -180,8 +183,12 @@ public class FileViewer extends Fragment implements
 
     //interfaces from the adapter
     @Override
-    public void onItemClickListener(int itemId) {
-        onButtonPressed(rvAdapter.getFileItem(itemId));
+    public void onItemClickListener(int itemId, int type) {
+        if (type==rvAdapter.TYPE_CHECKBOX) {
+            onButtonPressed(rvAdapter.getFileItem(itemId));
+        }else{
+            Toast.makeText(getActivity().getBaseContext(), "this is a test",Toast.LENGTH_LONG).show();
+        }
     }
 
     //method that takes value from the adapter implementation and sends it to the activity via an interface

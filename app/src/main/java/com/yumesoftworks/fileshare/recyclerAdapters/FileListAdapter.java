@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.yumesoftworks.fileshare.R;
@@ -21,6 +22,9 @@ import java.util.List;
 
 public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileListViewHolder> {
     private static final String TAG="FileListAdapter";
+    public static final int TYPE_CHECKBOX=1001;
+    public static final int TYPE_OPEN_FILE=1002;
+
     final private FileClickListener mFileClickListener;
 
     private List<FileListEntry> mFileList;
@@ -150,42 +154,51 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
             tv_fileName=itemView.findViewById(R.id.tv_item_file_name);
             cv_selected=itemView.findViewById(R.id.cb_item_file);
 
+            //for selector
             cv_selected.setOnClickListener(this);
             itemView.setOnClickListener(this);
+
+            //for image
+            iv_icon.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
             Log.d(TAG,"Click on item "+view.getId());
-            //we change the value of selected items
-            if (mFileList.get(getAdapterPosition()).getDirectory()==false) {
-                Log.d(TAG,"It is not a directory, it is a "+view.toString());
-                if (mFileList.get(getAdapterPosition()).getIsSelected() == 0) {
-                    //we activate the checkbox
-                    mFileList.get(getAdapterPosition()).setIsSelected(1);
+            //we check it is a thumbnail to open it in browser if needed
+            if (view.getId()==R.id.iv_item_file){
+                mFileClickListener.onItemClickListener(getAdapterPosition(),TYPE_OPEN_FILE);
+            }else {
+                //we change the value of selected items
+                if (mFileList.get(getAdapterPosition()).getDirectory() == false) {
+                    Log.d(TAG, "It is not a directory, it is a " + view.toString());
+                    if (mFileList.get(getAdapterPosition()).getIsSelected() == 0) {
+                        //we activate the checkbox
+                        mFileList.get(getAdapterPosition()).setIsSelected(1);
 
-                    if (view.getId() != R.id.cb_item_file) {
+                        if (view.getId() != R.id.cb_item_file) {
 
-                        Log.d(TAG, "we didnt click the checkbox so we change it");
-                        cv_selected.setChecked(true);
-                    }
-                } else {
-                    //we deactivate the checkbox and values
-                    mFileList.get(getAdapterPosition()).setIsSelected(0);
+                            Log.d(TAG, "we didnt click the checkbox so we change it");
+                            cv_selected.setChecked(true);
+                        }
+                    } else {
+                        //we deactivate the checkbox and values
+                        mFileList.get(getAdapterPosition()).setIsSelected(0);
 
-                    if (view.getId() != R.id.cb_item_file) {
-                        Log.d(TAG, "we didnt click the checkbox so we change it");
-                        cv_selected.setChecked(false);
+                        if (view.getId() != R.id.cb_item_file) {
+                            Log.d(TAG, "we didnt click the checkbox so we change it");
+                            cv_selected.setChecked(false);
+                        }
                     }
                 }
             }
 
-            mFileClickListener.onItemClickListener(getAdapterPosition());
+            mFileClickListener.onItemClickListener(getAdapterPosition(),TYPE_CHECKBOX);
         }
     }
 
     //interface
     public interface FileClickListener{
-        void onItemClickListener(int itemId);
+        void onItemClickListener(int itemId,int type);
     }
 }
