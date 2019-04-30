@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.recyclerAdapters.QueueListAdapter;
@@ -32,6 +33,7 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
     private static List<FileListEntry> fileList;
     private int mRvPosition;
     private LinearLayoutManager mLinearLayoutManager;
+    private LinearLayout mEmptyList;
 
     private QueueFragmentClickListener mQueueClickListener;
 
@@ -46,6 +48,14 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
         super.onAttach(context);
 
         mQueueClickListener=(QueueFragmentClickListener) context;
+
+        if (rvAdapter!=null) {
+            if (rvAdapter.getItemCount() > 0) {
+                mEmptyList.setVisibility(View.INVISIBLE);
+            } else {
+                mEmptyList.setVisibility(View.VISIBLE);
+            }
+        }
     }
 
     @Override
@@ -86,6 +96,7 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
         rvFileQueue=queueView.findViewById(R.id.rv_file_queue);
         mLinearLayoutManager=new LinearLayoutManager(getContext());
         rvFileQueue.setLayoutManager(mLinearLayoutManager);
+        mEmptyList=queueView.findViewById(R.id.ll_fqv_empty);
 
         //if (fileList != null) {
             rvAdapter = new QueueListAdapter(getContext(),this);
@@ -121,6 +132,14 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
             rvAdapter.setFileList(fileListEntry);
             rvAdapter.notifyDataSetChanged();
             mLinearLayoutManager.scrollToPosition(mRvPosition);
+
+            if (rvAdapter.getItemCount()>0){
+                mEmptyList.setVisibility(View.INVISIBLE);
+            }else{
+                mEmptyList.setVisibility(View.VISIBLE);
+            }
+        }else{
+            mEmptyList.setVisibility(View.VISIBLE);
         }
     }
 
@@ -136,8 +155,16 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
         rvAdapter.removeItem(position);
         rvAdapter.notifyItemRemoved(position);
 
+        Boolean isLast;
+
+        if (rvAdapter.getItemCount()<=0){
+            isLast=true;
+        }else{
+            isLast=false;
+        }
+
         //remove it from the database
-        mQueueClickListener.onItemSwiped(entryToDelete);
+        mQueueClickListener.onItemSwiped(entryToDelete, isLast);
     }
 
     //on click interface
@@ -151,7 +178,7 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
 
     //interface to activity
     public interface QueueFragmentClickListener{
-        void onItemSwiped(FileListEntry file);
+        void onItemSwiped(FileListEntry file, Boolean isLast);
         void onButtonSendClicked();
         void queueFragmentRequestUpdate();
     }

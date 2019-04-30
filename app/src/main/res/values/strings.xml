@@ -37,7 +37,10 @@
     <string name="fb_path">/</string>
 
     <!-- Activity file queue -->
+    <string name="fq_tv_title_queue">Files to be sent:</string>
     <string name="fq_iv_delete_description">Remove from queue</string>
+    <string name="fq_iv_empty_queue">The queue is empty</string>
+    <string name="fq_tv_empty_queue">Sharing queue is empty</string>
     <string name="fb_button_send_files">Send Files</string>
 
     <!--Activity pick user to send -->

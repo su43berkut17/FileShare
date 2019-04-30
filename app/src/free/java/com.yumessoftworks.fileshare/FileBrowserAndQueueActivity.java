@@ -260,11 +260,14 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     final Observer<List<FileListEntry>> queueViewerViewModelObserver=new Observer<List<FileListEntry>>() {
         @Override
         public void onChanged(@Nullable List<FileListEntry> fileListEntries) {
-            //only if it is not a swipe update since that is managed by the adapter
-            if (mIsNotDeletion) {
-                fragmentQueueViewer.updateQueue(fileListEntries);
-            }else{
-                mIsNotDeletion=true;
+            //only if the qeue fragment is attached
+            if (fragmentQueueViewer.isAdded()) {
+                //only if it is not a swipe update since that is managed by the adapter
+                if (mIsNotDeletion) {
+                    fragmentQueueViewer.updateQueue(fileListEntries);
+                } else {
+                    mIsNotDeletion = true;
+                }
             }
         }
     };
@@ -364,9 +367,10 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onItemSwiped(FileListEntry file) {
+    public void onItemSwiped(FileListEntry file, Boolean isLastSwipe) {
         //we delete it from the database
-        mIsNotDeletion=false;
+        mIsNotDeletion = isLastSwipe;
+
         fileViewerViewModel.deleteFile(file);
     }
 

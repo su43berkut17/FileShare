@@ -5,17 +5,52 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-    <ScrollView
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/fq_tv_title_queue"
+        android:layout_margin="@dimen/default_padding"
+        android:textSize="@dimen/medium_text"/>
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_file_queue"
+        <LinearLayout android:id="@+id/ll_fqv_empty"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
 
-    </ScrollView>
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="@dimen/welcome_icon_size"
+                android:layout_height="@dimen/welcome_icon_size"
+                android:contentDescription="@string/fq_iv_empty_queue"
+                app:srcCompat="@drawable/wait_transfer" />
+
+            <TextView
+                android:id="@+id/tv_empty_queue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_padding"
+                android:text="@string/fq_tv_empty_queue"
+                android:textSize="@dimen/medium_text" />
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_file_queue"
+                android:layout_width="match_parent"
+                android:layout_height="0dp" />
+
+        </ScrollView>
+    </FrameLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
