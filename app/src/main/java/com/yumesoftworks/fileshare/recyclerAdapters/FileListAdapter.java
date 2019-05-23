@@ -54,11 +54,13 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
         //we check the checkbox status
         if (fileListEntry.getIsSelected()==1){
             fileListViewHolder.cv_selected.setChecked(true);
+            Log.d(TAG,"It is checked");
         }else{
             fileListViewHolder.cv_selected.setChecked(false);
+            Log.d(TAG,"It is not checked");
         }
 
-        Log.d(TAG,"mime type is "+fileListEntry.getMimeType());
+        //Log.d(TAG,"mime type is "+fileListEntry.getMimeType());
         Log.d(TAG,"the path is "+fileListEntry.getPath());
 
         //placeholder uri
@@ -135,6 +137,19 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
         mFileList=FileListData;
         notifyDataSetChanged();
     }
+    
+    //public method to modify checklist when it is shown in double panels
+    public void updateChecklist(FileListEntry fileListEntry){
+        //cycle in the file list
+        for (FileListEntry file:mFileList){
+            if ((file.getPath()==fileListEntry.getPath())&&(file.getFileName()==fileListEntry.getFileName())){
+                //same file, we verify the status of the checkbox
+                file.setIsSelected(fileListEntry.getIsSelected());
+            }
+        }
+
+        notifyDataSetChanged();
+    }
 
     //public method to get adapter item
     public FileListEntry getFileItem(int itemId){
@@ -177,7 +192,6 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
                         mFileList.get(getAdapterPosition()).setIsSelected(1);
 
                         if (view.getId() != R.id.cb_item_file) {
-
                             Log.d(TAG, "we didnt click the checkbox so we change it");
                             cv_selected.setChecked(true);
                         }

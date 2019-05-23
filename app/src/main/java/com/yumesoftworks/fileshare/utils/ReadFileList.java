@@ -22,7 +22,8 @@ public class ReadFileList {
 
     }
 
-    public MutableLiveData<List<FileListEntry>> loadList(String path, Context context){
+    //public MutableLiveData<List<FileListEntry>> loadList(String path, Context context){
+    public List<FileListEntry> loadList(String path, Context context){
         mContext=context;
 
         File file=new File(path);
@@ -33,7 +34,7 @@ public class ReadFileList {
             Log.i(TAG, "the list of files is " + file.listFiles());
             Log.i(TAG, "the number of files in the array is " + String.valueOf(list.length));
 
-            MutableLiveData<List<FileListEntry>> LiveDataFileList = new MutableLiveData<>();
+            //MutableLiveData<List<FileListEntry>> LiveDataFileList = new MutableLiveData<>();
 
             //Final file list
             List<FileListEntry> fileList = new ArrayList<>();
@@ -89,9 +90,9 @@ public class ReadFileList {
             //merge the arrays
             fileList.addAll(tempFileList);
 
-            LiveDataFileList.setValue(fileList);
-
-            return LiveDataFileList;
+            //LiveDataFileList.setValue(fileList);
+            //return LiveDataFileList;
+            return fileList;
         }else{
             return null;
         }

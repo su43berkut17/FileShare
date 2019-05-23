@@ -372,6 +372,9 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         mIsNotDeletion = isLastSwipe;
 
         fileViewerViewModel.deleteFile(file);
+        if (mTwoPanel) {
+            //fragmentFileViewer.updateFileRV(fileViewerViewModel.getData().getValue());
+        }
     }
 
     @Override
