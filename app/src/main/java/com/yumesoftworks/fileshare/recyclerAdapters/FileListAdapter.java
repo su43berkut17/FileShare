@@ -54,14 +54,14 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
         //we check the checkbox status
         if (fileListEntry.getIsSelected()==1){
             fileListViewHolder.cv_selected.setChecked(true);
-            Log.d(TAG,"It is checked");
+            //Log.d(TAG,"It is checked");
         }else{
             fileListViewHolder.cv_selected.setChecked(false);
-            Log.d(TAG,"It is not checked");
+            //Log.d(TAG,"It is not checked");
         }
 
         //Log.d(TAG,"mime type is "+fileListEntry.getMimeType());
-        Log.d(TAG,"the path is "+fileListEntry.getPath());
+        //Log.d(TAG,"the path is "+fileListEntry.getPath());
 
         //placeholder uri
         int placeholderUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
@@ -188,11 +188,11 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
                 if (mFileList.get(getAdapterPosition()).getDirectory() == false) {
                     Log.d(TAG, "It is not a directory, it is a " + view.toString());
                     if (mFileList.get(getAdapterPosition()).getIsSelected() == 0) {
-                        //we activate the checkbox
+                        //we activate the checkbox and values
                         mFileList.get(getAdapterPosition()).setIsSelected(1);
 
                         if (view.getId() != R.id.cb_item_file) {
-                            Log.d(TAG, "we didnt click the checkbox so we change it");
+                            Log.d(TAG, "Checkbox set to true");
                             cv_selected.setChecked(true);
                         }
                     } else {
@@ -200,7 +200,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
                         mFileList.get(getAdapterPosition()).setIsSelected(0);
 
                         if (view.getId() != R.id.cb_item_file) {
-                            Log.d(TAG, "we didnt click the checkbox so we change it");
+                            Log.d(TAG, "Checkbox set to FALSE");
                             cv_selected.setChecked(false);
                         }
                     }

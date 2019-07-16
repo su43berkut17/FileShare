@@ -34,7 +34,7 @@ public class FileViewerViewModel extends AndroidViewModel {
         File path=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"");
         mPath=new MutableLiveData<>();
         mPath.postValue(path.getPath());
-        data=readFileList.loadList(path.getAbsolutePath(),this.getApplication().getApplicationContext());
+        //data=readFileList.loadList(path.getAbsolutePath(),this.getApplication().getApplicationContext());
     }
 
     public MutableLiveData<List<FileListEntry>> getData(){
@@ -56,7 +56,7 @@ public class FileViewerViewModel extends AndroidViewModel {
 
             mPath.postValue(path);
             try {
-                data.postValue(s.loadList(path, this.getApplication().getApplicationContext()).getValue());
+                //data.postValue(s.loadList(path, this.getApplication().getApplicationContext()).getValue());
             } catch (Exception e) {
                 Log.d(TAG, "error null");
             }

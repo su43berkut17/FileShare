@@ -26,7 +26,15 @@ public class FileListRepository {
         return data;
     }
 
-    //inserts
+    public LiveData<List<FileListEntry>>getFilesPath(String recPath){
+        return fileListDao.loadFileListPath(recPath);
+    }
+
+    public List<FileListEntry>getFilesDirect(){
+        return fileListDao.loadFileListDirect();
+    }
+
+    //add file to the list
     public void saveFile(FileListEntry fileListEntry){
         new saveDatabaseAsyncTask(database).execute(fileListEntry);
     }
@@ -46,7 +54,7 @@ public class FileListRepository {
         }
     }
 
-    //delete
+    //delete file
     public void deleteFile(FileListEntry fileListEntry){
         new deleteDatabaseAsyncTask(database).execute(fileListEntry);
     }
@@ -66,6 +74,7 @@ public class FileListRepository {
         }
     }
 
+    //delete with checkbox
     public void deleteFileCheckbox(FileListEntry fileListEntry){
         new deletePathAsyncTask(database).execute(fileListEntry);
     }
@@ -78,11 +87,14 @@ public class FileListRepository {
         @Override
         protected Void doInBackground(FileListEntry... voids) {
             //we delete the file checkbox
-            database.fileListDao().deleteFileNotSameId(voids[0].getPath());
+            Log.d(TAG,"Deleting "+voids[0].getFileName()+" is selected "+voids[0].getIsSelected());
+            int retInt=database.fileListDao().deleteFileNotSameId(voids[0].getPath());
+            Log.d(TAG,"retInt is "+retInt);
             return null;
         }
     }
 
+    //clear the file list
     public void deleteTable(){
         new deleteTableDatabaseAsyncTask(database).execute();
     }

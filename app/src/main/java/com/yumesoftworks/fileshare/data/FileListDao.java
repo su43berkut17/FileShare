@@ -16,7 +16,11 @@ public interface FileListDao {
     LiveData<List<FileListEntry>> loadFileList();
 
     @Query("SELECT * FROM FileList"+" ORDER BY id")
+    //no live data
     List<FileListEntry> loadFileListDirect();
+
+    @Query(("SELECT * FROM FileList WHERE parentFolder= :pathToRead")+" ORDER BY path")
+    LiveData<List<FileListEntry>> loadFileListPath(String pathToRead);
 
     @Insert
     void insertFile(FileListEntry fileListEntry);
@@ -28,7 +32,7 @@ public interface FileListDao {
     void deleteFile(FileListEntry fileListEntry);
 
     @Query("DELETE FROM FileList WHERE path = :pathToDelete")
-    void deleteFileNotSameId(String pathToDelete);
+    int deleteFileNotSameId(String pathToDelete);
 
     @Query("DELETE FROM FileList")
     void clearFileList();

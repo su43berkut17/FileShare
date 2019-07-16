@@ -16,15 +16,15 @@ import java.util.List;
 
 public class ReadFileList {
     private final static String TAG="ReadFileList";
-    private Context mContext;
+    //private Context mContext;
 
     public ReadFileList(){
 
     }
 
     //public MutableLiveData<List<FileListEntry>> loadList(String path, Context context){
-    public List<FileListEntry> loadList(String path, Context context){
-        mContext=context;
+    public List<FileListEntry> loadList(String path){
+        //mContext=context;
 
         File file=new File(path);
         Log.i(TAG,"we load the path: "+path);

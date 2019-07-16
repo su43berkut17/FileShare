@@ -22,7 +22,7 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
     ConstraintLayout receiveFilesButton;
 
     //view model
-    private FileViewerViewModel fileViewerViewModel;
+    private CombinedDataViewModel fileViewerViewModel;
 
     //analytics and admob
     private FirebaseAnalytics mFireAnalytics;
@@ -53,7 +53,7 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         receiveFilesButton.setOnClickListener(this);
 
         //we empty the stored database
-        fileViewerViewModel= ViewModelProviders.of(this).get(FileViewerViewModel.class);
+        fileViewerViewModel= ViewModelProviders.of(this).get(CombinedDataViewModel.class);
         fileViewerViewModel.deleteTable();
 
         //toolbar

@@ -14,6 +14,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.Environment;
 import android.util.Log;
 import android.view.MenuItem;
 
@@ -22,7 +24,9 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
+import com.yumesoftworks.fileshare.utils.MergeFileListAndDatabase;
 
+import java.io.File;
 import java.util.List;
 
 //this activity will change depending if it is a tablet view
@@ -33,6 +37,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private static final String TAG="FileBaQActivity";
     private static final int FILE_FRAGMENT=1000;
     private static final int QUEUE_FRAGMENT=1001;
+    private static final int LIVEDATA_UPDATE=2000;
+    private static final int FILETREE_UPDATE=2001;
 
     //2 panel
     private boolean mTwoPanel;
@@ -49,13 +55,17 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private FragmentManager fragmentManager;
 
     //view model
-    private FileViewerViewModel fileViewerViewModel;
-    private QueueViewerViewModel queueViewerViewModel;
+    //private FileViewerViewModel fileViewerViewModel;
+    //private QueueViewerViewModel queueViewerViewModel;
+    private CombinedDataViewModel fileViewerViewModel;
+    private CombinedDataViewModel queueViewerViewModel;
+    private String mPath;
+    private static final String CURRENT_PATH_TAG="CurrentPathTag";
 
     //for deletion in the queue viewer
     private boolean mIsNotDeletion=true;
     //for checkbox interaction
-    private boolean mIsCheckBoxInteraction=false;
+    private boolean mAllowLivedataUpdate = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,8 +85,10 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
         if(savedInstanceState!=null){
             mCurrentFragment=savedInstanceState.getInt(CURRENT_FRAGMENT_TAG);
+            mPath=savedInstanceState.getString(CURRENT_PATH_TAG);
         }else{
             mCurrentFragment=FILE_FRAGMENT;
+            mPath=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "").getAbsolutePath();
         }
 
         //we check if it is 1 or 2 panels
@@ -101,6 +113,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(CURRENT_FRAGMENT_TAG,mCurrentFragment);
+        outState.putString(CURRENT_PATH_TAG,mPath);
     }
 
     private void initializeVariables(){
@@ -195,10 +208,10 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         Log.d(TAG,"Load fragments");
         //we create the viewmodel observers if they are null
         if (fileViewerViewModel==null){
-            fileViewerViewModel = ViewModelProviders.of(this).get(FileViewerViewModel.class);
+            fileViewerViewModel = ViewModelProviders.of(this).get(CombinedDataViewModel.class);
         }
         if (queueViewerViewModel==null) {
-            queueViewerViewModel = ViewModelProviders.of(this).get(QueueViewerViewModel.class);
+            queueViewerViewModel = ViewModelProviders.of(this).get(CombinedDataViewModel.class);
         }
 
         //we check which fragment to load depending on the current fragment
@@ -226,7 +239,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
         //we attach the observers to the activiy
         fileViewerViewModel.getData().observe(this,fileViewerViewModelObserver);
-        fileViewerViewModel.getPath().observe(this,fileViewerViewModelObserverPath);
+        //fileViewerViewModel.getPath().observe(this,fileViewerViewModelObserverPath);
         queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
 
         changeActionBarName("FileShare - Send Files");
@@ -238,20 +251,36 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         public void onChanged(@Nullable List<FileListEntry> fileListEntries) {
             //we update the recyclerView Adapter
             Log.d(TAG,"ON CHANGED, the file list entries length returned in lifecycle is "+fileListEntries.size());
-            if (!mIsCheckBoxInteraction) {
-                fragmentFileViewer.updateFileRV(fileListEntries);
-            }else{
-                mIsCheckBoxInteraction=false;
+            if (mAllowLivedataUpdate) {
+                mergeFileAndData(fileListEntries,LIVEDATA_UPDATE);
             }
         }
     };
+
+    //function that merges whether is from livedata update or from button interaction
+    private void mergeFileAndData(List<FileListEntry> data, int type){
+        //depending on the type call the merging
+
+        List<FileListEntry> finalList;
+
+        if (type==LIVEDATA_UPDATE){
+            finalList=new MergeFileListAndDatabase().mergeFileListAndDatabase(data,mPath);
+        }else{
+            finalList=new MergeFileListAndDatabase().mergeFileListAndDatabase(fileViewerViewModel.getData().getValue(),mPath);
+        }
+
+        fragmentFileViewer.updateFileRV(finalList);
+        fragmentFileViewer.updatePath(mPath);
+    }
 
     final Observer<String> fileViewerViewModelObserverPath=new Observer<String>() {
         @Override
         public void onChanged(@Nullable String recPath) {
             //we update the path
-            if (fragmentFileViewer.isResumed()) {
-                fragmentFileViewer.updatePath(recPath);
+            if (recPath!=null) {
+                if (fragmentFileViewer.isResumed()) {
+                    fragmentFileViewer.updatePath(recPath);
+                }
             }
         }
     };
@@ -260,7 +289,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     final Observer<List<FileListEntry>> queueViewerViewModelObserver=new Observer<List<FileListEntry>>() {
         @Override
         public void onChanged(@Nullable List<FileListEntry> fileListEntries) {
-            //only if the qeue fragment is attached
+            //only if the queue fragment is attached
             if (fragmentQueueViewer.isAdded()) {
                 //only if it is not a swipe update since that is managed by the adapter
                 if (mIsNotDeletion) {
@@ -310,18 +339,24 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         if (fileListEntry.getDirectory()){
             //it is directory, we navigate to the new route
             Log.d(TAG,"the path to open is "+fileListEntry.getPath());
-            fileViewerViewModel.refreshData(fileListEntry.getPath());
+            //fileViewerViewModel.refreshData(fileListEntry.getPath());
+            //fileViewerViewModel.updateFileListPath(fileListEntry.getPath());
+            mPath=fileListEntry.getPath();
+            mAllowLivedataUpdate=true;
+            mergeFileAndData(fileViewerViewModel.getData().getValue(),FILETREE_UPDATE);
         }else{
             //we check if it has been selected or not
-            //mIsCheckBoxInteraction=true;
+            //mAllowLivedataUpdate=true;
             if (fileListEntry.getIsSelected()==0){
                 //it is not selected so we delete it
                 //we reset the is selected value as 1 so the fileListEntry is the same as the one that was saved before
-                fileListEntry.setIsSelected(1);
+                //fileListEntry.setIsSelected(1);
                 //fileViewerViewModel.deleteFile(fileListEntry);
+                mAllowLivedataUpdate =false;
                 fileViewerViewModel.deleteFileCheckbox(fileListEntry);
             }else{
                 //it is selected so we save it
+                mAllowLivedataUpdate =false;
                 fileViewerViewModel.saveFile(fileListEntry);
             }
         }
@@ -357,7 +392,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     public void fileFragmentRequestUpdate() {
         //we update the info of the fragment per the fragment request
         fragmentFileViewer.updateFileRV(fileViewerViewModel.getData().getValue());
-        fragmentFileViewer.updatePath(fileViewerViewModel.getPath().getValue());
+        //fragmentFileViewer.updatePath(fileViewerViewModel.getPath());
+        fragmentFileViewer.updatePath(mPath);
     }
 
     @Override
@@ -419,7 +455,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
                 //we reattach the observer
                 fileViewerViewModel.getData().observe(this, fileViewerViewModelObserver);
-                fileViewerViewModel.getPath().observe(this,fileViewerViewModelObserverPath);
+                //fileViewerViewModel.getPath().observe(this,fileViewerViewModelObserverPath);
 
                 //we update the data and path
                 fileFragmentRequestUpdate();
