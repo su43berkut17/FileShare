@@ -376,7 +376,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                     .commit();
 
             //it should load automatically from the lifecycle
-            queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
+            //queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
 
             //we set the current fragment as the 1st one
             mCurrentFragment=QUEUE_FRAGMENT;
@@ -392,8 +392,9 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     public void fileFragmentRequestUpdate() {
         //we update the info of the fragment per the fragment request
         fragmentFileViewer.updateFileRV(fileViewerViewModel.getData().getValue());
+        mergeFileAndData(null,FILETREE_UPDATE);
         //fragmentFileViewer.updatePath(fileViewerViewModel.getPath());
-        fragmentFileViewer.updatePath(mPath);
+        //fragmentFileViewer.updatePath(mPath);
     }
 
     @Override
@@ -453,8 +454,10 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                         .replace(R.id.frag_afv_main, fragmentFileViewer)
                         .commit();
 
+                mAllowLivedataUpdate=true;
+
                 //we reattach the observer
-                fileViewerViewModel.getData().observe(this, fileViewerViewModelObserver);
+                //fileViewerViewModel.getData().observe(this, fileViewerViewModelObserver);
                 //fileViewerViewModel.getPath().observe(this,fileViewerViewModelObserverPath);
 
                 //we update the data and path

@@ -123,6 +123,7 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
     public void removeItem(int position) {
         mFileList.remove(position);
         notifyItemRemoved(position);
+        notifyItemRangeChanged(position,getItemCount());
     }
 
     public void restoreItem(FileListEntry item, int position) {

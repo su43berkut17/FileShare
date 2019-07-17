@@ -12,7 +12,7 @@ import java.util.List;
 
 @Dao
 public interface FileListDao {
-    @Query("SELECT * FROM FileList"+" ORDER BY id")
+    @Query("SELECT * FROM FileList"+" ORDER BY LOWER(path)")
     LiveData<List<FileListEntry>> loadFileList();
 
     @Query("SELECT * FROM FileList"+" ORDER BY id")

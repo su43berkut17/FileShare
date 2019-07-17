@@ -26,13 +26,13 @@ public class FileListRepository {
         return data;
     }
 
-    public LiveData<List<FileListEntry>>getFilesPath(String recPath){
+    /*public LiveData<List<FileListEntry>>getFilesPath(String recPath){
         return fileListDao.loadFileListPath(recPath);
     }
 
     public List<FileListEntry>getFilesDirect(){
         return fileListDao.loadFileListDirect();
-    }
+    }*/
 
     //add file to the list
     public void saveFile(FileListEntry fileListEntry){

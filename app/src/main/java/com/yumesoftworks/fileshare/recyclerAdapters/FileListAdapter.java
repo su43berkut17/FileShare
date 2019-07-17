@@ -67,7 +67,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
         int placeholderUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
 
         //we check if it is a directory
-        if (fileListEntry.getDirectory()){
+        if (fileListEntry.getDirectory()!=null && fileListEntry.getDirectory()==true){
             //it is a directory
             fileListViewHolder.cv_selected.setVisibility(View.INVISIBLE);
             int imageUri = mContext.getResources().getIdentifier("icon_folder_128","drawable",mContext.getPackageName());
