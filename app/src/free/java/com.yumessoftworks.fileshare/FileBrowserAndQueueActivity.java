@@ -410,7 +410,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
         fileViewerViewModel.deleteFile(file);
         if (mTwoPanel) {
-            //fragmentFileViewer.updateFileRV(fileViewerViewModel.getData().getValue());
+            file.setIsSelected(0);
+            fragmentFileViewer.updateCheckbox(file);
         }
     }
 

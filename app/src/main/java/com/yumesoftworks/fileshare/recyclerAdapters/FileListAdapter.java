@@ -142,7 +142,8 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
     public void updateChecklist(FileListEntry fileListEntry){
         //cycle in the file list
         for (FileListEntry file:mFileList){
-            if ((file.getPath()==fileListEntry.getPath())&&(file.getFileName()==fileListEntry.getFileName())){
+
+            if ((file.getPath().equals(fileListEntry.getPath()))&&(file.getFileName().equals(fileListEntry.getFileName()))){
                 //same file, we verify the status of the checkbox
                 file.setIsSelected(fileListEntry.getIsSelected());
             }

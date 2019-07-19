@@ -143,6 +143,11 @@ public class FileViewer extends Fragment implements
         }
     }
 
+    //update the checkbox
+    public void updateCheckbox(FileListEntry recFileListEntry){
+        rvAdapter.updateChecklist(recFileListEntry);
+    }
+
     //hide the button here
     public void hideButton(){
         mIsButtonShown=false;
