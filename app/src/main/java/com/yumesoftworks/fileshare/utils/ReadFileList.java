@@ -1,8 +1,5 @@
 package com.yumesoftworks.fileshare.utils;
 
-import androidx.lifecycle.MutableLiveData;
-
-import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -16,10 +13,8 @@ import java.util.List;
 
 public class ReadFileList {
     private final static String TAG="ReadFileList";
-    //private Context mContext;
 
     public ReadFileList(){
-
     }
 
     //public MutableLiveData<List<FileListEntry>> loadList(String path, Context context){
@@ -34,8 +29,6 @@ public class ReadFileList {
             Log.i(TAG, "the list of files is " + file.listFiles());
             Log.i(TAG, "the number of files in the array is " + String.valueOf(list.length));
 
-            //MutableLiveData<List<FileListEntry>> LiveDataFileList = new MutableLiveData<>();
-
             //Final file list
             List<FileListEntry> fileList = new ArrayList<>();
 
@@ -46,8 +39,9 @@ public class ReadFileList {
             File upperLevel = new File(path);
             upperLevel = new File(upperLevel.getParent());
 
+            //we check if parent folder is accessible
             //we add the item
-            if (upperLevel != null) {
+            if (upperLevel != null && upperLevel.listFiles()!=null && upperLevel.getPath().equals("/storage")==false) {
                 FileListEntry parentEntry = new FileListEntry(upperLevel.getAbsolutePath(),
                         "..",
                         0,
@@ -90,8 +84,6 @@ public class ReadFileList {
             //merge the arrays
             fileList.addAll(tempFileList);
 
-            //LiveDataFileList.setValue(fileList);
-            //return LiveDataFileList;
             return fileList;
         }else{
             return null;

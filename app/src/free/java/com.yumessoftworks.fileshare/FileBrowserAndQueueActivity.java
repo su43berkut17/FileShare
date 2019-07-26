@@ -1,7 +1,10 @@
 package com.yumesoftworks.fileshare;
 
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -24,6 +27,8 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
+import com.yumesoftworks.fileshare.data.StorageListEntry;
+import com.yumesoftworks.fileshare.utils.ChangeShownPath;
 import com.yumesoftworks.fileshare.utils.MergeFileListAndDatabase;
 
 import java.io.File;
@@ -55,8 +60,6 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private FragmentManager fragmentManager;
 
     //view model
-    //private FileViewerViewModel fileViewerViewModel;
-    //private QueueViewerViewModel queueViewerViewModel;
     private CombinedDataViewModel fileViewerViewModel;
     private CombinedDataViewModel queueViewerViewModel;
     private String mPath;
@@ -64,6 +67,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
     //for deletion in the queue viewer
     private boolean mIsNotDeletion=true;
+
     //for checkbox interaction
     private boolean mAllowLivedataUpdate = true;
 
@@ -239,7 +243,6 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
         //we attach the observers to the activiy
         fileViewerViewModel.getData().observe(this,fileViewerViewModelObserver);
-        //fileViewerViewModel.getPath().observe(this,fileViewerViewModelObserverPath);
         queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
 
         changeActionBarName("FileShare - Send Files");
@@ -260,7 +263,6 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     //function that merges whether is from livedata update or from button interaction
     private void mergeFileAndData(List<FileListEntry> data, int type){
         //depending on the type call the merging
-
         List<FileListEntry> finalList;
 
         if (type==LIVEDATA_UPDATE){
@@ -269,21 +271,9 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             finalList=new MergeFileListAndDatabase().mergeFileListAndDatabase(fileViewerViewModel.getData().getValue(),mPath);
         }
 
+        fragmentFileViewer.updatePath(new ChangeShownPath().filterString(mPath));
         fragmentFileViewer.updateFileRV(finalList);
-        fragmentFileViewer.updatePath(mPath);
     }
-
-    final Observer<String> fileViewerViewModelObserverPath=new Observer<String>() {
-        @Override
-        public void onChanged(@Nullable String recPath) {
-            //we update the path
-            if (recPath!=null) {
-                if (fragmentFileViewer.isResumed()) {
-                    fragmentFileViewer.updatePath(recPath);
-                }
-            }
-        }
-    };
 
     //observer for the queue viewer
     final Observer<List<FileListEntry>> queueViewerViewModelObserver=new Observer<List<FileListEntry>>() {
@@ -393,8 +383,14 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         //we update the info of the fragment per the fragment request
         fragmentFileViewer.updateFileRV(fileViewerViewModel.getData().getValue());
         mergeFileAndData(null,FILETREE_UPDATE);
-        //fragmentFileViewer.updatePath(fileViewerViewModel.getPath());
-        //fragmentFileViewer.updatePath(mPath);
+    }
+
+    @Override
+    public void fileFragmentSpinner(StorageListEntry entry) {
+        //update path from spinner
+        mPath=entry.getPath();
+        mAllowLivedataUpdate=true;
+        mergeFileAndData(fileViewerViewModel.getData().getValue(),FILETREE_UPDATE);
     }
 
     @Override
@@ -456,10 +452,6 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                         .commit();
 
                 mAllowLivedataUpdate=true;
-
-                //we reattach the observer
-                //fileViewerViewModel.getData().observe(this, fileViewerViewModelObserver);
-                //fileViewerViewModel.getPath().observe(this,fileViewerViewModelObserverPath);
 
                 //we update the data and path
                 fileFragmentRequestUpdate();

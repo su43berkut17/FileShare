@@ -11,21 +11,30 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.yumesoftworks.fileshare.data.FileListEntry;
+import com.yumesoftworks.fileshare.data.StorageListEntry;
 import com.yumesoftworks.fileshare.recyclerAdapters.FileListAdapter;
+import com.yumesoftworks.fileshare.utils.StorageCheck;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class FileViewer extends Fragment implements
         FileListAdapter.FileClickListener,
-        View.OnClickListener{
+        View.OnClickListener,
+        AdapterView.OnItemSelectedListener {
 
     private static final String TAG="FileViewerFrag";
     private static final String RECYCLER_VIEW_POSITION="rvPosition";
+    private static final String STORAGE_POSITION="spnPosition";
 
     //recycler view
     private RecyclerView rvFileList;
@@ -38,6 +47,12 @@ public class FileViewer extends Fragment implements
     private Button btnQueue;
     private Boolean mIsButtonShown;
     private TextView textPath;
+    private Spinner storagePicker;
+
+    //spinner
+    private ArrayAdapter<StorageListEntry> storageAdapter;
+    private String mSelectedStorage="";
+    private Boolean mIsSpinnerInit;
 
     //interfaces
     private OnFragmentFileInteractionListener mListener;
@@ -54,6 +69,8 @@ public class FileViewer extends Fragment implements
         if (savedInstanceState!=null) {
             mRvPosition = savedInstanceState.getInt(RECYCLER_VIEW_POSITION);
             Log.d(TAG, "We load the position " + mRvPosition);
+            mSelectedStorage=savedInstanceState.getString(STORAGE_POSITION);
+            Log.d(TAG, "We load the spinner " + mSelectedStorage);
         }
     }
 
@@ -77,6 +94,7 @@ public class FileViewer extends Fragment implements
         mRvPosition=mLinearLayoutManager.findFirstVisibleItemPosition();
         Log.d(TAG,"on save instance state, saving rv "+mRvPosition);
         outState.putInt(RECYCLER_VIEW_POSITION, mRvPosition);
+        outState.putString(STORAGE_POSITION,mSelectedStorage);
     }
 
     @Override
@@ -86,6 +104,7 @@ public class FileViewer extends Fragment implements
         //we check which view to inflate
         View mainView = inflater.inflate(R.layout.fragment_file_viewer, container, false);
 
+        storagePicker=mainView.findViewById(R.id.spi_ffv_storage_list);
         textPath=mainView.findViewById(R.id.tv_ffv_current_path);
         btnQueue=mainView.findViewById(R.id.bt_ffv_review_queue);
         rvFileList=mainView.findViewById(R.id.rv_file_viewer);
@@ -99,31 +118,70 @@ public class FileViewer extends Fragment implements
             }
         }
 
-        //if (fileList != null) {
-            rvAdapter = new FileListAdapter(getContext(),this);
+        rvAdapter = new FileListAdapter(getContext(),this);
 
-            //we set the adapter
-            rvFileList.setAdapter(rvAdapter);
-            rvAdapter.notifyDataSetChanged();
+        //we set the adapter
+        rvFileList.setAdapter(rvAdapter);
+        rvAdapter.notifyDataSetChanged();
 
-            //request an update
-            mListener.fileFragmentRequestUpdate();
+        //request an update
+        mListener.fileFragmentRequestUpdate();
 
-            Log.d(TAG,"the number of items in the adapter is "+rvAdapter.getItemCount());
-        //}
-
-            /*if (mRvPosition!=null){
-                Log.d(TAG,"we load the position "+mRvPosition.describeContents());
-                //rvFileList.getLayoutManager().onRestoreInstanceState(mRvPosition);
-                mLinearLayoutManager.onRestoreInstanceState(mRvPosition);
-               //mLinearLayoutManager.scrollToPosition(3);
-            }*/
-        //}
+        Log.d(TAG,"the number of items in the adapter is "+rvAdapter.getItemCount());
 
         //listeners button queue
         btnQueue.setOnClickListener(this);
 
         return mainView;
+    }
+
+    //spinner creation
+    public void createSpinner(List<File> list,String selectedItem){
+        List<StorageListEntry> storageList=new ArrayList<>();
+
+        Log.d(TAG,"creating spinner, selected item "+selectedItem);
+
+        //populate
+        for (File file:list) {
+            String absolutePath=file.getAbsolutePath();
+            String name=file.getName()+":";
+
+            if (absolutePath.contains("emulated/")||absolutePath.contains("EMULATED/")){
+                name="Internal Storage"+":";
+            }
+
+            StorageListEntry entry=new StorageListEntry(name,absolutePath);
+            storageList.add(entry);
+        }
+
+        storageAdapter=new ArrayAdapter<>(getContext(),
+                R.layout.item_spn_content,
+                storageList);
+        storageAdapter.setDropDownViewResource(R.layout.item_spn_content_dropdown);
+        //android.R.layout.simple_spinner_item,
+
+        storagePicker.setAdapter(storageAdapter);
+        storagePicker.setOnItemSelectedListener(this);
+
+        updateSpinner(selectedItem);
+    }
+
+    //spinner update selection
+    public void updateSpinner(String selectedItem){
+        int selectedIndex=0;
+
+        if (selectedItem!=null && selectedItem.isEmpty()==false){
+            for (int i=0;i<storageAdapter.getCount();i++){
+                StorageListEntry entry=storageAdapter.getItem(i);
+                Log.d(TAG,"Spinner comparing: Selected item: "+selectedItem+" with entry: "+entry.getName());
+                if (entry.getPath().contains(selectedItem)){
+                    Log.d(TAG,"IT CONTAINS THE PATH");
+                    selectedIndex=i;
+                }
+            }
+        }
+
+        storagePicker.setSelection(selectedIndex);
     }
 
     //update file viewer
@@ -140,6 +198,8 @@ public class FileViewer extends Fragment implements
     public void updatePath(String path){
         if (textPath!=null) {
             textPath.setText(path);
+            mSelectedStorage=path;
+            Log.d(TAG,"we update the path to "+mSelectedStorage);
         }
     }
 
@@ -158,7 +218,8 @@ public class FileViewer extends Fragment implements
         super.onAttach(context);
         if (context instanceof OnFragmentFileInteractionListener) {
             mListener = (OnFragmentFileInteractionListener) context;
-            mQueueButton=(OnButtonGoToQueueInterface) context;
+            mQueueButton = (OnButtonGoToQueueInterface) context;
+
             Log.d(TAG,"reattaching");
         } else {
             throw new RuntimeException(context.toString()
@@ -167,10 +228,20 @@ public class FileViewer extends Fragment implements
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        //start storage data
+        Log.d(TAG,"onResume");
+        List<File> list=new StorageCheck().getStorageList();
+        createSpinner(list,mSelectedStorage);
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
         mQueueButton=null;
+        mIsSpinnerInit=null;
     }
 
     //clicks
@@ -203,11 +274,31 @@ public class FileViewer extends Fragment implements
         }
     }
 
+    //spinner
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        if (mIsSpinnerInit==null){
+            mIsSpinnerInit=true;
+            Log.d(TAG,"initializing spinner");
+            return;
+        }
+        Log.d(TAG,"We have clicked the item "+storageAdapter.getItem(position).getName()+" "+
+                storageAdapter.getItem(position).getPath());
+        mListener.fileFragmentSpinner(storageAdapter.getItem(position));
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        Log.d(TAG,"Nothing is selected");
+        return;
+    }
+
     //interface to interact with the main activity
     //click on file browser item
     public interface OnFragmentFileInteractionListener {
         void onFragmentFileInteraction(FileListEntry fileItemSelected);
         void fileFragmentRequestUpdate();
+        void fileFragmentSpinner(StorageListEntry entry);
     }
 
     public interface OnButtonGoToQueueInterface{
