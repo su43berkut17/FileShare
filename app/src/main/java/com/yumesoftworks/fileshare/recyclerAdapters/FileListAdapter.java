@@ -60,8 +60,8 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
             //Log.d(TAG,"It is not checked");
         }
 
-        //Log.d(TAG,"mime type is "+fileListEntry.getMimeType());
-        //Log.d(TAG,"the path is "+fileListEntry.getPath());
+        Log.d(TAG,"mime type is "+fileListEntry.getMimeType());
+        Log.d(TAG,"the path is "+fileListEntry.getPath());
 
         //placeholder uri
         int placeholderUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
@@ -105,7 +105,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
                             .centerCrop()
                             .placeholder(placeholderUri)
                             .into(fileListViewHolder.iv_icon);
-                }else {
+                }else{
                     int tempUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
                     Picasso.get()
                             .load(tempUri)
@@ -114,6 +114,15 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
                             .placeholder(placeholderUri)
                             .into(fileListViewHolder.iv_icon);
                 }
+            }else{
+                //it is a file with no mime type
+                int tempUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
+                Picasso.get()
+                        .load(tempUri)
+                        .resize(200, 200)
+                        .centerCrop()
+                        .placeholder(placeholderUri)
+                        .into(fileListViewHolder.iv_icon);
             }
         }
     }

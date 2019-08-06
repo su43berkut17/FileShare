@@ -1,6 +1,8 @@
 package com.yumesoftworks.fileshare;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -263,7 +265,13 @@ public class FileViewer extends Fragment implements
         if (type==rvAdapter.TYPE_CHECKBOX) {
             onButtonPressed(rvAdapter.getFileItem(itemId));
         }else{
-            Toast.makeText(getActivity().getBaseContext(), "this is a test",Toast.LENGTH_LONG).show();
+            Intent myIntent = new Intent(Intent.ACTION_VIEW);
+            myIntent.setDataAndType(Uri.parse(rvAdapter.getFileItem(itemId).getPath()),rvAdapter.getFileItem(itemId).getMimeType());
+            try {
+                startActivity(myIntent);
+            }catch (Exception e){
+                Toast.makeText(getActivity().getBaseContext(), "No available apps to open this file.",Toast.LENGTH_LONG).show();
+            }
         }
     }
 
