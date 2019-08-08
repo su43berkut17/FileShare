@@ -54,6 +54,27 @@ public class FileListRepository {
         }
     }
 
+    //update file
+    public void updateFileSetTransferred(FileListEntry fileListEntry){
+        new updateDatabaseSentAsyncTask(database).execute(fileListEntry);
+    }
+
+    private static class updateDatabaseSentAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
+        private AppDatabase database;
+
+        updateDatabaseSentAsyncTask(AppDatabase recDatabase){
+            database=recDatabase;
+        }
+
+        @Override
+        protected Void doInBackground(final FileListEntry... params) {
+            FileListEntry updateEntry=params[0];
+            updateEntry.setIsTransferred(1);
+            database.fileListDao().updateFile(updateEntry);
+            return null;
+        }
+    }
+
     //delete file
     public void deleteFile(FileListEntry fileListEntry){
         new deleteDatabaseAsyncTask(database).execute(fileListEntry);

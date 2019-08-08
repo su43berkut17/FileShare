@@ -45,12 +45,7 @@ public class TransferProgressWidget extends AppWidgetProvider {
         mCurrentState=currentState;
 
         //set the values
-        if (mCurrentState==STATE_NORMAL) {
-
-            //database
-            //AppDatabase database=AppDatabase.getInstance(context);
-
-           //new AsyncLoadService().execute(context);
+        if (mCurrentState.equals(STATE_NORMAL)) {
             //we load the database
             AppDatabase database=AppDatabase.getInstance(context);
             List<UserInfoEntry> listUser=database.userInfoDao().loadUserWidget();
@@ -58,8 +53,7 @@ public class TransferProgressWidget extends AppWidgetProvider {
 
             Log.d(TAG,"The number if transfers is "+user +" "+user.getNumberFilesTransferred());
             mTotalNumberOfTransfers=user.getNumberFilesTransferred();
-        }else if (mCurrentState==STATE_TRANSFER){
-
+        }else if (mCurrentState.equals(STATE_TRANSFER)){
             mNameOfCurrentFile=nameOfCurrentFile;
             mTotalNumberOfFiles=totalNumberOfFiles;
             mCurrentNumberOfFiles=currentNumberOfFiles;
@@ -103,11 +97,11 @@ public class TransferProgressWidget extends AppWidgetProvider {
                 views.setProgressBar(R.id.pb_widget_progress,1,mPercentage,false);
 
                 //we set the pending intent to launch the main app on transfer mode
-                Intent intentT = new Intent(context, TransferProgressActivity.class);
-                PendingIntent pendingIntentT = PendingIntent.getActivity(context, 0, intentT, 0);
+                Intent intentTransfer = new Intent(context, TransferProgressActivity.class);
+                PendingIntent pendingIntentTransfer = PendingIntent.getActivity(context, 0, intentTransfer, 0);
 
                 //we set the pending intent for the widget
-                views.setOnClickPendingIntent(R.id.widget_default_state, pendingIntentT);
+                views.setOnClickPendingIntent(R.id.widget_transfer_state, pendingIntentTransfer);
 
                 break;
             default:

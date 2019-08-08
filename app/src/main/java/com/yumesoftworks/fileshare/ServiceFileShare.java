@@ -17,11 +17,13 @@ import android.util.Log;
 
 import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.FileListEntry;
+import com.yumesoftworks.fileshare.data.FileListRepository;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 
 import java.util.List;
 
+import com.yumesoftworks.fileshare.data.UserInfoRepository;
 import com.yumesoftworks.fileshare.peerToPeer.TransferFileCoordinatorHelper;
 
 public class ServiceFileShare extends Service implements
@@ -43,6 +45,8 @@ public class ServiceFileShare extends Service implements
 
     //database access
     private AppDatabase database;
+    private FileListRepository repositoryFile;
+    private UserInfoRepository repositoryUser;
 
     //loaded entry
     private List<FileListEntry> mFileListEntry;
@@ -55,12 +59,20 @@ public class ServiceFileShare extends Service implements
 
         super.onCreate();
 
+        repositoryFile=new FileListRepository(getApplication());
+        repositoryUser=new UserInfoRepository(getApplication());
+
         //we read the database
-        database = AppDatabase.getInstance(this);
-        new saveDatabaseAsyncTask(database).execute();
+        mFileListEntry=repositoryFile.getFiles().getValue();
+        Log.d(TAG,"Database loaded, file list entry is "+mFileListEntry);
+
+        initializeSockets();
+
+        //database = AppDatabase.getInstance(this);
+        //new saveDatabaseAsyncTask(database).execute();
     }
 
-    private class saveDatabaseAsyncTask extends AsyncTask<Void,Void,Void> {
+    /*private class saveDatabaseAsyncTask extends AsyncTask<Void,Void,Void> {
         private AppDatabase database;
 
         saveDatabaseAsyncTask(AppDatabase recDatabase){
@@ -75,7 +87,7 @@ public class ServiceFileShare extends Service implements
             initializeSockets();
             return null;
         }
-    }
+    }*/
 
     //start the transfer
     @Override
@@ -177,11 +189,13 @@ public class ServiceFileShare extends Service implements
 
     //dabatase stuff
     private void switchTransfer(Boolean activateTransfer){
+
+        repositoryUser.switchTransfer(activateTransfer);
         //we switch the transfer status to on or off
-        new updateDatabaseAsyncTask(database).execute(activateTransfer);
+        //new updateDatabaseAsyncTask(database).execute(activateTransfer);
     }
 
-    private class updateDatabaseAsyncTask extends AsyncTask<Boolean,Void,Void> {
+    /*private class updateDatabaseAsyncTask extends AsyncTask<Boolean,Void,Void> {
         private AppDatabase database;
 
         updateDatabaseAsyncTask(AppDatabase recDatabase){
@@ -205,13 +219,15 @@ public class ServiceFileShare extends Service implements
 
             return null;
         }
-    }
+    }*/
 
     //successful sent
     private void addSuccessfulTransferCounter(){
-        new updateDatabaseCounterAsyncTask(database).execute();
+        repositoryUser.addSuccessfulTransferCounter();
+        //new updateDatabaseCounterAsyncTask(database).execute();
     }
 
+    /*
     //save transfer
     private class updateDatabaseCounterAsyncTask extends AsyncTask<Void,Void,Void> {
         private AppDatabase database;
@@ -231,7 +247,7 @@ public class ServiceFileShare extends Service implements
 
             return null;
         }
-    }
+    }*/
 
     //socket error
     private void connectionError(){
@@ -282,10 +298,12 @@ public class ServiceFileShare extends Service implements
 
     @Override
     public void updateReceivedFile(FileListEntry fileListEntry) {
-        new updateDatabaseReceivedAsyncTask(database).execute(fileListEntry);
+        //new updateDatabaseReceivedAsyncTask(database).execute(fileListEntry);
+        repositoryFile.saveFile(fileListEntry);
+        Log.d(TAG,"Received file entry changed to transferred "+mFileListEntry);
     }
 
-    private class updateDatabaseReceivedAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
+    /*private class updateDatabaseReceivedAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
         private AppDatabase database;
 
         updateDatabaseReceivedAsyncTask(AppDatabase recDatabase){
@@ -295,15 +313,13 @@ public class ServiceFileShare extends Service implements
         @Override
         protected Void doInBackground(final FileListEntry... params) {
             //mFileListEntry=database.fileListDao().loadFileListDirect()
-            /*FileListEntry updateEntry=params[0];
-            updateEntry.setIsTransferred(1);
-            database.fileListDao().updateFile(updateEntry);*/
+
             database.fileListDao().insertFile(params[0]);
 
             Log.d(TAG,"Received file entry changed to transferred "+mFileListEntry);
             return null;
         }
-    }
+    }*/
 
     @Override
     public void addReceivedCounter() {
@@ -355,10 +371,12 @@ public class ServiceFileShare extends Service implements
     @Override
     public void updateSendSentFile(FileListEntry fileListEntry) {
         //set the file to is Transferred true
-        new updateDatabaseSentAsyncTask(database).execute(fileListEntry);
+        //new updateDatabaseSentAsyncTask(database).execute(fileListEntry);
+        repositoryFile.updateFileSetTransferred(fileListEntry);
+        Log.d(TAG,"Sent file entry changed to transferred "+mFileListEntry);
     }
 
-    private class updateDatabaseSentAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
+    /*private class updateDatabaseSentAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
         private AppDatabase database;
 
         updateDatabaseSentAsyncTask(AppDatabase recDatabase){
@@ -375,7 +393,7 @@ public class ServiceFileShare extends Service implements
             Log.d(TAG,"Sent file entry changed to transferred "+mFileListEntry);
             return null;
         }
-    }
+    }*/
 
     //general methods
     private void updateGeneralUI(TextInfoSendObject textInfoSendObject){

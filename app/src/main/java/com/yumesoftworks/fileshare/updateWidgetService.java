@@ -75,7 +75,7 @@ public class updateWidgetService extends IntentService {
                 //this is an update that is done purposely by the app
                 updateWidget("purposely via the app");
             }else{
-                Log.d(TAG,"FIND OUT HOW IS THIS RUNNING");
+                Log.d(TAG,"FIND OUT HOW IS THIS RUNNING "+intent.getAction());
             }
         }
     }
