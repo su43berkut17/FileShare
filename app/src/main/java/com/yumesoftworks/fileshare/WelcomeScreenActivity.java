@@ -15,6 +15,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -55,6 +56,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     private TextView tvUsername;
     private Button buttonGo;
     private Button buttonCancel;
+    private LinearLayout mLoadingScreen;
 
     //database
     private AppDatabase mDb;
@@ -67,6 +69,9 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
         //analytics
         mFireAnalytics=FirebaseAnalytics.getInstance(this);
+
+        //loading screen
+        mLoadingScreen=findViewById(R.id.aws_loading_layout);
 
         //rotation values
         if (savedInstanceState==null){
@@ -114,6 +119,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         if (mIsThisSettings==false) {
             getSupportActionBar().hide();
         }else{
+            mLoadingScreen.setVisibility(View.INVISIBLE);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
@@ -141,6 +147,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                     if (mIsThisSettings){
                         //we change the go button text to save changes
                         buttonGo.setText(R.string.aws_button_save);
+                        mLoadingScreen.setVisibility(View.INVISIBLE);
 
                         //we set the loaded data to the ui
                         mSelectedAvatar=userInfoEntries.get(0).getPickedAvatar();
