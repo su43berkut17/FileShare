@@ -113,10 +113,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         //we get the instance of the indeterminate progress bar
         mProgressBarHide=findViewById(R.id.pb_atp_waitingForConnection);
 
-        if (typeOfService==RELAUNCH_APP){
-            //nothing happens since everything has been initialized
-
-        }else {
+        if (typeOfService!=RELAUNCH_APP){
             //first initialization
             //choose data in the intent
             if (typeOfService == FILES_SENDING) {

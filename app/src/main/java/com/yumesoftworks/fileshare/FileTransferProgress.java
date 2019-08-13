@@ -1,6 +1,8 @@
 package com.yumesoftworks.fileshare;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
@@ -138,8 +141,14 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
 
     @Override
     public void onQueueClickListener(int itemId) {
-        //see if we can open it
-
+        //open file if type compatible
+        Intent myIntent = new Intent(Intent.ACTION_VIEW);
+        myIntent.setDataAndType(Uri.parse(rvAdapter.getFileItem(itemId).getPath()),rvAdapter.getFileItem(itemId).getMimeType());
+        try {
+            startActivity(myIntent);
+        }catch (Exception e){
+            Toast.makeText(getActivity().getBaseContext(), R.string.fb_incompatible_file,Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override

@@ -271,6 +271,10 @@ public class ServiceFileShare extends Service implements
     }
 
     public void finishedReceiveTransfer() {
+        //we update the ui as successful
+        TextInfoSendObject endObject=new TextInfoSendObject(TransferProgressActivity.TYPE_END,getResources().getString(R.string.service_success),String.valueOf(mTotalFiles)+","+String.valueOf(mTotalFiles));
+        updateGeneralUI(endObject);
+
         //we hide the notification
         manager.cancel(NOTIFICATION_ID);
 

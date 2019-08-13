@@ -270,7 +270,7 @@ public class FileViewer extends Fragment implements
             try {
                 startActivity(myIntent);
             }catch (Exception e){
-                Toast.makeText(getActivity().getBaseContext(), "No available apps to open this file.",Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity().getBaseContext(), R.string.fb_incompatible_file,Toast.LENGTH_LONG).show();
             }
         }
     }

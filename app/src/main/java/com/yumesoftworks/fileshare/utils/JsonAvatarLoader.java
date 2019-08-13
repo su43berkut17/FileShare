@@ -54,7 +54,7 @@ public class JsonAvatarLoader {
             Log.d(TAG,"There is an error with the https");
             e.printStackTrace();
             return null;
-        }finally {
+        }finally{
             connection.disconnect();
         }
     }

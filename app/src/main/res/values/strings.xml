@@ -35,6 +35,7 @@
     <string name="fb_button_review_queue">Review Queue</string>
     <string name="fb_path_description">The filepath</string>
     <string name="fb_path">/</string>
+    <string name="fb_incompatible_file">No available apps to open this file.</string>
 
     <!-- Activity file queue -->
     <string name="fq_tv_title_queue">Files to be sent:</string>

@@ -161,12 +161,15 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                         mIsTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
                         if (mIsTransferInProgress==1){
                             //we relaunch the transfer activity
-                            /*Intent intent= new Intent(getApplicationContext(),TransferProgressActivity.class);
+                            Intent intent= new Intent(getApplicationContext(),TransferProgressActivity.class);
 
                             //set the extra
                             Bundle extras=new Bundle();
                             extras.putInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER,TransferProgressActivity.RELAUNCH_APP);
                             intent.putExtras(extras);
+
+                            //clear backstack
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 
                             //basic transition to main menu
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
@@ -176,9 +179,11 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                                 startActivity(intent);
                             }
 
-                            */
+                            //finish this activity
+                            finish();
+
                             //for debug we open the activity for now
-                            goMainActivity();
+                            //goMainActivity();
                         }else {
                             goMainActivity();
                         }
