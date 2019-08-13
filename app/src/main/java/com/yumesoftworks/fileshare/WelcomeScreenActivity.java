@@ -173,7 +173,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
                             //basic transition to main menu
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                                Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle();
+                                Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(getParent()).toBundle();
                                 startActivity(intent, bundle);
                             } else {
                                 startActivity(intent);

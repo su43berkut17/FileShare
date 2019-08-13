@@ -129,7 +129,7 @@ public class ServiceFileShare extends Service implements
     //initialize sockets
     //should only work when database has been loaded and after receiving the intents
     private void initializeSockets(){
-        if (mFileListEntry!=null && receivedBundle!=null){
+        if (mFileListEntry!=null || receivedBundle!=null){
             //do stuff
             //get action
             int action=receivedBundle.getInt(TransferProgressActivity.ACTION_SERVICE);
