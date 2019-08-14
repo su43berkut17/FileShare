@@ -140,8 +140,9 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
             @Override
             public void onChanged(@Nullable List<UserInfoEntry> userInfoEntries) {
                 if (userInfoEntries.isEmpty()){
-                    //we hide the cancel button
+                    //we hide the cancel button and the loading screen
                     buttonCancel.setVisibility(View.GONE);
+                    mLoadingScreen.setVisibility(View.INVISIBLE);
                 }else{
                     //we go to the next activity if it is not settings
                     if (mIsThisSettings){

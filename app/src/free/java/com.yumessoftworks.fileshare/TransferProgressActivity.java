@@ -94,6 +94,8 @@ public class TransferProgressActivity extends AppCompatActivity implements
         Intent serviceIntent=new Intent(this,ServiceFileShare.class);
         Bundle extras=intent.getExtras();
 
+
+
         //get the data to see how do we start the service
         typeOfService=extras.getInt(EXTRA_TYPE_TRANSFER);
 
@@ -216,7 +218,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     break;
                 case ACTION_FINISHED_TRANSFER:
                     //we show dialog that transfer is done
-                    AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getParent());
                     builder.setMessage(R.string.service_finished_transfer)
                             .setCancelable(true)
                             .setNeutralButton(R.string.gen_button_ok,

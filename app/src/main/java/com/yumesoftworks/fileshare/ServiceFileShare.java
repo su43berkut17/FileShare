@@ -62,32 +62,29 @@ public class ServiceFileShare extends Service implements
         repositoryFile=new FileListRepository(getApplication());
         repositoryUser=new UserInfoRepository(getApplication());
 
+        //Todo: change it so database is being read by an observer or any asynchronous method
         //we read the database
-        mFileListEntry=repositoryFile.getFiles().getValue();
-        Log.d(TAG,"Database loaded, file list entry is "+mFileListEntry);
+        //mFileListEntry=repositoryFile.getFilesDirect();
+        //Log.d(TAG,"Database loaded, file list entry is "+mFileListEntry);
 
-        initializeSockets();
+        //initializeSockets();
 
-        //database = AppDatabase.getInstance(this);
-        //new saveDatabaseAsyncTask(database).execute();
+        database = AppDatabase.getInstance(this);
+        new loadDatabaseAsyncTask().execute();
     }
 
-    /*private class saveDatabaseAsyncTask extends AsyncTask<Void,Void,Void> {
-        private AppDatabase database;
+    private class loadDatabaseAsyncTask extends AsyncTask<Void,Void,Void> {
 
-        saveDatabaseAsyncTask(AppDatabase recDatabase){
-            database=recDatabase;
-        }
 
         @Override
         protected Void doInBackground(final Void... params) {
-            mFileListEntry=database.fileListDao().loadFileListDirect();
+            mFileListEntry=repositoryFile.getFilesDirect();
             Log.d(TAG,"Database loaded, file list entry is "+mFileListEntry);
 
             initializeSockets();
             return null;
         }
-    }*/
+    }
 
     //start the transfer
     @Override
@@ -129,7 +126,7 @@ public class ServiceFileShare extends Service implements
     //initialize sockets
     //should only work when database has been loaded and after receiving the intents
     private void initializeSockets(){
-        if (mFileListEntry!=null || receivedBundle!=null){
+        if (mFileListEntry!=null && receivedBundle!=null){
             //do stuff
             //get action
             int action=receivedBundle.getInt(TransferProgressActivity.ACTION_SERVICE);
