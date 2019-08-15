@@ -56,7 +56,7 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
 
         //get the type via arguments
         Bundle bundle=getArguments();
-        mType=bundle.getInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER);
+        mType=bundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.EXTRA_TYPE_TRANSFER);
 
         rvFileList=fileProgressView.findViewById(R.id.rv_file_progress_queue);
         rvFileList.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -77,9 +77,9 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         mButton=fileProgressView.findViewById(R.id.btn_atp_cancelOk);
 
         //get the text depending on the type
-        if (mType==TransferProgressActivity.FILES_RECEIVING){
+        if (mType== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_RECEIVING){
             mTitleQueue.setText(R.string.ats_tv_received_files);
-        }else if (mType==TransferProgressActivity.FILES_SENDING){
+        }else if (mType== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_SENDING){
             mTitleQueue.setText(R.string.atp_tv_files_in_queue);
         }
 
@@ -115,7 +115,7 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
     //update the ui
     public void updateData(Bundle bundle){
         //process data
-        TextInfoSendObject textInfoSendObject=(TextInfoSendObject) bundle.getSerializable(TransferProgressActivity.ACTION_UPDATE_UI_DATA);
+        TextInfoSendObject textInfoSendObject=(TextInfoSendObject) bundle.getSerializable(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI_DATA);
 
         //name of file, current number and total number
         String fileName=textInfoSendObject.getMessageContent();
@@ -127,6 +127,25 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         int totalFiles=Integer.parseInt(currentNumbers[1]);
         int currentFile=Integer.parseInt(currentNumbers[0]);
         int percentage=currentFile*100/totalFiles;
+
+        //if this is the percentage of bytes
+        if (currentNumbers[2]!=null) {
+            //percentage based on the bytes sent
+            long totalBytes = Long.parseLong(currentNumbers[2]);
+            long currentBytes = Long.parseLong(currentNumbers[3]);
+            long percentageBytes = currentBytes * 100 / totalBytes;
+            int percentageBytesInt=(int)percentageBytes;
+
+            if (percentageBytesInt>100){
+                percentageBytesInt=100;
+            }
+
+            //percentage based on the total
+            int singlePercentage=100/totalFiles;
+
+            //final percentage
+            percentage=percentage+(percentageBytesInt*singlePercentage/100);
+        }
 
         //we update the data
         mTvFileName.setText(fileName);

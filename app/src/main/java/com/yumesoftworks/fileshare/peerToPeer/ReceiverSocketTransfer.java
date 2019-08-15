@@ -1,6 +1,7 @@
 package com.yumesoftworks.fileshare.peerToPeer;
 
 import android.content.Context;
+
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
@@ -8,6 +9,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import com.google.android.gms.common.util.ArrayUtils;
 import com.yumesoftworks.fileshare.TransferProgressActivity;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
@@ -22,6 +24,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
 
 public class ReceiverSocketTransfer {
     private static final String TAG="ServiceClientSocket";
@@ -43,10 +46,13 @@ public class ReceiverSocketTransfer {
     private Thread socketThread;
 
     //current action
-       private int mCurrentAction;
+    private int mCurrentAction;
 
     //current file
     private TextInfoSendObject mTextInfoSendObject;
+    private String mCurrentFileSize;
+    private String mCurrentFile;
+    private String mTotalFiles;
 
     //interface
     private ReceiverSocketTransferInterface mReceiverInterface;
@@ -130,6 +136,17 @@ public class ReceiverSocketTransfer {
                                 TextInfoSendObject message = (TextInfoSendObject) messageIn.readObject();
                                 mTextInfoSendObject=message;
 
+                                //extract the size of the file and set again
+                                String stringNumbers=mTextInfoSendObject.getAdditionalInfo();
+                                String[] currentNumbers = stringNumbers.split(",");
+
+                                mCurrentFile=currentNumbers[0];
+                                mTotalFiles=currentNumbers[1];
+                                mCurrentFileSize=currentNumbers[2];
+
+                                //fix the initial message
+                                message.setAdditionalInfo(currentNumbers[0]+","+currentNumbers[1]);
+
                                 //update the ui
                                 mReceiverInterface.updateReceiveSendUI(message);
                                 /*if (message == SenderPickDestinationActivity.MESSAGE_OPEN_ACTIVITY) {
@@ -161,9 +178,26 @@ public class ReceiverSocketTransfer {
 
                             Log.d(TAG,"Reading bytes");
 
+                            //initialize progress message
+                            String additionalInfo="";
+
+                            //progress message
+                            TextInfoSendObject objectUpdate=new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_DETAILS,realName,additionalInfo);
+
                             int count;
                             while((count=fileInputStream.read(bytes))>0){
                                 bufferedOutputStream.write(bytes,0,count);
+
+                                //set the message
+                                //send progress update to UI
+                                additionalInfo= mCurrentFile + "," +
+                                        mTotalFiles+","+
+                                        mCurrentFileSize+","+
+                                        String.valueOf(bytes.length);
+
+                                objectUpdate.setAdditionalInfo(additionalInfo);
+
+                                mReceiverInterface.updateReceiveSendUI(objectUpdate);
                             }
 
                             bufferedOutputStream.flush();

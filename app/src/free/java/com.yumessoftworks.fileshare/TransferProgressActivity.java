@@ -1,4 +1,4 @@
-package com.yumesoftworks.fileshare;
+package com.yumessoftworks.fileshare;
 
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -94,8 +94,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
         Intent serviceIntent=new Intent(this,ServiceFileShare.class);
         Bundle extras=intent.getExtras();
 
-
-
         //get the data to see how do we start the service
         typeOfService=extras.getInt(EXTRA_TYPE_TRANSFER);
 
@@ -134,22 +132,28 @@ public class TransferProgressActivity extends AppCompatActivity implements
             } else {
                 startService(serviceIntent);
             }
-
-            //initialize fragments
-            initializeFragments();
-
-            //get the broadcast receivers for responses from the service
-            IntentFilter intentFilter=new IntentFilter(LOCAL_BROADCAST_REC);
-            intentFilter.addAction(ACTION_FINISHED_TRANSFER);
-            intentFilter.addAction(ACTION_SOCKET_ERROR);
-            intentFilter.addAction(ACTION_UPDATE_UI);
-            intentFilter.addAction(ACTION_UPDATE_UI_DATA);
-            LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceived, intentFilter);
         }
+
+        //initialize fragments
+        initializeFragments();
+
+        //get the broadcast receivers for responses from the service
+        IntentFilter intentFilter=new IntentFilter(LOCAL_BROADCAST_REC);
+        intentFilter.addAction(ACTION_FINISHED_TRANSFER);
+        intentFilter.addAction(ACTION_SOCKET_ERROR);
+        intentFilter.addAction(ACTION_UPDATE_UI);
+        intentFilter.addAction(ACTION_UPDATE_UI_DATA);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceived, intentFilter);
 
         //toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.tp_toolbar);
         setSupportActionBar(myToolbar);
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(mMessageReceived);
+        super.onDestroy();
     }
 
     private void initializeFragments(){

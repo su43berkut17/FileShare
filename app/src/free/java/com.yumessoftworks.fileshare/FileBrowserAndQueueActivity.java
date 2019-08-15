@@ -317,7 +317,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             initializeVariables();
         }else{
             //go back to main activity
-            Intent intent=new Intent(this, MainMenuActivity.class);
+            Intent intent=new Intent(this, com.yumesoftworks.fileshare.MainMenuActivity.class);
             startActivity(intent);
         }
     }
@@ -414,7 +414,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     @Override
     public void onButtonSendClicked() {
         //we go to the send activity
-        Intent intent=new Intent(this, SenderPickDestinationActivity.class);
+        Intent intent=new Intent(this, com.yumesoftworks.fileshare.SenderPickDestinationActivity.class);
         startActivity(intent);
 
         //this is a test to open directly the file progress

@@ -108,7 +108,9 @@ public class SenderSocketTransfer{
 
                                 //we send the file name
                                 messageToSend = mFileEntry.getFileName();
-                                String additionalInfo = String.valueOf(mCurrentFile) + "," + String.valueOf(mTotalFiles);
+                                String additionalInfo = String.valueOf(mCurrentFile) + "," +
+                                        String.valueOf(mTotalFiles)+","+
+                                        String.valueOf(new File(mFileEntry.getPath()).length());
 
                                 TextInfoSendObject sendObject = new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_DETAILS, messageToSend, additionalInfo);
                                 //messageOut = new ObjectOutputStream(mSocket.getOutputStream());
@@ -139,10 +141,27 @@ public class SenderSocketTransfer{
                                 Log.d(TAG, "File: getting the file input stream " + fileInputStream.toString());
                                 //fileOutputStream = mSocket.getOutputStream();
 
+                                //we send the file name
+                                messageToSend = mFileEntry.getFileName();
+                                String additionalInfo="";
+
+                                //progress message
+                                TextInfoSendObject objectUpdate=new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_DETAILS,messageToSend,additionalInfo);
+
                                 int count;
                                 while ((count = fileInputStream.read(bytes)) > 0) {
                                     //Log.d(TAG, "File: reading the bytes " + count);
                                     fileOutputStream.write(bytes, 0, count);
+
+                                    //send progress update to UI
+                                    additionalInfo= String.valueOf(mCurrentFile) + "," +
+                                            String.valueOf(mTotalFiles)+","+
+                                            String.valueOf(((FileInputStream) fileInputStream).getChannel().size())+","+
+                                            String.valueOf(bytes.length);
+
+                                    objectUpdate.setAdditionalInfo(additionalInfo);
+
+                                    mSenderInterface.updateSendSendUI(objectUpdate);
                                     //Log.d(TAG, "File: wrote the bytes");
                                 }
 
@@ -154,7 +173,6 @@ public class SenderSocketTransfer{
 
                                 Log.d(TAG, "File sent");
                                 mCurrentAction = ACTION_FINISHED_FILE_TRANSFER;
-                                //mCurrentAction=ACTION_NEXT_ACTION;
                             } catch (Exception e) {
                                 Log.d(TAG, "There was en exception when sending file " + e.getMessage());
                                 e.printStackTrace();

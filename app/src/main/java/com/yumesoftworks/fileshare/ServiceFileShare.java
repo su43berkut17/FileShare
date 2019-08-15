@@ -129,11 +129,11 @@ public class ServiceFileShare extends Service implements
         if (mFileListEntry!=null && receivedBundle!=null){
             //do stuff
             //get action
-            int action=receivedBundle.getInt(TransferProgressActivity.ACTION_SERVICE);
+            int action=receivedBundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_SERVICE);
             Log.d(TAG,"the action is "+action);
 
             //we check if the intent is to send or to receive
-            if (action==TransferProgressActivity.FILES_SENDING){
+            if (action== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_SENDING){
                 //we are sending files
                 //mFileListEntry=mFileListEntryLive;
                 Log.d(TAG,"the value of the files is "+mFileListEntry.size());
@@ -142,8 +142,8 @@ public class ServiceFileShare extends Service implements
                 //we start the socket for communication
                 try{
                     mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,
-                            receivedBundle.getString(TransferProgressActivity.REMOTE_IP),
-                            receivedBundle.getInt(TransferProgressActivity.REMOTE_PORT),
+                            receivedBundle.getString(com.yumesoftworks.fileshare.TransferProgressActivity.REMOTE_IP),
+                            receivedBundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.REMOTE_PORT),
                             mFileListEntry,action);
 
                 }catch (Exception e){
@@ -152,11 +152,11 @@ public class ServiceFileShare extends Service implements
                     connectionError();
                 }
 
-            }else if (action==TransferProgressActivity.FILES_RECEIVING){
+            }else if (action== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_RECEIVING){
                 //we are receiving files
                 try{
                     //create the server socket
-                    mPort=receivedBundle.getInt(TransferProgressActivity.LOCAL_PORT);
+                    mPort=receivedBundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.LOCAL_PORT);
 
                     mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,mPort,action);
                 }catch (Exception e){
@@ -256,7 +256,7 @@ public class ServiceFileShare extends Service implements
         switchTransfer(false);
 
         //set error dialog and go back to activity
-        Intent intent=new Intent(TransferProgressActivity.ACTION_SOCKET_ERROR);
+        Intent intent=new Intent(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_SOCKET_ERROR);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         stopSelf();
     }
@@ -269,7 +269,7 @@ public class ServiceFileShare extends Service implements
 
     public void finishedReceiveTransfer() {
         //we update the ui as successful
-        TextInfoSendObject endObject=new TextInfoSendObject(TransferProgressActivity.TYPE_END,getResources().getString(R.string.service_success),String.valueOf(mTotalFiles)+","+String.valueOf(mTotalFiles));
+        TextInfoSendObject endObject=new TextInfoSendObject(com.yumesoftworks.fileshare.TransferProgressActivity.TYPE_END,getResources().getString(R.string.service_success),String.valueOf(mTotalFiles)+","+String.valueOf(mTotalFiles));
         updateGeneralUI(endObject);
 
         //we hide the notification
@@ -282,7 +282,7 @@ public class ServiceFileShare extends Service implements
         updateWidgetService.startActionUpdateWidget(this,TransferProgressWidget.STATE_NORMAL,"",0,0);
 
         //the transfer is done, set dialog and go back to activity
-        Intent intent=new Intent(TransferProgressActivity.ACTION_FINISHED_TRANSFER);
+        Intent intent=new Intent(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_FINISHED_TRANSFER);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         stopSelf();
     }
@@ -341,7 +341,7 @@ public class ServiceFileShare extends Service implements
     @Override
     public void finishedSendTransfer() {
         //we update the ui as successful
-        TextInfoSendObject endObject=new TextInfoSendObject(TransferProgressActivity.TYPE_END,getResources().getString(R.string.service_success),String.valueOf(mTotalFiles)+","+String.valueOf(mTotalFiles));
+        TextInfoSendObject endObject=new TextInfoSendObject(com.yumesoftworks.fileshare.TransferProgressActivity.TYPE_END,getResources().getString(R.string.service_success),String.valueOf(mTotalFiles)+","+String.valueOf(mTotalFiles));
         updateGeneralUI(endObject);
 
         //we hide the notification
@@ -354,7 +354,7 @@ public class ServiceFileShare extends Service implements
         updateWidgetService.startActionUpdateWidget(this,TransferProgressWidget.STATE_NORMAL,"",0,0);
 
         //the transfer is done, set dialog and go back to activity
-        Intent intent=new Intent(TransferProgressActivity.ACTION_FINISHED_TRANSFER);
+        Intent intent=new Intent(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_FINISHED_TRANSFER);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         stopSelf();
     }
@@ -411,7 +411,7 @@ public class ServiceFileShare extends Service implements
 
         //bundle
         Bundle bundle=new Bundle();
-        bundle.putSerializable(TransferProgressActivity.ACTION_UPDATE_UI_DATA,textInfoSendObject);
+        bundle.putSerializable(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI_DATA,textInfoSendObject);
 
         //we update the notification
         manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
@@ -419,7 +419,7 @@ public class ServiceFileShare extends Service implements
                 ,true).build());
 
         //we update the UI
-        Intent intent=new Intent(TransferProgressActivity.ACTION_UPDATE_UI);
+        Intent intent=new Intent(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI);
         intent.putExtras(bundle);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 

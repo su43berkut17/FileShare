@@ -162,11 +162,11 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                         mIsTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
                         if (mIsTransferInProgress==1){
                             //we relaunch the transfer activity
-                            Intent intent= new Intent(getApplicationContext(),TransferProgressActivity.class);
+                            Intent intent= new Intent(getApplicationContext(), com.yumesoftworks.fileshare.TransferProgressActivity.class);
 
                             //set the extra
                             Bundle extras=new Bundle();
-                            extras.putInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER,TransferProgressActivity.RELAUNCH_APP);
+                            extras.putInt(com.yumesoftworks.fileshare.TransferProgressActivity.EXTRA_TYPE_TRANSFER, com.yumesoftworks.fileshare.TransferProgressActivity.RELAUNCH_APP);
                             intent.putExtras(extras);
 
                             //clear backstack
@@ -195,7 +195,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     }
 
     private void goMainActivity(){
-        Intent mainMenuActivity=new Intent(getApplicationContext(), MainMenuActivity.class);
+        Intent mainMenuActivity=new Intent(getApplicationContext(), com.yumesoftworks.fileshare.MainMenuActivity.class);
 
         //basic transition to main menu
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
