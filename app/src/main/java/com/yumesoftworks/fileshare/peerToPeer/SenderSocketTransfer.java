@@ -149,15 +149,18 @@ public class SenderSocketTransfer{
                                 TextInfoSendObject objectUpdate=new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_DETAILS,messageToSend,additionalInfo);
 
                                 int count;
+                                int byteCounter=0;
                                 while ((count = fileInputStream.read(bytes)) > 0) {
                                     //Log.d(TAG, "File: reading the bytes " + count);
                                     fileOutputStream.write(bytes, 0, count);
+
+                                    byteCounter+=bytes.length;
 
                                     //send progress update to UI
                                     additionalInfo= String.valueOf(mCurrentFile) + "," +
                                             String.valueOf(mTotalFiles)+","+
                                             String.valueOf(((FileInputStream) fileInputStream).getChannel().size())+","+
-                                            String.valueOf(bytes.length);
+                                            String.valueOf(byteCounter);
 
                                     objectUpdate.setAdditionalInfo(additionalInfo);
 

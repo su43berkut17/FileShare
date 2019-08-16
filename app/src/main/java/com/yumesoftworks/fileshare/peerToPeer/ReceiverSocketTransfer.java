@@ -185,15 +185,18 @@ public class ReceiverSocketTransfer {
                             TextInfoSendObject objectUpdate=new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_DETAILS,realName,additionalInfo);
 
                             int count;
+                            int byteCounter=0;
                             while((count=fileInputStream.read(bytes))>0){
                                 bufferedOutputStream.write(bytes,0,count);
+
+                                byteCounter+=bytes.length;
 
                                 //set the message
                                 //send progress update to UI
                                 additionalInfo= mCurrentFile + "," +
                                         mTotalFiles+","+
                                         mCurrentFileSize+","+
-                                        String.valueOf(bytes.length);
+                                        String.valueOf(byteCounter);
 
                                 objectUpdate.setAdditionalInfo(additionalInfo);
 

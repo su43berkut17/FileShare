@@ -7,6 +7,8 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +26,8 @@ import java.util.List;
 public class FileTransferProgress extends Fragment implements QueueListAdapter.QueueClickListener, View.OnClickListener {
 
     private OnFragmentInteractionListener mListener;
+
+    private static final String TAG="FileTransferProgress";
 
     //recycler view
     private RecyclerView rvFileList;
@@ -123,13 +127,15 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         String[] currentNumbers = stringNumbers.split(",");
         String finalTextNumbers=currentNumbers[0]+" of "+currentNumbers[1];
 
+        Log.d(TAG,"the numbers received are: "+stringNumbers);
+
         //we change the member variables of the progress
         int totalFiles=Integer.parseInt(currentNumbers[1]);
         int currentFile=Integer.parseInt(currentNumbers[0]);
         int percentage=currentFile*100/totalFiles;
 
         //if this is the percentage of bytes
-        if (currentNumbers[2]!=null) {
+        if (currentNumbers.length>3){
             //percentage based on the bytes sent
             long totalBytes = Long.parseLong(currentNumbers[2]);
             long currentBytes = Long.parseLong(currentNumbers[3]);

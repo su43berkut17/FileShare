@@ -38,6 +38,7 @@ public class ServiceFileShare extends Service implements
     private NotificationManager manager;
     private int mTotalFiles;
     private int mCurrentFile;
+    private int mCounterTimesWidget=0;
 
     //socket stuff
     private TransferFileCoordinatorHelper mTransferFileCoordinatorHelper;
@@ -61,13 +62,6 @@ public class ServiceFileShare extends Service implements
 
         repositoryFile=new FileListRepository(getApplication());
         repositoryUser=new UserInfoRepository(getApplication());
-
-        //Todo: change it so database is being read by an observer or any asynchronous method
-        //we read the database
-        //mFileListEntry=repositoryFile.getFilesDirect();
-        //Log.d(TAG,"Database loaded, file list entry is "+mFileListEntry);
-
-        //initializeSockets();
 
         database = AppDatabase.getInstance(this);
         new loadDatabaseAsyncTask().execute();
@@ -424,6 +418,12 @@ public class ServiceFileShare extends Service implements
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
         //update the widget
-        updateWidgetService.startActionUpdateWidget(this,TransferProgressWidget.STATE_TRANSFER,fileName,mTotalFiles,mCurrentFile);
+        //we will set a counter to prevent calling an update on the widget several times
+        if (mCounterTimesWidget>10) {
+            mCounterTimesWidget=0;
+            updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_TRANSFER, fileName, mTotalFiles, mCurrentFile);
+        }else{
+            mCounterTimesWidget++;
+        }
     }
 }

@@ -54,7 +54,11 @@ public class updateWidgetService extends IntentService {
 
         Notification notification=notificationBuilder().build();
 
-        startForeground(WIDGET_NOTIFICATION_ID,notification);
+        try {
+            startForeground(WIDGET_NOTIFICATION_ID, notification);
+        }catch (Exception e){
+            Log.d(TAG,e.getMessage());
+        }
     }
 
     //notification build
@@ -126,9 +130,17 @@ public class updateWidgetService extends IntentService {
 
         //we check if it is before android O
         if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
-            context.startForegroundService(intent);
+            try {
+                context.startForegroundService(intent);
+            }catch (Exception e){
+                Log.d(TAG,e.getMessage());
+            }
         }else {
-            context.startService(intent);
+            try {
+                context.startService(intent);
+            }catch (Exception e){
+                Log.d(TAG,e.getMessage());
+            }
         }
     }
 }
