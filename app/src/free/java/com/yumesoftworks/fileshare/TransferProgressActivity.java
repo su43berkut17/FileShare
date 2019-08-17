@@ -152,7 +152,12 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(mMessageReceived);
+        try {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceived);
+        }catch (Exception e){
+            Log.d(TAG,"couldn't unregister the receiver "+e.getMessage());
+        }
+
         super.onDestroy();
     }
 

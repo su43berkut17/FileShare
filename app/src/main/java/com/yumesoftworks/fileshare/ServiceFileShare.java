@@ -96,7 +96,9 @@ public class ServiceFileShare extends Service implements
             manager.createNotificationChannel(channel);
             Notification notification=new NotificationCompat.Builder(getApplicationContext(),NOTIFICATION_CHANNEL)
                     .setContentTitle(getString(R.string.app_name))
-                    .setContentText(getString(R.string.service_notification_text_initialize)).build();
+                    .setContentText(getString(R.string.service_notification_text_initialize))
+                    .setOnlyAlertOnce(true)
+                    .build();
             startForeground(NOTIFICATION_ID,notification);
         }else{
             manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
@@ -419,7 +421,7 @@ public class ServiceFileShare extends Service implements
 
         //update the widget
         //we will set a counter to prevent calling an update on the widget several times
-        if (mCounterTimesWidget>10) {
+        if (mCounterTimesWidget>10 || textInfoSendObject.getMessageType()==com.yumesoftworks.fileshare.TransferProgressActivity.TYPE_END) {
             mCounterTimesWidget=0;
             updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_TRANSFER, fileName, mTotalFiles, mCurrentFile);
         }else{

@@ -1,8 +1,11 @@
 package com.yumesoftworks.fileshare;
 
+import android.app.Activity;
 import android.app.ActivityOptions;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import androidx.annotation.Nullable;
@@ -62,10 +65,16 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     private AppDatabase mDb;
     private WelcomeScreenViewModel viewModel;
 
+    //context
+    private Context thisActivity;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome_screen);
+
+        //this activity
+        thisActivity=this;
 
         //analytics
         mFireAnalytics=FirebaseAnalytics.getInstance(this);
@@ -174,7 +183,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
                             //basic transition to main menu
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                                Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(getParent()).toBundle();
+                                Bundle bundle = ActivityOptions.makeSceneTransitionAnimation((Activity)thisActivity).toBundle();
                                 startActivity(intent, bundle);
                             } else {
                                 startActivity(intent);
