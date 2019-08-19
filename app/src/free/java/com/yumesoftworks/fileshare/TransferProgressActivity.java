@@ -47,11 +47,13 @@ public class TransferProgressActivity extends AppCompatActivity implements
     public static final int TYPE_FILE_DETAILS=1002;
     public static final int TYPE_FILE_DETAILS_SUCCESS=1003;
     public static final int TYPE_FILE_TRANSFER_SUCCESS=1004;
+    public static final int TYPE_FILE_TRANSFER_NO_SPACE=1005;
 
     //broadcast actions
     public static final String ACTION_FINISHED_TRANSFER="finishedTransfer";
     public static final String ACTION_UPDATE_UI="updateUI";
     public static final String ACTION_SOCKET_ERROR="connectionError";
+    public static final String ACTION_OUT_OF_SPACE="noSpaceAvailable";
 
     //name of bundle objects coming from service
     public static final String ACTION_UPDATE_UI_DATA="updateUIData";
@@ -141,6 +143,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         IntentFilter intentFilter=new IntentFilter(LOCAL_BROADCAST_REC);
         intentFilter.addAction(ACTION_FINISHED_TRANSFER);
         intentFilter.addAction(ACTION_SOCKET_ERROR);
+        intentFilter.addAction(ACTION_OUT_OF_SPACE);
         intentFilter.addAction(ACTION_UPDATE_UI);
         intentFilter.addAction(ACTION_UPDATE_UI_DATA);
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceived, intentFilter);
@@ -276,6 +279,30 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     builder2.show();
                     //change button to ok
                     fragmentFileTransferProgress.changeButton();
+                    break;
+                case ACTION_OUT_OF_SPACE:
+                    //we show dialog we ran out of space and return to the main menu
+                    AlertDialog.Builder builder3 = new AlertDialog.Builder(thisActivity);
+                    builder3.setMessage(R.string.service_out_of_space_error)
+                            .setCancelable(true)
+                            .setNeutralButton(R.string.gen_button_ok,
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                        }
+                                    });
+
+                    /*builder2.setMessage(R.string.service_socket_error)
+                            .setCancelable(true)
+                            .setNeutralButton(R.string.gen_button_ok,
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            //we go to the main activity
+                                            Intent intent=new Intent(getApplicationContext(),WelcomeScreenActivity.class);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(intent);
+                                        }
+                                    });*/
+                    builder3.show();
                     break;
             }
         }

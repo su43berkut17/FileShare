@@ -1,15 +1,14 @@
 package com.yumesoftworks.fileshare.peerToPeer;
 
-import android.content.Context;
-
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.StatFs;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
-import com.google.android.gms.common.util.ArrayUtils;
 import com.yumesoftworks.fileshare.TransferProgressActivity;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
@@ -24,7 +23,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-import java.util.Arrays;
 
 public class ReceiverSocketTransfer {
     private static final String TAG="ServiceClientSocket";
@@ -35,6 +33,11 @@ public class ReceiverSocketTransfer {
     private static final int ACTION_RECEIVE_DETAILS=1003;
     private static final int ACTION_CONFIRM_DETAILS=1004;
     private static final int ACTION_NEXT_ACTION=1005;
+    private static final int ACTION_NOT_ENOUGH_SPACE=1006;
+
+    //types of next actions
+    public static final int NEXT_ACTION_CONTINUE=2001;
+    public static final int NEXT_ACTION_CANCEL_SPACE =2002;
 
     //local server socket
     private ServerSocket mServerSocket;
@@ -47,6 +50,7 @@ public class ReceiverSocketTransfer {
 
     //current action
     private int mCurrentAction;
+    private int mNextActionDetail;
 
     //current file
     private TextInfoSendObject mTextInfoSendObject;
@@ -101,7 +105,7 @@ public class ReceiverSocketTransfer {
 
                     //loop for sending and receiving
                     do{
-                        if (mCurrentAction==ACTION_SEND_MESSAGE || mCurrentAction==ACTION_CONFIRM_DETAILS) {
+                        if (mCurrentAction==ACTION_SEND_MESSAGE || mCurrentAction==ACTION_CONFIRM_DETAILS || mCurrentAction==ACTION_NOT_ENOUGH_SPACE) {
                             //we send message that the transfer has been successful
                             try {
                                 if (mCurrentAction==ACTION_SEND_MESSAGE) {
@@ -120,6 +124,14 @@ public class ReceiverSocketTransfer {
 
                                     //reset action to receive file
                                     mCurrentAction=ACTION_RECEIVE_FILE;
+                                }else if(mCurrentAction==ACTION_NOT_ENOUGH_SPACE){
+                                    Log.d(TAG,"sending error message");
+                                    TextInfoSendObject textInfoSendObject = new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_TRANSFER_NO_SPACE, "", "");
+                                    messageOut.writeObject(textInfoSendObject);
+
+                                    //reset action to receive file
+                                    mNextActionDetail= NEXT_ACTION_CANCEL_SPACE;
+                                    mCurrentAction=ACTION_NEXT_ACTION;
                                 }
 
                             } catch (Exception e) {
@@ -149,13 +161,24 @@ public class ReceiverSocketTransfer {
 
                                 //update the ui
                                 mReceiverInterface.updateReceiveSendUI(message);
-                                /*if (message == SenderPickDestinationActivity.MESSAGE_OPEN_ACTIVITY) {
-                                    //we will open the new activity and wait for the connection via interface
-                                    //mReceiverInterface.openNexActivity();
-                                }*/
-                                //change the action to get ready to receive file
-                                mCurrentAction=ACTION_CONFIRM_DETAILS;
-                                Log.d(TAG,"We got the details of the file, confirm with sender");
+
+                                //check if we have enough space available
+                                StatFs statfs=new StatFs(Environment.getExternalStorageDirectory().getAbsolutePath());
+                                Long spaceAvailable;
+                                if (Build.VERSION.SDK_INT>=18) {
+                                    spaceAvailable=statfs.getAvailableBytes();
+                                }else{
+                                    spaceAvailable=statfs.getAvailableBlocks()*(long)statfs.getBlockSize();
+                                }
+
+                                if (spaceAvailable>Long.getLong(mCurrentFileSize)) {
+                                    //change the action to get ready to receive file
+                                    mCurrentAction = ACTION_CONFIRM_DETAILS;
+                                    Log.d(TAG, "We got the details of the file, confirm with sender");
+                                }else{
+                                    //not enough available space
+                                    mCurrentAction=ACTION_NOT_ENOUGH_SPACE;
+                                }
 
                             } catch (Exception e) {
                                 Log.d(TAG, "There is no input stream " + e.getMessage());
@@ -234,7 +257,7 @@ public class ReceiverSocketTransfer {
                             mReceiverInterface.updateReceiveReceivedFile(tempEntry);
 
                             //we store the file
-                            //mCurrentAction=ACTION_SEND_MESSAGE;
+                            mNextActionDetail=NEXT_ACTION_CONTINUE;
                             mCurrentAction=ACTION_NEXT_ACTION;
                         }
 
@@ -258,7 +281,7 @@ public class ReceiverSocketTransfer {
                     }
 
                     doWeRepeat=false;
-                    mReceiverInterface.finishedReceiveTransfer();
+                    mReceiverInterface.finishedReceiveTransfer(mNextActionDetail);
                 } catch (Exception e) {
                     Log.d(TAG, "the socket accept has failed, try again");
                     currentSocketRetries++;
@@ -329,7 +352,7 @@ public class ReceiverSocketTransfer {
     public interface ReceiverSocketTransferInterface{
         void updateReceiveSendUI(TextInfoSendObject textInfoSendObject);
         void updateReceiveReceivedFile(FileListEntry fileListEntry);
-        void finishedReceiveTransfer();
+        void finishedReceiveTransfer(int typeFinishTransfer);
         void socketReceiveFailedClient();
     }
 }

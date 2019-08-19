@@ -67,6 +67,17 @@ public class ServiceFileShare extends Service implements
         new loadDatabaseAsyncTask().execute();
     }
 
+    @Override
+    public void onDestroy() {
+        //we cancel everything
+        //cancel notification
+        manager.cancel(NOTIFICATION_ID);
+
+        mTransferFileCoordinatorHelper.userCancelled();
+
+        super.onDestroy();
+    }
+
     private class loadDatabaseAsyncTask extends AsyncTask<Void,Void,Void> {
 
 
@@ -184,63 +195,13 @@ public class ServiceFileShare extends Service implements
     private void switchTransfer(Boolean activateTransfer){
 
         repositoryUser.switchTransfer(activateTransfer);
-        //we switch the transfer status to on or off
-        //new updateDatabaseAsyncTask(database).execute(activateTransfer);
     }
-
-    /*private class updateDatabaseAsyncTask extends AsyncTask<Boolean,Void,Void> {
-        private AppDatabase database;
-
-        updateDatabaseAsyncTask(AppDatabase recDatabase){
-            database=recDatabase;
-        }
-
-        @Override
-        protected Void doInBackground(final Boolean... params) {
-            int status;
-            //we read the status
-            if (params[0]){
-                status=1;
-            }else{
-                status=0;
-            }
-
-            UserInfoEntry userInfoEntry=database.userInfoDao().loadUserWidget().get(0);
-            userInfoEntry.setIsTransferInProgress(status);
-            database.userInfoDao().updateTask(userInfoEntry);
-            Log.d(TAG,"The transfer file status activation is: "+status);
-
-            return null;
-        }
-    }*/
 
     //successful sent
     private void addSuccessfulTransferCounter(){
         repositoryUser.addSuccessfulTransferCounter();
         //new updateDatabaseCounterAsyncTask(database).execute();
     }
-
-    /*
-    //save transfer
-    private class updateDatabaseCounterAsyncTask extends AsyncTask<Void,Void,Void> {
-        private AppDatabase database;
-
-        updateDatabaseCounterAsyncTask(AppDatabase recDatabase){
-            database=recDatabase;
-        }
-
-        @Override
-        protected Void doInBackground(final Void... params) {
-            UserInfoEntry userInfoEntry=database.userInfoDao().loadUserWidget().get(0);
-            int currentCount=userInfoEntry.getNumberFilesTransferred();
-            currentCount++;
-            userInfoEntry.setNumberFilesTransferred(currentCount);
-            database.userInfoDao().updateTask(userInfoEntry);
-            Log.d(TAG,"We add a number more to the total transfers: "+currentCount);
-
-            return null;
-        }
-    }*/
 
     //socket error
     private void connectionError(){
@@ -253,6 +214,21 @@ public class ServiceFileShare extends Service implements
 
         //set error dialog and go back to activity
         Intent intent=new Intent(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_SOCKET_ERROR);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        stopSelf();
+    }
+
+    //out of space
+    private void transferErrorOutOfSpace(){
+        //the socket failed
+        //we hide the notification
+        manager.cancel(NOTIFICATION_ID);
+
+        //we deactivate the transfer status
+        switchTransfer(false);
+
+        //set error dialog and go back to activity
+        Intent intent=new Intent(TransferProgressActivity.ACTION_OUT_OF_SPACE);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         stopSelf();
     }
@@ -289,6 +265,11 @@ public class ServiceFileShare extends Service implements
     }
 
     @Override
+    public void errorReceiveNoSpace() {
+        transferErrorOutOfSpace();
+    }
+
+    @Override
     public void updateReceiveSendUI(TextInfoSendObject textInfoSendObject) {
         updateGeneralUI(textInfoSendObject);
     }
@@ -299,24 +280,6 @@ public class ServiceFileShare extends Service implements
         repositoryFile.saveFile(fileListEntry);
         Log.d(TAG,"Received file entry changed to transferred "+mFileListEntry);
     }
-
-    /*private class updateDatabaseReceivedAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
-        private AppDatabase database;
-
-        updateDatabaseReceivedAsyncTask(AppDatabase recDatabase){
-            database=recDatabase;
-        }
-
-        @Override
-        protected Void doInBackground(final FileListEntry... params) {
-            //mFileListEntry=database.fileListDao().loadFileListDirect()
-
-            database.fileListDao().insertFile(params[0]);
-
-            Log.d(TAG,"Received file entry changed to transferred "+mFileListEntry);
-            return null;
-        }
-    }*/
 
     @Override
     public void addReceivedCounter() {
@@ -361,6 +324,11 @@ public class ServiceFileShare extends Service implements
     }
 
     @Override
+    public void errorSendNoSpace() {
+        transferErrorOutOfSpace();
+    }
+
+    @Override
     public void addSentCounter() {
         addSuccessfulTransferCounter();
     }
@@ -372,25 +340,6 @@ public class ServiceFileShare extends Service implements
         repositoryFile.updateFileSetTransferred(fileListEntry);
         Log.d(TAG,"Sent file entry changed to transferred "+mFileListEntry);
     }
-
-    /*private class updateDatabaseSentAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
-        private AppDatabase database;
-
-        updateDatabaseSentAsyncTask(AppDatabase recDatabase){
-            database=recDatabase;
-        }
-
-        @Override
-        protected Void doInBackground(final FileListEntry... params) {
-            //mFileListEntry=database.fileListDao().loadFileListDirect()
-            FileListEntry updateEntry=params[0];
-            updateEntry.setIsTransferred(1);
-            database.fileListDao().updateFile(updateEntry);
-
-            Log.d(TAG,"Sent file entry changed to transferred "+mFileListEntry);
-            return null;
-        }
-    }*/
 
     //general methods
     private void updateGeneralUI(TextInfoSendObject textInfoSendObject){

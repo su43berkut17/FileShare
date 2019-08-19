@@ -70,6 +70,7 @@
     <string name="service_notification_text_initialize">Starting transfer...</string>
     <string name="service_finished_transfer">File transfer has been completed.</string>
     <string name="service_socket_error">There was a connection error. Please ty again.</string>
+    <string name="service_out_of_space_error">The receiver device ran out of space and the transfer cannot continue.</string>
     <string name="service_success">Success!</string>
 
     <!-- Widget -->

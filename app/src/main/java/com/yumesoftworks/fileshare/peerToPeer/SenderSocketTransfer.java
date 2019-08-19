@@ -29,6 +29,10 @@ public class SenderSocketTransfer{
     private static final int ACTION_WAITING_FILE_SUCCESS=4005;
     private static final int ACTION_NEXT_ACTION=4006;
 
+    //types of next actions
+    public static final int NEXT_ACTION_CONTINUE=2001;
+    public static final int NEXT_ACTION_CANCEL_SPACE =2002;
+
     //thread
     private Handler socketHandler;
     private Thread socketThread;
@@ -43,6 +47,7 @@ public class SenderSocketTransfer{
     private String mIpAddress;
     private int mPort;
     private int mCurrentAction;
+    private int mNextActionDetail;
 
     //data handling
     private FileListEntry mFileEntry;
@@ -206,6 +211,12 @@ public class SenderSocketTransfer{
                                     //transfer is completed
                                     Log.d(TAG, "the details have been received on the client, we send the bytes now");
                                     mCurrentAction = ACTION_SEND_FILE;
+                                }else if(message.getMessageType()==TransferProgressActivity.TYPE_FILE_TRANSFER_NO_SPACE){
+                                    //we cannot complete transfer
+                                    Log.d(TAG,"the transfer cannot be completed since the receiver ran our of space");
+                                    //mCurrentAction
+                                    mNextActionDetail=NEXT_ACTION_CANCEL_SPACE;
+                                    mSenderInterface.finishedSendTransfer(mNextActionDetail);
                                 }
                             } catch (Exception e) {
                                 Log.d(TAG, "Waiting client to communicate "+e.getMessage());
@@ -225,7 +236,8 @@ public class SenderSocketTransfer{
 
                     //we finish
                     doWeRepeat=false;
-                    mSenderInterface.finishedSendTransfer();
+                    mNextActionDetail=NEXT_ACTION_CONTINUE;
+                    mSenderInterface.finishedSendTransfer(mNextActionDetail);
                 } catch (Exception e) {
                     Log.d(TAG, "the socket creation has failed, try again" + e.getMessage());
                     currentSocketRetries++;
@@ -265,7 +277,7 @@ public class SenderSocketTransfer{
     public interface SenderSocketTransferInterface {
         void updateSendSendUI(TextInfoSendObject textInfoSendObject);
         void updateSendSentFile(FileListEntry fileListEntry);
-        void finishedSendTransfer();
+        void finishedSendTransfer(int typeFinishTransfer);
         void socketErrorSend();
     }
 }

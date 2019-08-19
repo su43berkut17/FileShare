@@ -70,6 +70,19 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
         startTransfer();
     }
 
+    public void userCancelled(){
+        try {
+            mReceiverSocketTransfer.destroy();
+        }catch (Exception e){
+            Log.d(TAG,"Couldnt cancel the receiver socket");
+        }
+        try {
+            mSenderSocketTransfer.destroy();
+        }catch (Exception e){
+            Log.d(TAG,"Couldnt cancel the sender socket");
+        }
+    }
+
     private void startTransfer(){
         if (mCurrentFile<mTotalFiles) {
             //we continue with the transfer
@@ -112,21 +125,28 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
     }
 
     @Override
-    public void finishedReceiveTransfer() {
-        //we finished receiving the object
-        mCurrentFile++;
+    public void finishedReceiveTransfer(int typeOfFinishTransfer) {
+        //we check if it is an error or continued transfer
+        if (typeOfFinishTransfer==ReceiverSocketTransfer.NEXT_ACTION_CONTINUE) {
 
-        //we call the counter to add a new transferred file
-        mReceiverInterface.addReceivedCounter();
+            //we finished receiving the object
+            mCurrentFile++;
 
-        //destroy socket
-        Boolean canWeContinue=false;
-        do{
-            canWeContinue=mReceiverSocketTransfer.destroy();
-        }while (!canWeContinue);
+            //we call the counter to add a new transferred file
+            mReceiverInterface.addReceivedCounter();
 
-        //we restart the transfer
-        startTransfer();
+            //destroy socket
+            Boolean canWeContinue = false;
+            do {
+                canWeContinue = mReceiverSocketTransfer.destroy();
+            } while (!canWeContinue);
+
+            //we restart the transfer
+            startTransfer();
+        }else if(typeOfFinishTransfer==ReceiverSocketTransfer.NEXT_ACTION_CANCEL_SPACE){
+            //we ran out of space, cancel transfer and display dialog
+            mReceiverInterface.errorReceiveNoSpace();
+        }
     }
 
     @Override
@@ -141,21 +161,26 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
     }
 
     @Override
-    public void finishedSendTransfer() {
-        //we finished sending the object
-        mCurrentFile++;
+    public void finishedSendTransfer(int typeOfFinishedTransfer) {
+        if (typeOfFinishedTransfer==SenderSocketTransfer.NEXT_ACTION_CONTINUE) {
+            //we finished sending the object
+            mCurrentFile++;
 
-        //add the sent counter
-        mSenderInterface.addSentCounter();
+            //add the sent counter
+            mSenderInterface.addSentCounter();
 
-        //destroy socket
-        Boolean canWeContinue=false;
-        do{
-            canWeContinue=mSenderSocketTransfer.destroy();
-        }while (!canWeContinue);
+            //destroy socket
+            Boolean canWeContinue = false;
+            do {
+                canWeContinue = mSenderSocketTransfer.destroy();
+            } while (!canWeContinue);
 
-        //we restart the transfer
-        startTransfer();
+            //we restart the transfer
+            startTransfer();
+        }else if(typeOfFinishedTransfer==SenderSocketTransfer.NEXT_ACTION_CANCEL_SPACE){
+            //receiver ran out of space, cancel the remaining transfers
+            mSenderInterface.errorSendNoSpace();
+        }
     }
 
     @Override
@@ -177,6 +202,7 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
         void addSentCounter();
         void finishedSendTransfer();
         void socketSendFailedClient();
+        void errorSendNoSpace();
     }
 
     public interface ReceiverSocketTransferInterfaceCoor{
@@ -186,5 +212,6 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
         void addReceivedCounter();
         void finishedReceiveTransfer();
         void socketReceiveFailedClient();
+        void errorReceiveNoSpace();
     }
 }
