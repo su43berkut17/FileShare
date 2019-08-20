@@ -125,7 +125,7 @@ public class ReceiverSocketTransfer {
                                     //reset action to receive file
                                     mCurrentAction=ACTION_RECEIVE_FILE;
                                 }else if(mCurrentAction==ACTION_NOT_ENOUGH_SPACE){
-                                    Log.d(TAG,"sending error message");
+                                    Log.d(TAG,"sending error message for not enough space");
                                     TextInfoSendObject textInfoSendObject = new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_TRANSFER_NO_SPACE, "", "");
                                     messageOut.writeObject(textInfoSendObject);
 
@@ -170,6 +170,9 @@ public class ReceiverSocketTransfer {
                                 }else{
                                     spaceAvailable=statfs.getAvailableBlocks()*(long)statfs.getBlockSize();
                                 }
+
+                                Log.d(TAG,"Comparing the filesize to the available storage, space available: "+
+                                        spaceAvailable.toString()+" file size "+mCurrentFileSize);
 
                                 if (spaceAvailable>Long.getLong(mCurrentFileSize)) {
                                     //change the action to get ready to receive file
@@ -280,6 +283,7 @@ public class ReceiverSocketTransfer {
                         }
                     }
 
+                    //we finish
                     doWeRepeat=false;
                     mReceiverInterface.finishedReceiveTransfer(mNextActionDetail);
                 } catch (Exception e) {

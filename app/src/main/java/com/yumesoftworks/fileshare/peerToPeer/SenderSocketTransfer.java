@@ -1,6 +1,5 @@
 package com.yumesoftworks.fileshare.peerToPeer;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -117,8 +116,10 @@ public class SenderSocketTransfer{
                                         String.valueOf(mTotalFiles)+","+
                                         String.valueOf(new File(mFileEntry.getPath()).length());
 
-                                TextInfoSendObject sendObject = new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_DETAILS, messageToSend, additionalInfo);
-                                //messageOut = new ObjectOutputStream(mSocket.getOutputStream());
+                                TextInfoSendObject sendObject = new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_DETAILS,
+                                        messageToSend,
+                                        additionalInfo);
+
                                 messageOut.writeObject(sendObject);
                                 messageOut.flush();
                                 mCurrentAction = ACTION_WAIT_BEFORE_SEND_FILE;
@@ -128,7 +129,6 @@ public class SenderSocketTransfer{
 
                             } catch (Exception e) {
                                 Log.d(TAG, "Error sending file details message: " + messageToSend + " " + e.getMessage());
-                                //e.printStackTrace();
                             }
                         }
 
@@ -183,7 +183,6 @@ public class SenderSocketTransfer{
                                 mCurrentAction = ACTION_FINISHED_FILE_TRANSFER;
                             } catch (Exception e) {
                                 Log.d(TAG, "There was en exception when sending file " + e.getMessage());
-                                e.printStackTrace();
                             }
                         }
 
@@ -192,6 +191,7 @@ public class SenderSocketTransfer{
                             //we set the file as transferred in the database
                             mSenderInterface.updateSendSentFile(mFileEntry);
 
+                            mNextActionDetail=NEXT_ACTION_CONTINUE;
                             mCurrentAction = ACTION_NEXT_ACTION;
                         }
 
@@ -236,7 +236,6 @@ public class SenderSocketTransfer{
 
                     //we finish
                     doWeRepeat=false;
-                    mNextActionDetail=NEXT_ACTION_CONTINUE;
                     mSenderInterface.finishedSendTransfer(mNextActionDetail);
                 } catch (Exception e) {
                     Log.d(TAG, "the socket creation has failed, try again" + e.getMessage());

@@ -73,13 +73,16 @@ public class ServiceFileShare extends Service implements
         //cancel notification
         manager.cancel(NOTIFICATION_ID);
 
+        //clear the file list
+        repositoryFile.deleteTable();
+        repositoryUser.switchTransfer(false);
+
         mTransferFileCoordinatorHelper.userCancelled();
 
         super.onDestroy();
     }
 
     private class loadDatabaseAsyncTask extends AsyncTask<Void,Void,Void> {
-
 
         @Override
         protected Void doInBackground(final Void... params) {
