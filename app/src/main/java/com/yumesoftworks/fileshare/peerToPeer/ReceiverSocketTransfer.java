@@ -25,7 +25,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class ReceiverSocketTransfer {
-    private static final String TAG="ServiceClientSocket";
+    private static final String TAG="ReceiverSocketTransfer";
 
     //actions
     private static final int ACTION_SEND_MESSAGE=1001;
@@ -143,7 +143,6 @@ public class ReceiverSocketTransfer {
                         if (mCurrentAction==ACTION_RECEIVE_DETAILS){
                             //we read the object
                             try {
-                                Log.d(TAG,"receiving details");
                                 //messageIn = new ObjectInputStream(mSocket.getInputStream());
                                 TextInfoSendObject message = (TextInfoSendObject) messageIn.readObject();
                                 mTextInfoSendObject=message;
@@ -152,9 +151,13 @@ public class ReceiverSocketTransfer {
                                 String stringNumbers=mTextInfoSendObject.getAdditionalInfo();
                                 String[] currentNumbers = stringNumbers.split(",");
 
+                                Log.d(TAG,"receiving details "+stringNumbers);
+
                                 mCurrentFile=currentNumbers[0];
                                 mTotalFiles=currentNumbers[1];
                                 mCurrentFileSize=currentNumbers[2];
+
+                                Long currentFileSizeLong=Long.parseLong(mCurrentFile);
 
                                 //fix the initial message
                                 message.setAdditionalInfo(currentNumbers[0]+","+currentNumbers[1]);
@@ -174,12 +177,13 @@ public class ReceiverSocketTransfer {
                                 Log.d(TAG,"Comparing the filesize to the available storage, space available: "+
                                         spaceAvailable.toString()+" file size "+mCurrentFileSize);
 
-                                if (spaceAvailable>Long.getLong(mCurrentFileSize)) {
+                                if (spaceAvailable>currentFileSizeLong) {
                                     //change the action to get ready to receive file
                                     mCurrentAction = ACTION_CONFIRM_DETAILS;
                                     Log.d(TAG, "We got the details of the file, confirm with sender");
                                 }else{
                                     //not enough available space
+                                    Log.d(TAG, "Error, not enough space");
                                     mCurrentAction=ACTION_NOT_ENOUGH_SPACE;
                                 }
 

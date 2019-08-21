@@ -108,8 +108,6 @@ public class SenderSocketTransfer{
                         if (mCurrentAction == ACTION_SEND_DETAIL) {
                             //we send the details of the file
                             try {
-                                Log.d(TAG, "we send the file details");
-
                                 //we send the file name
                                 messageToSend = mFileEntry.getFileName();
                                 String additionalInfo = String.valueOf(mCurrentFile) + "," +
@@ -123,6 +121,8 @@ public class SenderSocketTransfer{
                                 messageOut.writeObject(sendObject);
                                 messageOut.flush();
                                 mCurrentAction = ACTION_WAIT_BEFORE_SEND_FILE;
+
+                                Log.d(TAG, "we send the file details "+additionalInfo);
 
                                 //send to ui the current file to be sent
                                 mSenderInterface.updateSendSendUI(sendObject);
