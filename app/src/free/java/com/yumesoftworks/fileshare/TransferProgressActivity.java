@@ -139,6 +139,8 @@ public class TransferProgressActivity extends AppCompatActivity implements
             } else {
                 startService(serviceIntent);
             }
+        }else{
+            mProgressBarHide.setVisibility(View.GONE);
         }
 
         //initialize fragments
