@@ -22,6 +22,7 @@ import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import com.yumesoftworks.fileshare.data.UserInfoRepository;
 import com.yumesoftworks.fileshare.peerToPeer.TransferFileCoordinatorHelper;
@@ -69,6 +70,7 @@ public class ServiceFileShare extends Service implements
 
     @Override
     public void onDestroy() {
+        Log.d(TAG,"Destroying service");
         //we cancel everything
         //cancel notification
         manager.cancel(NOTIFICATION_ID);
@@ -77,7 +79,16 @@ public class ServiceFileShare extends Service implements
         repositoryFile.deleteTable();
         repositoryUser.switchTransfer(false);
 
-        mTransferFileCoordinatorHelper.userCancelled();
+        Boolean isItDestroyed=false;
+
+        do {
+            isItDestroyed=mTransferFileCoordinatorHelper.userCancelled();
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            }catch (Exception e){
+                Log.e(TAG,"Couldn't interrupt");
+            }
+        }while (isItDestroyed==false);
 
         super.onDestroy();
     }
@@ -125,10 +136,14 @@ public class ServiceFileShare extends Service implements
         mCurrentFile=0;
 
         //we get the bundle of extras
-        receivedBundle=intent.getExtras();
-
-        //we call the initialize sockets
-        initializeSockets();
+        try {
+            //we call the initialize sockets
+            receivedBundle = intent.getExtras();
+            initializeSockets();
+        }catch (Exception e){
+            Log.d(TAG,"No extra information sent to the service, we stop it.");
+            stopSelf();
+        }
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -196,7 +211,6 @@ public class ServiceFileShare extends Service implements
 
     //dabatase stuff
     private void switchTransfer(Boolean activateTransfer){
-
         repositoryUser.switchTransfer(activateTransfer);
     }
 

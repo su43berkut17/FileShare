@@ -70,17 +70,26 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
         startTransfer();
     }
 
-    public void userCancelled(){
-        try {
-            mReceiverSocketTransfer.destroy();
-        }catch (Exception e){
-            Log.d(TAG,"Couldnt cancel the receiver socket");
+    public Boolean userCancelled(){
+        if (mReceiverSocketTransfer != null) {
+            try {
+                return mReceiverSocketTransfer.destroy();
+            } catch (Exception e) {
+                Log.d(TAG, "Couldn't cancel the receiver socket");
+                return false;
+            }
         }
-        try {
-            mSenderSocketTransfer.destroy();
-        }catch (Exception e){
-            Log.d(TAG,"Couldnt cancel the sender socket");
+
+        if (mSenderSocketTransfer!=null) {
+            try {
+                return mSenderSocketTransfer.destroy();
+            } catch (Exception e) {
+                Log.d(TAG, "Couldn't cancel the sender socket");
+                return false;
+            }
         }
+
+        return true;
     }
 
     private void startTransfer(){

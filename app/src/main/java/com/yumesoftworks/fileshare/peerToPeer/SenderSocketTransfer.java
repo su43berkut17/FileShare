@@ -59,7 +59,6 @@ public class SenderSocketTransfer{
     public SenderSocketTransfer(TransferFileCoordinatorHelper context, String recIpAddress, int recPort, FileListEntry recFile, int recCurrentFile, int recTotalFiles){
         mIpAddress=recIpAddress;
         mPort=recPort;
-        //mSenderInterface=(SenderSocketTransferInterface)context;
         mSenderInterface=(SenderSocketTransferInterface)context;
         mFileEntry =recFile;
 
@@ -137,8 +136,8 @@ public class SenderSocketTransfer{
                             try {
                                 Log.d(TAG, "we start sending the file");
                                 File file = new File(mFileEntry.getPath());
-                                // Get the size of the file
 
+                                // Get the size of the file
                                 long length = file.length();
                                 Log.d(TAG, "File: getting the length " + length);
                                 byte[] bytes = new byte[16 * 1024];
@@ -205,12 +204,12 @@ public class SenderSocketTransfer{
                                 //we check if the message is the success of the file so we can continue with the next file
                                 if (message.getMessageType() == TransferProgressActivity.TYPE_FILE_TRANSFER_SUCCESS) {
                                     //transfer is completed
-                                    Log.d(TAG, "the file has been transferred, we open a new socket");
                                     mCurrentAction = ACTION_NEXT_ACTION;
+                                    Log.d(TAG, "the file has been transferred, we open a new socket");
                                 }else if (message.getMessageType() == TransferProgressActivity.TYPE_FILE_DETAILS_SUCCESS) {
                                     //transfer is completed
-                                    Log.d(TAG, "the details have been received on the client, we send the bytes now");
                                     mCurrentAction = ACTION_SEND_FILE;
+                                    Log.d(TAG, "the details have been received on the client, we send the bytes now");
                                 }else if(message.getMessageType()==TransferProgressActivity.TYPE_FILE_TRANSFER_NO_SPACE){
                                     //we cannot complete transfer
                                     Log.d(TAG,"the transfer cannot be completed since the receiver ran our of space");
@@ -220,7 +219,6 @@ public class SenderSocketTransfer{
                                 }
                             } catch (Exception e) {
                                 Log.d(TAG, "Waiting client to communicate "+e.getMessage());
-                                //e.printStackTrace();
                             }
                         }
                     }while(mCurrentAction!=ACTION_NEXT_ACTION);
@@ -229,6 +227,7 @@ public class SenderSocketTransfer{
                     if (!mSocket.isClosed()) {
                         try {
                             mSocket.close();
+                            Log.e(TAG, "Socket closed");
                         } catch (Exception e) {
                             Log.e(TAG, "Failed to close the socket");
                         }
@@ -244,6 +243,7 @@ public class SenderSocketTransfer{
                     if (currentSocketRetries==totalSocketRetries){
                         doWeRepeat=false;
                         mSenderInterface.socketErrorSend();
+                        Log.d(TAG, "we ran out of tries for the socket");
                     }else{
                         try {
                             TimeUnit.SECONDS.sleep(1);
@@ -257,16 +257,20 @@ public class SenderSocketTransfer{
     }
 
     public Boolean destroy(){
+        Log.d(TAG, "Destroy sockets");
         mSenderInterface=null;
         socketThread.interrupt();
 
         if (mSocket.isClosed()){
+            Log.d(TAG, "Socket destroyed successfully");
             return true;
         }else{
             try{
                 mSocket.close();
+                Log.d(TAG, "Socket destroyed successfully");
                 return true;
             }catch (Exception e){
+                Log.d(TAG, "Cannot close socket " + e.getMessage());
                 return false;
             }
         }

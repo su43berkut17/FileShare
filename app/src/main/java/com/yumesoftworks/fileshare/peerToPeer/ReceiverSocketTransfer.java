@@ -135,7 +135,7 @@ public class ReceiverSocketTransfer {
                                 }
 
                             } catch (Exception e) {
-                                Log.d(TAG, "There is no output stream " + e.getMessage());
+                                Log.d(TAG, "Action send mess, confirm deta, not enough spa, There is no output stream " + e.getMessage());
                             }
                         }
 
@@ -183,12 +183,12 @@ public class ReceiverSocketTransfer {
                                     Log.d(TAG, "We got the details of the file, confirm with sender");
                                 }else{
                                     //not enough available space
-                                    Log.d(TAG, "Error, not enough space");
                                     mCurrentAction=ACTION_NOT_ENOUGH_SPACE;
+                                    Log.d(TAG, "Error, not enough space");
                                 }
 
                             } catch (Exception e) {
-                                Log.d(TAG, "There is no input stream " + e.getMessage());
+                                Log.d(TAG, "Action receive details, there is no input stream " + e.getMessage());
                             }
                         }
 
@@ -274,6 +274,7 @@ public class ReceiverSocketTransfer {
                     if (!mSocket.isClosed()) {
                         try {
                             mSocket.close();
+                            Log.e(TAG, "Socket closed");
                         } catch (Exception e) {
                             Log.e(TAG, "Failed to close the socket");
                         }
@@ -282,6 +283,7 @@ public class ReceiverSocketTransfer {
                     if (!mServerSocket.isClosed()){
                         try{
                             mServerSocket.close();
+                            Log.e(TAG, "Server Socket closed");
                         }catch (Exception e){
                             Log.e(TAG, "Failed to close the server socket");
                         }
@@ -297,6 +299,7 @@ public class ReceiverSocketTransfer {
                     if (currentSocketRetries==totalSocketRetries) {
                         doWeRepeat=false;
                         mReceiverInterface.socketReceiveFailedClient();
+                        Log.d(TAG, "we ran out of tries for the socket");
                     }else{
                         try{
                             TimeUnit.SECONDS.sleep(1);
@@ -320,11 +323,13 @@ public class ReceiverSocketTransfer {
         //cancel socket
         if (mSocket!=null) {
             if (mSocket.isClosed()) {
+                Log.d(TAG, "Client socket destroyed successfully");
                 bothClosed++;
             } else {
                 try {
                     mSocket.close();
                     bothClosed++;
+                    Log.d(TAG, "Client Socket destroyed successfully");
                 } catch (Exception e) {
                     Log.d(TAG, "Cannot close socket " + e.getMessage());
                 }
@@ -335,11 +340,13 @@ public class ReceiverSocketTransfer {
 
         if (mServerSocket!=null) {
             if (mServerSocket.isClosed()) {
+                Log.d(TAG, "Server socket destroyed successfully");
                 bothClosed++;
             } else {
                 try {
                     mServerSocket.close();
                     bothClosed++;
+                    Log.d(TAG, "Server socket destroyed successfully");
                 } catch (Exception e) {
                     Log.d(TAG, "Cannot close server socket " + e.getMessage());
                 }
