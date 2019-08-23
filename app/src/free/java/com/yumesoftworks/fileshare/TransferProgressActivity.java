@@ -285,12 +285,27 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
     @Override
     public void buttonOkCancel(String received){
-        //we check if it ended or if we are cancelling it
-        if(received.equals(getResources().getString(R.string.gen_button_cancel))){
-            Intent serviceIntent=new Intent(this,ServiceFileShare.class);
-            stopService(serviceIntent);
+        if (received.equals("Cancel")) {
+            //create the dialog that will ask if yes or no
+            AlertDialog.Builder cancelDialog = new AlertDialog.Builder(thisActivity);
+            cancelDialog.setMessage("Are you sure you want to cancel?")
+                    .setNegativeButton("NO", null)
+                    .setPositiveButton("YES",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent serviceIntent=new Intent(thisActivity,ServiceFileShare.class);
+                                    stopService(serviceIntent);
+                                    reopenApp();
+                                }
+                            });
+            cancelDialog.show();
+        }else{
+            reopenApp();
         }
+    }
 
+    private void reopenApp(){
         Intent intent=new Intent(getApplicationContext(),WelcomeScreenActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
