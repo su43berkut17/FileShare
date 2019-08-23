@@ -128,7 +128,9 @@ public class ServiceFileShare extends Service implements
         }else{
             manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
                     ,getString(R.string.service_notification_text_initialize)
-                    ,false).build());
+                    ,false)
+                    .setOnlyAlertOnce(true)
+                    .build());
         }
 
         //we initialize the files
@@ -378,7 +380,9 @@ public class ServiceFileShare extends Service implements
         //we update the notification
         manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
                 ,finalNotificationText
-                ,true).build());
+                ,true)
+                .setOnlyAlertOnce(true)
+                .build());
 
         //we update the UI
         Intent intent=new Intent(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI);

@@ -66,7 +66,8 @@ public class updateWidgetService extends IntentService {
         //we set the notification
         return new NotificationCompat.Builder(this, WIDGET_CHANNEL)
                 .setContentTitle(getString(R.string.app_name))
-                .setAutoCancel(true);
+                .setAutoCancel(true)
+                .setOnlyAlertOnce(true);
     }
 
     @Override
