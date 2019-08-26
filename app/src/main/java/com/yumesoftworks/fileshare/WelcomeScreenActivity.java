@@ -15,6 +15,8 @@ import android.os.Bundle;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.appcompat.widget.Toolbar;
+
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -206,6 +208,13 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     private void goMainActivity(){
         Intent mainMenuActivity=new Intent(getApplicationContext(), com.yumesoftworks.fileshare.MainMenuActivity.class);
 
+        //delete the backstack if it is not settings
+        if (!mIsThisSettings) {
+            Log.d(TAG,"it is not settings, we");
+            mainMenuActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            finish();
+        }
+
         //basic transition to main menu
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle();
@@ -247,7 +256,8 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                     viewModel.saveData(dataToSave);
 
                     //go to main activity
-                    goMainActivity();
+                    //goMainActivity();
+                    super.onBackPressed();
                 }
                 break;
 
