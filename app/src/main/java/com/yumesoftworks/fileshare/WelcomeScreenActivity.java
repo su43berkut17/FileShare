@@ -17,8 +17,10 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.appcompat.widget.Toolbar;
 
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -115,6 +117,18 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         buttonGo=(Button)findViewById(R.id.button_go);
         buttonCancel=(Button)findViewById(R.id.button_cancel);
         tvUsername=(TextView)findViewById(R.id.tv_aws_input_username);
+
+        tvUsername.setOnEditorActionListener(new TextView.OnEditorActionListener(){
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId==EditorInfo.IME_ACTION_UNSPECIFIED) {
+                    saveChanges();
+                    handled = true;
+                }
+                return handled;
+            }
+        });
 
         buttonGo.setOnClickListener(this);
         buttonCancel.setOnClickListener(this);
@@ -228,43 +242,48 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     public void onClick(View view){
         switch (view.getId()){
             case R.id.button_go:
-                //save changes and either return to former activity or run new activity
-                //we verify if there is data to save
-                String username=tvUsername.getText().toString();
-                if ((username.isEmpty()||(mSelectedAvatar==-1))){
-                    //we show the dialog
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-                    alertDialogBuilder.setCancelable(false);
-                    if (mSelectedAvatar==-1) {
-                        alertDialogBuilder.setMessage(R.string.aws_dialog_avatar);
-                    }else{
-                        alertDialogBuilder.setMessage(R.string.aws_dialog_username);
-                    }
-                    alertDialogBuilder.setTitle(R.string.aws_dialog_title);
-                    alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-
-                    alertDialogBuilder.show();
-
-                }else{
-                    //we save the data and open the activity
-                    UserInfoEntry dataToSave=new UserInfoEntry(tvUsername.getText().toString(),mSelectedAvatar,mFilesTransferred,mVersion,mIsTransferInProgress);
-                    viewModel.saveData(dataToSave);
-
-                    //go to main activity
-                    //goMainActivity();
-                    super.onBackPressed();
-                }
+               saveChanges();
                 break;
 
             case R.id.button_cancel:
                 //return to former activity
                 super.onBackPressed();
                 break;
+        }
+    }
+
+    //save changes function
+    private void saveChanges(){
+        //save changes and either return to former activity or run new activity
+        //we verify if there is data to save
+        String username=tvUsername.getText().toString();
+        if ((username.isEmpty()||(mSelectedAvatar==-1))){
+            //we show the dialog
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setCancelable(false);
+            if (mSelectedAvatar==-1) {
+                alertDialogBuilder.setMessage(R.string.aws_dialog_avatar);
+            }else{
+                alertDialogBuilder.setMessage(R.string.aws_dialog_username);
+            }
+            alertDialogBuilder.setTitle(R.string.aws_dialog_title);
+            alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+
+            alertDialogBuilder.show();
+
+        }else{
+            //we save the data and open the activity
+            UserInfoEntry dataToSave=new UserInfoEntry(tvUsername.getText().toString(),mSelectedAvatar,mFilesTransferred,mVersion,mIsTransferInProgress);
+            viewModel.saveData(dataToSave);
+
+            //go to main activity
+            //goMainActivity();
+            super.onBackPressed();
         }
     }
 
