@@ -1,10 +1,15 @@
 package com.yumesoftworks.fileshare;
 
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
@@ -62,13 +67,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         mAdView = findViewById(R.id.ad_view_receiver_pick_destination);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
-        //we reset the execution
-        isFirstExecution=true;
-        NSDInitialized=false;
-
-        //we will use livedata for user
-        mDb=AppDatabase.getInstance(getApplicationContext());
-        setupViewModel();
 
         //toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.rpd_toolbar);
@@ -76,6 +74,49 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
         //we set the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        //get file write access
+        askForFilePermission();
+    }
+
+    private void initialize(){
+        //we reset the execution
+        isFirstExecution=true;
+        NSDInitialized=false;
+
+        //we will use livedata for user
+        mDb=AppDatabase.getInstance(getApplicationContext());
+        setupViewModel();
+    }
+
+    private void askForFilePermission(){
+        //we ask for permission before continuing
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                //initialize values
+                initialize();
+            } else {
+                //we ask for permission
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+            }
+        } else {
+            //permission is automatically granted on sdk<23 upon installation
+            //initialize values
+            initialize();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        //super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (grantResults[0]==PackageManager.PERMISSION_GRANTED){
+            //initialize values
+            initialize();
+        }else{
+            //go back to main activity
+            onBackPressed();
+        }
     }
 
     //view model
@@ -145,11 +186,8 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
                 mNsdHelper.initializeNsd();
                 mNsdHelper.registerService(mServerSocket.getLocalPort());
 
-                //we check if the receiver socket is null
-                //if (mReceiverSocket == null) {
-                    Log.d(TAG, "recreating socket");
-                    mReceiverSocket = new ReceiverPickSocket(this, mServerSocket, mUserInfoEntry);
-                //}
+                Log.d(TAG, "recreating socket");
+                mReceiverSocket = new ReceiverPickSocket(this, mServerSocket, mUserInfoEntry);
             }
         }
 
@@ -159,15 +197,14 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-        //destroy the discovery
         mNsdHelper=null;
+
+        super.onDestroy();
     }
 
     @Override
     public void openNexActivity() {
         //we close the socket
-        Boolean test=mReceiverSocket.destroySocket();
         try {
             mServerSocket.close();
             Log.d(TAG,"server socket is closed "+mServerSocket.isClosed());

@@ -317,8 +317,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             initializeVariables();
         }else{
             //go back to main activity
-            Intent intent=new Intent(this, com.yumesoftworks.fileshare.MainMenuActivity.class);
-            startActivity(intent);
+            onBackPressed();
         }
     }
 
