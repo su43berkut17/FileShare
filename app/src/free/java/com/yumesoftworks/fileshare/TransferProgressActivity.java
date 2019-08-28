@@ -24,6 +24,7 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
+import com.yumesoftworks.fileshare.data.FileListRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -306,6 +307,11 @@ public class TransferProgressActivity extends AppCompatActivity implements
     }
 
     private void reopenApp(){
+        //reset the file list
+        FileListRepository fileListRepository=new FileListRepository(getApplication());
+        fileListRepository.deleteTable();
+
+        //reopen the activity
         Intent intent=new Intent(getApplicationContext(),WelcomeScreenActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

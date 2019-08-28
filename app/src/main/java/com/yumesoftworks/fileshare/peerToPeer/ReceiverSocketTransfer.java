@@ -200,13 +200,11 @@ public class ReceiverSocketTransfer {
                             String finalName=new Date().toString()+"-"+realName;
 
                             //we create the file
-                            //fileInputStream=mSocket.getInputStream();
-
                             byte[] bytes = new byte[16 * 1024];
                             fileOutputStream=new FileOutputStream(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/" +finalName);
                             BufferedOutputStream bufferedOutputStream=new BufferedOutputStream(fileOutputStream);
 
-                            Log.d(TAG,"Reading bytes");
+                            Log.d(TAG,"Receiving bytes");
 
                             //initialize progress message
                             String additionalInfo="";
@@ -220,6 +218,7 @@ public class ReceiverSocketTransfer {
                                 bufferedOutputStream.write(bytes,0,count);
 
                                 byteCounter+=bytes.length;
+                                byteCounter+=fileOutputStream.getChannel().size();
 
                                 //set the message
                                 //send progress update to UI

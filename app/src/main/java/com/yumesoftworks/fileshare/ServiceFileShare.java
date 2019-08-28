@@ -46,7 +46,7 @@ public class ServiceFileShare extends Service implements
     private int mPort;
 
     //database access
-    private AppDatabase database;
+    //private AppDatabase database;
     private FileListRepository repositoryFile;
     private UserInfoRepository repositoryUser;
 
@@ -58,13 +58,12 @@ public class ServiceFileShare extends Service implements
 
     @Override
     public void onCreate() {
-
         super.onCreate();
 
         repositoryFile=new FileListRepository(getApplication());
         repositoryUser=new UserInfoRepository(getApplication());
 
-        database = AppDatabase.getInstance(this);
+        //AppDatabase database = AppDatabase.getInstance(this);
         new loadDatabaseAsyncTask().execute();
     }
 
@@ -75,8 +74,7 @@ public class ServiceFileShare extends Service implements
         //cancel notification
         manager.cancel(NOTIFICATION_ID);
 
-        //clear the file list
-        repositoryFile.deleteTable();
+        //deactivate the switch transfer
         repositoryUser.switchTransfer(false);
 
         Boolean isItDestroyed=false;
@@ -219,7 +217,6 @@ public class ServiceFileShare extends Service implements
     //successful sent
     private void addSuccessfulTransferCounter(){
         repositoryUser.addSuccessfulTransferCounter();
-        //new updateDatabaseCounterAsyncTask(database).execute();
     }
 
     //socket error
@@ -392,6 +389,7 @@ public class ServiceFileShare extends Service implements
         //update the widget
         //we will set a counter to prevent calling an update on the widget several times
         if (mCounterTimesWidget>10 || textInfoSendObject.getMessageType()==com.yumesoftworks.fileshare.TransferProgressActivity.TYPE_END) {
+           Log.d(TAG,fileName+": "+currentNumbers.toString());
             mCounterTimesWidget=0;
             updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_TRANSFER, fileName, mTotalFiles, mCurrentFile);
         }else{

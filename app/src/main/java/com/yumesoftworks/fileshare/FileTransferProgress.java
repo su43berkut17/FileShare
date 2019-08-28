@@ -127,8 +127,6 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         String[] currentNumbers = stringNumbers.split(",");
         String finalTextNumbers=currentNumbers[0]+" of "+currentNumbers[1];
 
-        Log.d(TAG,"the numbers received are: "+stringNumbers);
-
         //we change the member variables of the progress
         int totalFiles=Integer.parseInt(currentNumbers[1]);
         int currentFile=Integer.parseInt(currentNumbers[0]);
