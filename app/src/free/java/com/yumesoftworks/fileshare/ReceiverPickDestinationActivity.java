@@ -9,17 +9,24 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.squareup.picasso.Picasso;
 import com.yumesoftworks.fileshare.data.AppDatabase;
+import com.yumesoftworks.fileshare.data.AvatarDefaultImages;
+import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
 import com.yumesoftworks.fileshare.peerToPeer.ReceiverPickSocket;
@@ -48,6 +55,11 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
     private AppDatabase mDb;
     private ReceiverPickDestinationViewModel viewModel;
 
+    //ui
+    private TextView mUserName;
+    private ImageView mUserIcon;
+    private ImageView mConnectionAnimation;
+
     //lifecycle
     private Boolean isFirstExecution=true;
     private Boolean NSDInitialized=false;
@@ -67,6 +79,16 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         mAdView = findViewById(R.id.ad_view_receiver_pick_destination);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
+
+        //assign views
+        mUserName=(TextView)findViewById(R.id.tv_receive_username);
+        mUserIcon=(ImageView)findViewById(R.id.iv_receive_icon);
+        mConnectionAnimation=(ImageView)findViewById(R.id.iv_receive_animation);
+
+        Drawable drawable = mConnectionAnimation.getDrawable();
+        if (drawable instanceof Animatable) {
+            ((Animatable) drawable).start();
+        }
 
         //toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.rpd_toolbar);
@@ -125,7 +147,19 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         viewModel.getUserInfo().observe(this, new Observer<List<UserInfoEntry>>() {
             @Override
             public void onChanged(@Nullable List<UserInfoEntry> userInfoEntries) {
+
+                //we load the info
                 mUserInfoEntry=userInfoEntries.get(0);
+
+                //assign the info
+                mUserName.setText(mUserInfoEntry.getUsername());
+
+                //image
+                List<AvatarStaticEntry> receivedAvatars = AvatarDefaultImages.getDefaultImages();
+                String path=receivedAvatars.get(mUserInfoEntry.getPickedAvatar()).getPath();
+                int imageUri = getApplicationContext().getResources().getIdentifier(path,"drawable",getApplicationContext().getPackageName());
+                Picasso.get().load(imageUri).into(mUserIcon);
+
                 if (!NSDInitialized) {
                     initializeNsd();
                     NSDInitialized=true;

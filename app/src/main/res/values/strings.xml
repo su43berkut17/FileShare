@@ -54,6 +54,7 @@
     <!--Activity wait user receive -->
     <string name="ru_avatar_description">Wait for the sender to connect</string>
     <string name="ru_tv_please_wait">Waiting for sender connection...</string>
+    <string name="ru_tv_username">Username</string>
 
     <!--Activity transfer progress-->
     <string name="atp_tv_filename">Filename</string>

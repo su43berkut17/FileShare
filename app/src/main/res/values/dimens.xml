@@ -14,6 +14,11 @@
     <dimen name="welcome_icon_size">128dp</dimen>
     <dimen name="avatar_size">60dp</dimen>
 
+    <!-- Activity receive items-->
+    <dimen name="receive_icon">64dp</dimen>
+    <dimen name="receive_animation">128dp</dimen>
+    <dimen name="receive_username">24sp</dimen>
+
     <!-- Widget -->
     <dimen name="widget_big_text">50sp</dimen>
     <dimen name="widget_margin">8dp</dimen>
