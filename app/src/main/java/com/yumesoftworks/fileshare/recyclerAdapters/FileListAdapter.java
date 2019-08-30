@@ -3,6 +3,7 @@ package com.yumesoftworks.fileshare.recyclerAdapters;
 import android.content.Context;
 import android.net.Uri;
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.Guideline;
 import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,7 +18,12 @@ import com.squareup.picasso.Picasso;
 import com.yumesoftworks.fileshare.R;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileListViewHolder> {
@@ -51,17 +57,13 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
 
         //set values in view
         fileListViewHolder.tv_fileName.setText(fileListEntry.getFileName());
+
         //we check the checkbox status
         if (fileListEntry.getIsSelected()==1){
             fileListViewHolder.cv_selected.setChecked(true);
-            //Log.d(TAG,"It is checked");
         }else{
             fileListViewHolder.cv_selected.setChecked(false);
-            //Log.d(TAG,"It is not checked");
         }
-
-        Log.d(TAG,"mime type is "+fileListEntry.getMimeType());
-        Log.d(TAG,"the path is "+fileListEntry.getPath());
 
         //placeholder uri
         int placeholderUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
@@ -76,8 +78,39 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
                     .resize(200, 200)
                     .centerCrop()
                     .into(fileListViewHolder.iv_icon);
+
+            fileListViewHolder.tv_date.setVisibility(View.GONE);
+            fileListViewHolder.tv_size.setVisibility(View.GONE);
+            fileListViewHolder.gd_separator.setGuidelinePercent(1);
         }else{
             //it is a file
+            File tempFile = new File(fileListEntry.getPath());
+
+            //date and size
+            fileListViewHolder.tv_date.setVisibility(View.VISIBLE);
+            fileListViewHolder.tv_size.setVisibility(View.VISIBLE);
+            fileListViewHolder.gd_separator.setGuidelinePercent(0.5f);
+            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy - hh:mm:ss");
+            String finalDate = dateFormat.format(new Date(tempFile.lastModified()));
+
+            //size
+            Long fileSize=tempFile.length();
+            String sizeUnit;
+
+            if (fileSize>1024*1024){
+                //megabytes
+                fileSize=fileSize/1024/1024;
+                sizeUnit=" MB";
+            }else{
+                //kilobytes
+                fileSize=fileSize/1024;
+                sizeUnit=" KB";
+            }
+
+            fileListViewHolder.tv_date.setText(finalDate);
+            fileListViewHolder.tv_size.setText(fileSize+sizeUnit);
+
+            //populate icons
             fileListViewHolder.cv_selected.setVisibility(View.VISIBLE);
             if (fileListEntry.getMimeType()!=null) {
                 if (fileListEntry.getMimeType().startsWith("image")) {
@@ -170,7 +203,10 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
     class FileListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView iv_icon;
         TextView tv_fileName;
+        TextView tv_size;
+        TextView tv_date;
         CheckBox cv_selected;
+        Guideline gd_separator;
 
         public FileListViewHolder(View itemView){
             super(itemView);
@@ -178,6 +214,9 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
             iv_icon=itemView.findViewById(R.id.iv_item_file);
             tv_fileName=itemView.findViewById(R.id.tv_item_file_name);
             cv_selected=itemView.findViewById(R.id.cb_item_file);
+            tv_size=itemView.findViewById(R.id.tv_item_file_size);
+            tv_date=itemView.findViewById(R.id.tv_item_file_date);
+            gd_separator=itemView.findViewById(R.id.guideline);
 
             //for selector
             cv_selected.setOnClickListener(this);

@@ -8,4 +8,5 @@
     <color name="colorCardWhite">#FFFFFF</color>
     <color name="colorWidgetText">#ffffff</color>
     <color name="colorWidgetBackground">#367AFF</color>
+    <color name="blackText">#000000</color>
 </resources>
