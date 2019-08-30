@@ -71,7 +71,7 @@ public class SenderSocketTransfer{
     }
 
     class CommunicationThread implements Runnable {
-        
+
         @Override
         public void run() {
             Boolean doWeRepeat=true;//to retry if needed
