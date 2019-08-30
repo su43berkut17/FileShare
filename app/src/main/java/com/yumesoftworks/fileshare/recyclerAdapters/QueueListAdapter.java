@@ -55,6 +55,27 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
         //placeholder uri
         int placeholderUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
 
+        File tempFile = new File(fileListEntry.getPath());
+
+        //date and size
+        queueListViewHolder.tv_size.setVisibility(View.VISIBLE);
+
+        //size
+        Long fileSize=tempFile.length();
+        String sizeUnit;
+
+        if (fileSize>1024*1024){
+            //megabytes
+            fileSize=fileSize/1024/1024;
+            sizeUnit=" MB";
+        }else{
+            //kilobytes
+            fileSize=fileSize/1024;
+            sizeUnit=" KB";
+        }
+
+        queueListViewHolder.tv_size.setText(fileSize+sizeUnit);
+
         //it is a file
         if (fileListEntry.getMimeType()!=null) {
             if (fileListEntry.getMimeType().startsWith("image")) {
@@ -135,6 +156,7 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
     class QueueListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView iv_icon;
         TextView tv_fileName;
+        TextView tv_size;
         ConstraintLayout view_foreground;
         FileListEntry fileContents;
 
@@ -144,6 +166,7 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
             iv_icon=itemView.findViewById(R.id.iv_item_file_queue);
             tv_fileName=itemView.findViewById(R.id.tv_item_file_name_queue);
             view_foreground=itemView.findViewById(R.id.v_item_file_queue_foreground);
+            tv_size=itemView.findViewById(R.id.tv_item_file_size_queue);
 
             itemView.setOnClickListener(this);
         }
