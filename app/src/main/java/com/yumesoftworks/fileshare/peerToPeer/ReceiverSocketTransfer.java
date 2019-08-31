@@ -34,6 +34,7 @@ public class ReceiverSocketTransfer {
     private static final int ACTION_CONFIRM_DETAILS=1004;
     private static final int ACTION_NEXT_ACTION=1005;
     private static final int ACTION_NOT_ENOUGH_SPACE=1006;
+    private static final int ACTION_EXCEPTION=1007;
 
     //types of next actions
     public static final int NEXT_ACTION_CONTINUE=2001;
@@ -45,7 +46,7 @@ public class ReceiverSocketTransfer {
     private int mPort;
 
     //thread
-    private Handler socketHandler;
+    //private Handler socketHandler;
     private Thread socketThread;
 
     //current action
@@ -66,7 +67,7 @@ public class ReceiverSocketTransfer {
         //mReceiverInterface=(ReceiverSocketTransferInterface) context;
         mReceiverInterface=(ReceiverSocketTransferInterface) context;
 
-        socketHandler=new Handler(Looper.getMainLooper());
+        //socketHandler=new Handler(Looper.getMainLooper());
         socketThread=new Thread(new CommunicationThread());
         socketThread.start();
     }
@@ -78,7 +79,7 @@ public class ReceiverSocketTransfer {
             int totalSocketRetries=20;
             int currentSocketRetries=0;
 
-            while(doWeRepeat){
+            while(doWeRepeat && !socketThread.isInterrupted()){
                 // Socket object
                 try {
                     //wait for a connection
@@ -136,6 +137,7 @@ public class ReceiverSocketTransfer {
 
                             } catch (Exception e) {
                                 Log.d(TAG, "Action send mess, confirm deta, not enough spa, There is no output stream " + e.getMessage());
+                                mCurrentAction=ACTION_EXCEPTION;
                             }
                         }
 
@@ -151,7 +153,7 @@ public class ReceiverSocketTransfer {
                                 String stringNumbers=mTextInfoSendObject.getAdditionalInfo();
                                 String[] currentNumbers = stringNumbers.split(",");
 
-                                Log.d(TAG,"receiving details "+stringNumbers);
+                                //Log.d(TAG,"receiving details "+stringNumbers);
 
                                 mCurrentFile=currentNumbers[0];
                                 mTotalFiles=currentNumbers[1];
@@ -189,12 +191,13 @@ public class ReceiverSocketTransfer {
 
                             } catch (Exception e) {
                                 Log.d(TAG, "Action receive details, there is no input stream " + e.getMessage());
+                                mCurrentAction=ACTION_EXCEPTION;
                             }
                         }
 
                         if (mCurrentAction==ACTION_RECEIVE_FILE){
                             //we receive the bytes and then save it
-                            Log.d(TAG,"Starting stream of the file");
+                            //Log.d(TAG,"Starting stream of the file");
                             //know the final name of the file
                             String realName=mTextInfoSendObject.getMessageContent();
                             String finalName=new Date().toString()+"-"+realName;
@@ -204,7 +207,7 @@ public class ReceiverSocketTransfer {
                             fileOutputStream=new FileOutputStream(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/" +finalName);
                             BufferedOutputStream bufferedOutputStream=new BufferedOutputStream(fileOutputStream);
 
-                            Log.d(TAG,"Receiving bytes");
+                            //Log.d(TAG,"Receiving bytes");
 
                             //initialize progress message
                             String additionalInfo="";
@@ -217,8 +220,8 @@ public class ReceiverSocketTransfer {
                             while((count=fileInputStream.read(bytes))>0){
                                 bufferedOutputStream.write(bytes,0,count);
 
-                                byteCounter+=bytes.length;
-                                byteCounter+=fileOutputStream.getChannel().size();
+                                //byteCounter+=bytes.length;
+                                byteCounter=(int)fileOutputStream.getChannel().size();
 
                                 //set the message
                                 //send progress update to UI
@@ -267,7 +270,7 @@ public class ReceiverSocketTransfer {
                             mCurrentAction=ACTION_NEXT_ACTION;
                         }
 
-                    }while (mCurrentAction!=ACTION_NEXT_ACTION);
+                    }while (mCurrentAction!=ACTION_NEXT_ACTION && mCurrentAction!=ACTION_EXCEPTION && !socketThread.isInterrupted());
 
                     //close the socket
                     if (!mSocket.isClosed()) {
@@ -288,9 +291,14 @@ public class ReceiverSocketTransfer {
                         }
                     }
 
-                    //we finish
-                    doWeRepeat=false;
-                    mReceiverInterface.finishedReceiveTransfer(mNextActionDetail);
+                    if (mCurrentAction==ACTION_NEXT_ACTION) {
+                        //we finish
+                        doWeRepeat = false;
+                        mReceiverInterface.finishedReceiveTransfer(mNextActionDetail);
+                    }else{
+                        doWeRepeat=false;
+                        return;
+                    }
                 } catch (Exception e) {
                     Log.d(TAG, "the socket accept has failed, try again");
                     currentSocketRetries++;
@@ -314,13 +322,25 @@ public class ReceiverSocketTransfer {
     //kill the socket
     public Boolean destroy(){
         Log.d(TAG,"Destroy sockets");
-        mReceiverInterface=null;
-        socketThread.interrupt();
 
         int bothClosed=0;
 
         //cancel socket
         if (mSocket!=null) {
+            try {
+                mSocket.close();
+
+                if (mSocket.isClosed()) {
+                    Log.d(TAG, "Client socket destroyed successfully");
+                    bothClosed++;
+                }
+            } catch (Exception e) {
+                Log.d(TAG, "Cannot close receiver socket " + e.getMessage());
+            }
+        }else{
+            bothClosed++;
+        }
+        /*if (mSocket!=null) {
             if (mSocket.isClosed()) {
                 Log.d(TAG, "Client socket destroyed successfully");
                 bothClosed++;
@@ -335,9 +355,24 @@ public class ReceiverSocketTransfer {
             }
         }else{
             bothClosed++;
-        }
+        }*/
 
         if (mServerSocket!=null) {
+            try{
+                mServerSocket.close();
+
+                if (mServerSocket.isClosed()) {
+                    Log.d(TAG, "Server socket destroyed successfully");
+                    bothClosed++;
+                }
+            }catch (Exception e){
+                Log.d(TAG, "Cannot close server socket " + e.getMessage());
+            }
+        }else{
+            bothClosed++;
+        }
+
+        /*if (mServerSocket!=null) {
             if (mServerSocket.isClosed()) {
                 Log.d(TAG, "Server socket destroyed successfully");
                 bothClosed++;
@@ -352,10 +387,14 @@ public class ReceiverSocketTransfer {
             }
         }else{
             bothClosed++;
-        }
+        }*/
 
         if (bothClosed==2){
-            Log.d(TAG,"Sockets have been destroyed succesfully");
+            //socket closed
+            mReceiverInterface = null;
+            socketThread.interrupt();
+
+            Log.d(TAG,"Sockets have been destroyed successfully");
             return true;
         }else{
             Log.d(TAG,"Could not destroy sockets");

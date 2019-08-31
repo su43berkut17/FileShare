@@ -27,13 +27,14 @@ public class SenderSocketTransfer{
     private static final int ACTION_FINISHED_FILE_TRANSFER=4004;
     private static final int ACTION_WAITING_FILE_SUCCESS=4005;
     private static final int ACTION_NEXT_ACTION=4006;
+    private static final int ACTION_EXCEPTION=4007;
 
     //types of next actions
     public static final int NEXT_ACTION_CONTINUE=2001;
     public static final int NEXT_ACTION_CANCEL_SPACE =2002;
 
     //thread
-    private Handler socketHandler;
+    //private Handler socketHandler;
     private Thread socketThread;
 
     //socket
@@ -65,7 +66,7 @@ public class SenderSocketTransfer{
         mCurrentFile=recCurrentFile;
         mTotalFiles=recTotalFiles;
 
-        socketHandler=new Handler(Looper.getMainLooper());
+        //socketHandler=new Handler(Looper.getMainLooper());
         socketThread=new Thread(new CommunicationThread());
         socketThread.start();
     }
@@ -78,7 +79,7 @@ public class SenderSocketTransfer{
             int totalSocketRetries=20;
             int currentSocketRetries=0;
 
-            while (doWeRepeat) {
+            while (doWeRepeat && !socketThread.isInterrupted()) {
                 // block the call until connection is created and return
                 // Socket object
                 try {
@@ -121,28 +122,29 @@ public class SenderSocketTransfer{
                                 messageOut.flush();
                                 mCurrentAction = ACTION_WAIT_BEFORE_SEND_FILE;
 
-                                Log.d(TAG, "we send the file details "+additionalInfo);
+                                //Log.d(TAG, "we send the file details "+additionalInfo);
 
                                 //send to ui the current file to be sent
                                 mSenderInterface.updateSendSendUI(sendObject);
 
                             } catch (Exception e) {
                                 Log.d(TAG, "Error sending file details message: " + messageToSend + " " + e.getMessage());
+                                mCurrentAction=ACTION_EXCEPTION;
                             }
                         }
 
                         //we send the file
                         if (mCurrentAction == ACTION_SEND_FILE) {
                             try {
-                                Log.d(TAG, "we start sending the file");
+                                //Log.d(TAG, "we start sending the file");
                                 File file = new File(mFileEntry.getPath());
 
                                 // Get the size of the file
                                 long length = file.length();
-                                Log.d(TAG, "File: getting the length " + length);
+                                //Log.d(TAG, "File: getting the length " + length);
                                 byte[] bytes = new byte[16 * 1024];
                                 fileInputStream = new FileInputStream(file);
-                                Log.d(TAG, "File: getting the file input stream " + fileInputStream.toString());
+                                //Log.d(TAG, "File: getting the file input stream " + fileInputStream.toString());
                                 //fileOutputStream = mSocket.getOutputStream();
 
                                 //we send the file name
@@ -174,7 +176,7 @@ public class SenderSocketTransfer{
 
                                 fileOutputStream.flush();
                                 fileInputStream.close();
-                                Log.d(TAG, "File: flushed " + length);
+                                //Log.d(TAG, "File: flushed " + length);
 
                                 fileOutputStream.close();
 
@@ -182,6 +184,7 @@ public class SenderSocketTransfer{
                                 mCurrentAction = ACTION_FINISHED_FILE_TRANSFER;
                             } catch (Exception e) {
                                 Log.d(TAG, "There was en exception when sending file " + e.getMessage());
+                                mCurrentAction=ACTION_EXCEPTION;
                             }
                         }
 
@@ -221,7 +224,7 @@ public class SenderSocketTransfer{
                                 Log.d(TAG, "Waiting client to communicate "+e.getMessage());
                             }
                         }
-                    }while(mCurrentAction!=ACTION_NEXT_ACTION);
+                    }while(mCurrentAction!=ACTION_NEXT_ACTION && mCurrentAction!=ACTION_EXCEPTION && !socketThread.isInterrupted());
 
                     //close the socket
                     if (!mSocket.isClosed()) {
@@ -233,9 +236,14 @@ public class SenderSocketTransfer{
                         }
                     }
 
-                    //we finish
-                    doWeRepeat=false;
-                    mSenderInterface.finishedSendTransfer(mNextActionDetail);
+                    if (mCurrentAction==ACTION_NEXT_ACTION) {
+                        //we finish
+                        doWeRepeat = false;
+                        mSenderInterface.finishedSendTransfer(mNextActionDetail);
+                    }else{
+                        doWeRepeat=false;
+                        return;
+                    }
                 } catch (Exception e) {
                     Log.d(TAG, "the socket creation has failed, try again" + e.getMessage());
                     currentSocketRetries++;
@@ -258,10 +266,29 @@ public class SenderSocketTransfer{
 
     public Boolean destroy(){
         Log.d(TAG, "Destroy sockets");
-        mSenderInterface=null;
-        socketThread.interrupt();
 
-        if (mSocket.isClosed()){
+        try{
+            mSocket.close();
+
+            if (mSocket.isClosed()) {
+                //socket closed
+                mSenderInterface = null;
+                socketThread.interrupt();
+
+                Log.d(TAG, "Socket destroyed successfully");
+                return true;
+            }else{
+                Log.d(TAG, "Cannot close socket after executing close()");
+                return false;
+            }
+        }catch (Exception e){
+            Log.d(TAG, "Cannot close socket " + e.getMessage());
+            return false;
+        }
+
+
+
+        /*if (mSocket.isClosed()){
             Log.d(TAG, "Socket destroyed successfully");
             return true;
         }else{
@@ -273,7 +300,7 @@ public class SenderSocketTransfer{
                 Log.d(TAG, "Cannot close socket " + e.getMessage());
                 return false;
             }
-        }
+        }*/
     }
 
     //interface
