@@ -32,6 +32,7 @@
 
     <!-- Activity file browser -->
     <string name="fb_file_name_placeholder">testFile.jpg</string>
+    <string name="fb_file_size_placeholder">6 MB</string>
     <string name="fb_icon_description">File icon</string>
     <string name="fb_button_review_queue">Review Queue</string>
     <string name="fb_path_description">The filepath</string>

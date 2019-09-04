@@ -12,13 +12,10 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.yumesoftworks.fileshare.R;
 import com.yumesoftworks.fileshare.data.FileListEntry;
-
-import org.w3c.dom.Text;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -46,7 +43,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
     public FileListViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         // Inflate the task_layout to a view
         View view = LayoutInflater.from(mContext)
-                .inflate(R.layout.item_tv_file_browser, viewGroup, false);
+                .inflate(R.layout.item_rv_file_browser, viewGroup, false);
 
         return new FileListViewHolder(view);
     }
@@ -100,15 +97,15 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
             if (fileSize>1024*1024){
                 //megabytes
                 fileSize=fileSize/1024/1024;
-                sizeUnit=" MB";
+                sizeUnit=fileSize+" MB";
             }else{
                 //kilobytes
                 fileSize=fileSize/1024;
-                sizeUnit=" KB";
+                sizeUnit=fileSize+" KB";
             }
 
             fileListViewHolder.tv_date.setText(finalDate);
-            fileListViewHolder.tv_size.setText(fileSize+sizeUnit);
+            fileListViewHolder.tv_size.setText(sizeUnit);
 
             //populate icons
             fileListViewHolder.cv_selected.setVisibility(View.VISIBLE);
