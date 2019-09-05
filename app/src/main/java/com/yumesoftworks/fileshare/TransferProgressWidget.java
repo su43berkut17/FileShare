@@ -52,7 +52,7 @@ public class TransferProgressWidget extends AppWidgetProvider {
             List<UserInfoEntry> listUser=database.userInfoDao().loadUserWidget();
             UserInfoEntry user=listUser.get(0);
 
-            Log.d(TAG,"The number if transfers is "+user +" "+user.getNumberFilesTransferred());
+            Log.d(TAG,"The number of transfers is "+user +" "+user.getNumberFilesTransferred());
             mTotalNumberOfTransfers=user.getNumberFilesTransferred();
         }else if (mCurrentState.equals(STATE_TRANSFER)){
             mNameOfCurrentFile=nameOfCurrentFile;
@@ -95,7 +95,7 @@ public class TransferProgressWidget extends AppWidgetProvider {
                 }
 
                 //update the progress bar
-                views.setProgressBar(R.id.pb_widget_progress,1,mPercentage,false);
+                views.setProgressBar(R.id.pb_widget_progress,100,mPercentage,false);
 
                 //set the extra
                 Bundle extras=new Bundle();

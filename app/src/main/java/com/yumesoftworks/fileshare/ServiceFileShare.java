@@ -388,8 +388,8 @@ public class ServiceFileShare extends Service implements
 
         //update the widget
         //we will set a counter to prevent calling an update on the widget several times
-        if (mCounterTimesWidget>10 || textInfoSendObject.getMessageType()==com.yumesoftworks.fileshare.TransferProgressActivity.TYPE_END) {
-           Log.d(TAG,fileName+": "+currentNumbers.toString());
+        if (mCounterTimesWidget>20 || textInfoSendObject.getMessageType()==com.yumesoftworks.fileshare.TransferProgressActivity.TYPE_END) {
+            Log.d(TAG,fileName+": "+currentNumbers.toString());
             mCounterTimesWidget=0;
             updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_TRANSFER, fileName, mTotalFiles, mCurrentFile);
         }else{

@@ -105,7 +105,9 @@ public class updateWidgetService extends IntentService {
                                                int recCurrentNumberOfFiles){
 
         //we store the data if it is sent, if it is not the widget doesn't need to update
-        Log.d(TAG,"this is startActionUpdateWidget");
+        Log.d(TAG,"this is startActionUpdateWidget "+
+                mCurrentState+"-"+mNameOfCurrentFile+"-"+
+                mTotalNumberOfFiles+" of "+mCurrentNumberOfFiles);
 
         if (recCurrentState!=null) {
             mCurrentState=recCurrentState;
