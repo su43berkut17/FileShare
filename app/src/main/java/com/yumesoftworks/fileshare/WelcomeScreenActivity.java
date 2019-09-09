@@ -66,7 +66,6 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     private LinearLayout mLoadingScreen;
 
     //database
-    private AppDatabase mDb;
     private WelcomeScreenViewModel viewModel;
 
     //context
@@ -133,7 +132,6 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         buttonGo.setOnClickListener(this);
         buttonCancel.setOnClickListener(this);
 
-        mDb=AppDatabase.getInstance(getApplicationContext());
         setupViewModel();
 
         //toolbar

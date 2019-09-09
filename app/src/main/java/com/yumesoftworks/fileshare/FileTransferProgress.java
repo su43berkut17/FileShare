@@ -158,6 +158,14 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         mTvProgress.setProgress(percentage);
     }
 
+    //update ui completed
+    public void setComplete(){
+        mTvFileName.setText(R.string.service_success);
+        mTvOutOf.setText("");
+        mtvPercentage.setText("100%");
+        mTvProgress.setProgress(100);
+    }
+
     public void changeButton(){
         mButton.setText(R.string.gen_button_ok);
     }

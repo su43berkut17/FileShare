@@ -85,10 +85,12 @@ public class ReceiverSocketTransfer {
                     //wait for a connection
                     mServerSocket=new ServerSocket(mPort);
                     mServerSocket.setReuseAddress(true);
+                    mServerSocket.setSoTimeout(3000);
 
                     Log.d(TAG, "Waiting for the socket to be connected " + mServerSocket.getLocalPort());
 
                     mSocket = mServerSocket.accept();
+                    mSocket.setSoTimeout(3000);
 
                     Log.d(TAG,"Socket has connected successfully");
 
@@ -340,22 +342,6 @@ public class ReceiverSocketTransfer {
         }else{
             bothClosed++;
         }
-        /*if (mSocket!=null) {
-            if (mSocket.isClosed()) {
-                Log.d(TAG, "Client socket destroyed successfully");
-                bothClosed++;
-            } else {
-                try {
-                    mSocket.close();
-                    bothClosed++;
-                    Log.d(TAG, "Client Socket destroyed successfully");
-                } catch (Exception e) {
-                    Log.d(TAG, "Cannot close socket " + e.getMessage());
-                }
-            }
-        }else{
-            bothClosed++;
-        }*/
 
         if (mServerSocket!=null) {
             try{
@@ -371,23 +357,6 @@ public class ReceiverSocketTransfer {
         }else{
             bothClosed++;
         }
-
-        /*if (mServerSocket!=null) {
-            if (mServerSocket.isClosed()) {
-                Log.d(TAG, "Server socket destroyed successfully");
-                bothClosed++;
-            } else {
-                try {
-                    mServerSocket.close();
-                    bothClosed++;
-                    Log.d(TAG, "Server socket destroyed successfully");
-                } catch (Exception e) {
-                    Log.d(TAG, "Cannot close server socket " + e.getMessage());
-                }
-            }
-        }else{
-            bothClosed++;
-        }*/
 
         if (bothClosed==2){
             //socket closed

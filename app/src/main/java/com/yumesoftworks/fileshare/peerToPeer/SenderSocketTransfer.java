@@ -88,6 +88,7 @@ public class SenderSocketTransfer{
 
                     //vars
                     mSocket = new Socket(mIpAddress, mPort);
+                    mSocket.setSoTimeout(3000);
 
                     Log.d(TAG, "Socket connected successfully Reading the user data");
 
@@ -139,9 +140,6 @@ public class SenderSocketTransfer{
                                 //Log.d(TAG, "we start sending the file");
                                 File file = new File(mFileEntry.getPath());
 
-                                // Get the size of the file
-                                long length = file.length();
-                                //Log.d(TAG, "File: getting the length " + length);
                                 byte[] bytes = new byte[16 * 1024];
                                 fileInputStream = new FileInputStream(file);
                                 //Log.d(TAG, "File: getting the file input stream " + fileInputStream.toString());
@@ -253,6 +251,7 @@ public class SenderSocketTransfer{
                         mSenderInterface.socketErrorSend();
                         Log.d(TAG, "we ran out of tries for the socket");
                     }else{
+                        //wait 1 second before trying again
                         try {
                             TimeUnit.SECONDS.sleep(1);
                         }catch (InterruptedException exe){
@@ -285,22 +284,6 @@ public class SenderSocketTransfer{
             Log.d(TAG, "Cannot close socket " + e.getMessage());
             return false;
         }
-
-
-
-        /*if (mSocket.isClosed()){
-            Log.d(TAG, "Socket destroyed successfully");
-            return true;
-        }else{
-            try{
-                mSocket.close();
-                Log.d(TAG, "Socket destroyed successfully");
-                return true;
-            }catch (Exception e){
-                Log.d(TAG, "Cannot close socket " + e.getMessage());
-                return false;
-            }
-        }*/
     }
 
     //interface

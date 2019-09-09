@@ -6,6 +6,60 @@
     android:padding="@dimen/widget_margin">
 
     <RelativeLayout
+        android:id="@+id/widget_transfer_state"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="@dimen/default_padding"
+        android:background="@color/colorWidgetBackground">
+        <TextView
+            android:id="@+id/tv_widget_number_of_transfers"
+            android:text="@string/widget_tv_of"
+            android:contentDescription="@string/widget_tv_of_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:textColor="@color/colorWidgetText" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_widget_title_transfer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight=".3"
+                android:contentDescription="@string/widget_tv_title"
+                android:text="@string/widget_tv_title"
+                android:textColor="@color/colorWidgetText" />
+            <TextView
+                android:id="@+id/tv_widget_current_file"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight=".3"
+                android:contentDescription="@string/widget_tv_filename"
+                android:text="@string/widget_tv_filename"
+                android:textColor="@color/colorWidgetText" />
+
+            <ProgressBar
+                android:id="@+id/pb_widget_progress"
+                style="@style/AppThemeProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight=".3"
+                android:progress="20"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <RelativeLayout
         android:id="@+id/widget_default_state"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -69,60 +123,6 @@
                 android:textSize="@dimen/widget_big_text"
                 android:textStyle="bold" />
         </LinearLayout>
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/widget_transfer_state"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_margin="@dimen/default_padding"
-        android:background="@color/colorWidgetBackground">
-        <TextView
-            android:id="@+id/tv_widget_number_of_transfers"
-            android:text="@string/widget_tv_of"
-            android:contentDescription="@string/widget_tv_of_description"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:textColor="@color/colorWidgetText" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tv_widget_title_transfer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight=".3"
-                android:contentDescription="@string/widget_tv_title"
-                android:text="@string/widget_tv_title"
-                android:textColor="@color/colorWidgetText" />
-            <TextView
-                android:id="@+id/tv_widget_current_file"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight=".3"
-                android:contentDescription="@string/widget_tv_filename"
-                android:text="@string/widget_tv_filename"
-                android:textColor="@color/colorWidgetText" />
-
-            <ProgressBar
-                android:id="@+id/pb_widget_progress"
-                style="@style/AppThemeProgressBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight=".3"
-                android:progress="20"/>
-
-        </LinearLayout>
-
     </RelativeLayout>
 
 </RelativeLayout>

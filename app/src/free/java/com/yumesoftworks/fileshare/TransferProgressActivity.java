@@ -25,6 +25,8 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.FileListRepository;
+import com.yumesoftworks.fileshare.data.UserInfoEntry;
+import com.yumesoftworks.fileshare.data.UserInfoRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -140,8 +142,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
             } else {
                 startService(serviceIntent);
             }
-        }else{
-            mProgressBarHide.setVisibility(View.GONE);
         }
 
         //initialize fragments
@@ -191,9 +191,33 @@ public class TransferProgressActivity extends AppCompatActivity implements
         //we get the file model to populate the stuff
         fileTransferViewModel=ViewModelProviders.of(this).get(FileTransferViewModel.class);
         fileTransferViewModel.getFileListInfo().observe(this,fileTransferViewModelObserver);
+
+        //we check if the transfer has been completed before
+        List<UserInfoEntry> userInfo=new UserInfoRepository(this.getApplication()).getTransferStatus();
+
+        //if the app is relaunched and the transfer has finished and hasnt captured the broadcast events
+        if (userInfo.get(0).getIsTransferInProgress()==0 && typeOfService==RELAUNCH_APP){
+            //transfer is over, show dialog and change button
+            //we show dialog that transfer is done
+            AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
+            builder.setMessage(R.string.service_finished_transfer)
+                    .setCancelable(true)
+                    .setNeutralButton(R.string.gen_button_ok,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                }
+                            });
+            builder.show();
+            //change button to ok
+            fragmentFileTransferProgress.changeButton();
+            //hide the progress bar
+            mProgressBarHide.setVisibility(View.GONE);
+            //set values
+            fragmentFileTransferProgress.setComplete();
+        }
     }
 
-    //observer
+    //file observer
     final Observer<List<FileListEntry>> fileTransferViewModelObserver=new Observer<List<FileListEntry>>() {
         @Override
         public void onChanged(@Nullable List<FileListEntry> fileListEntries) {
@@ -238,6 +262,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     break;
                 case ACTION_FINISHED_TRANSFER:
                     //we show dialog that transfer is done
+                    mProgressBarHide.setVisibility(View.GONE);
                     AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
                     builder.setMessage(R.string.service_finished_transfer)
                             .setCancelable(true)
@@ -251,6 +276,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     fragmentFileTransferProgress.changeButton();
                     break;
                 case ACTION_SOCKET_ERROR:
+                    mProgressBarHide.setVisibility(View.GONE);
                     //we show dialog that there was an error and return to the main menu
                     AlertDialog.Builder builder2 = new AlertDialog.Builder(thisActivity);
                     builder2.setMessage(R.string.service_socket_error)
@@ -266,6 +292,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     fragmentFileTransferProgress.changeButton();
                     break;
                 case ACTION_OUT_OF_SPACE:
+                    mProgressBarHide.setVisibility(View.GONE);
                     //we show dialog we ran out of space and return to the main menu
                     AlertDialog.Builder builder3 = new AlertDialog.Builder(thisActivity);
                     builder3.setMessage(R.string.service_out_of_space_error)

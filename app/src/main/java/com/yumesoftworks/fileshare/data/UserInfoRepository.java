@@ -24,6 +24,11 @@ public class UserInfoRepository {
         data=userInfoDao.loadUserInfo();
     }
 
+    //reading transfer status
+    public List<UserInfoEntry> getTransferStatus(){
+        return userInfoDao.loadUserInfo().getValue();
+    }
+
     //switching the transfer status
     public void switchTransfer(Boolean activateTransfer){
         //we switch the transfer status to on or off
