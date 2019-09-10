@@ -81,6 +81,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
     //viewmodel
     private FileTransferViewModel fileTransferViewModel;
+    private TransferProgressActivityViewModel transferProgressActivityViewModel;
 
     private AdView mAdView;
 
@@ -192,29 +193,9 @@ public class TransferProgressActivity extends AppCompatActivity implements
         fileTransferViewModel=ViewModelProviders.of(this).get(FileTransferViewModel.class);
         fileTransferViewModel.getFileListInfo().observe(this,fileTransferViewModelObserver);
 
-        //we check if the transfer has been completed before
-        List<UserInfoEntry> userInfo=new UserInfoRepository(this.getApplication()).getTransferStatus();
-
-        //if the app is relaunched and the transfer has finished and hasnt captured the broadcast events
-        if (userInfo.get(0).getIsTransferInProgress()==0 && typeOfService==RELAUNCH_APP){
-            //transfer is over, show dialog and change button
-            //we show dialog that transfer is done
-            AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
-            builder.setMessage(R.string.service_finished_transfer)
-                    .setCancelable(true)
-                    .setNeutralButton(R.string.gen_button_ok,
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                }
-                            });
-            builder.show();
-            //change button to ok
-            fragmentFileTransferProgress.changeButton();
-            //hide the progress bar
-            mProgressBarHide.setVisibility(View.GONE);
-            //set values
-            fragmentFileTransferProgress.setComplete();
-        }
+        //we get the view model for the user transfer info
+        transferProgressActivityViewModel=ViewModelProviders.of(this).get(TransferProgressActivityViewModel.class);
+        transferProgressActivityViewModel.getData().observe(this,transferProgressActivityViewModelObserver);
     }
 
     //file observer
@@ -238,6 +219,36 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 fragmentFileTransferProgress.updateRV(tempNotSent);
             }else{
                 fragmentFileTransferProgress.updateRV(fileListEntries);
+            }
+        }
+    };
+
+    //user info observer
+    final Observer<List<UserInfoEntry>> transferProgressActivityViewModelObserver=new Observer<List<UserInfoEntry>>() {
+        @Override
+        public void onChanged(List<UserInfoEntry> userInfoEntries) {
+            //we check if the transfer has been completed before
+            int isTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
+
+            //if the app is relaunched and the transfer has finished and hasnt captured the broadcast events
+            if (isTransferInProgress==0 && typeOfService==RELAUNCH_APP){
+                //transfer is over, show dialog and change button
+                //we show dialog that transfer is done
+                AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
+                builder.setMessage(R.string.service_finished_transfer)
+                        .setCancelable(true)
+                        .setNeutralButton(R.string.gen_button_ok,
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                    }
+                                });
+                builder.show();
+                //change button to ok
+                fragmentFileTransferProgress.changeButton();
+                //hide the progress bar
+                mProgressBarHide.setVisibility(View.GONE);
+                //set values
+                fragmentFileTransferProgress.setComplete();
             }
         }
     };

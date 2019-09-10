@@ -25,8 +25,8 @@ public class UserInfoRepository {
     }
 
     //reading transfer status
-    public List<UserInfoEntry> getTransferStatus(){
-        return userInfoDao.loadUserInfo().getValue();
+    public LiveData<List<UserInfoEntry>> getTransferStatus(){
+        return userInfoDao.loadUserInfo();
     }
 
     //switching the transfer status
