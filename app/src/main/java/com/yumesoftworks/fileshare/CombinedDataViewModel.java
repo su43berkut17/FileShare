@@ -22,15 +22,6 @@ public class CombinedDataViewModel extends AndroidViewModel {
     //combined data
     private LiveData<List<FileListEntry>> data;
 
-    //directory file list
-    private List<FileListEntry> dirFiles;
-
-    //path
-    private String path;
-
-    //added files
-    private List<FileListEntry> addedFiles;
-
     //repository
     private FileListRepository repository;
 
@@ -39,68 +30,7 @@ public class CombinedDataViewModel extends AndroidViewModel {
 
         repository=new FileListRepository(this.getApplication());
         data=repository.getFiles();
-
-        /*//check if files has been initialized
-        if (dirFiles==null) {
-            //initialize the files to the default path
-            //we set the data to be read
-            ReadFileList readFileList = new ReadFileList();
-            File path = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "");
-            this.path=path.getPath();
-            dirFiles = readFileList.loadList(path.getAbsolutePath(), this.getApplication().getApplicationContext());
-        }
-
-        //start comparing
-        mergeData();*/
     }
-
-    //update file list
-    /*public void updateFileListPath(String recPath){
-        ReadFileList readFileList = new ReadFileList();
-        dirFiles=readFileList.loadList(recPath,this.getApplication().getApplicationContext());
-        path=recPath;
-
-        //compare
-        mergeData();
-    }
-
-    //return path if needed
-    public String getPath(){
-        return path;
-    }
-
-    //merge data and update the final view model
-    private void mergeData(){
-
-        //we read the added files
-        addedFiles=repository.getFilesPath(path).getValue();
-        //addedFiles=repository.getFiles().getValue();
-        //addedFiles=repository.getFilesDirect();
-
-        //check if any is null
-        if ((addedFiles==null)||(addedFiles.isEmpty())){
-            Log.d(TAG,"No added files, it is empty ");
-            //we return the normal file list
-            //this catches for initialization of viewmodel in th emain activity where there is no file list
-            if (dirFiles!=null && !dirFiles.isEmpty()) {
-                data.setValue(dirFiles);
-            }
-        }else{
-            Log.d(TAG,"The number of files is: "+addedFiles.size());
-            //there is data in the added files so we compare and check the info
-            for (FileListEntry fileElement:addedFiles) {
-                //cycle for each saved element
-                for (FileListEntry localDirectoryFile:dirFiles){
-                    if (fileElement.getPath()==localDirectoryFile.getPath()) {
-                        localDirectoryFile.setIsSelected(1);
-                    }
-                }
-            }
-
-            data.postValue(addedFiles);
-            //data.notifyAll();
-        }
-    }*/
 
     public void saveFile(FileListEntry file){
         repository.saveFile(file);
