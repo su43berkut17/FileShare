@@ -27,7 +27,6 @@ import android.widget.TextView;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
-import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.AvatarAndVersion;
 import com.yumesoftworks.fileshare.data.AvatarDefaultImages;
 import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
@@ -183,7 +182,9 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                         //we open the main activity
                         //we check if a transfer is in progress
                         mIsTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
-                        if (mIsTransferInProgress==1){
+                        if (mIsTransferInProgress==TransferProgressActivity.STATUS_TRANSFER_INACTIVE){
+                            goMainActivity();
+                        }else {
                             //we relaunch the transfer activity
                             Intent intent= new Intent(getApplicationContext(), com.yumesoftworks.fileshare.TransferProgressActivity.class);
 
@@ -208,8 +209,6 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
                             //for debug we open the activity for now
                             //goMainActivity();
-                        }else {
-                            goMainActivity();
                         }
                     }
                 }

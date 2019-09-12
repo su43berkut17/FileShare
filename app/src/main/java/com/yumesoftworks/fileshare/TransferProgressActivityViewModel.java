@@ -31,4 +31,8 @@ public class TransferProgressActivityViewModel extends AndroidViewModel {
         return data;
     }
 
+    public void changeTransferStatus(int value){
+        repository.switchTransfer(value);
+    }
+
 }

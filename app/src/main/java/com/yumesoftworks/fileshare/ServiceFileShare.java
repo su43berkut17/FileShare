@@ -75,7 +75,7 @@ public class ServiceFileShare extends Service implements
         manager.cancel(NOTIFICATION_ID);
 
         //deactivate the switch transfer
-        repositoryUser.switchTransfer(false);
+        repositoryUser.switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
 
         Boolean isItDestroyed=false;
 
@@ -210,7 +210,7 @@ public class ServiceFileShare extends Service implements
     }
 
     //dabatase stuff
-    private void switchTransfer(Boolean activateTransfer){
+    private void switchTransfer(int activateTransfer){
         repositoryUser.switchTransfer(activateTransfer);
     }
 
@@ -226,7 +226,7 @@ public class ServiceFileShare extends Service implements
         manager.cancel(NOTIFICATION_ID);
 
         //we deactivate the transfer status
-        switchTransfer(false);
+        switchTransfer(TransferProgressActivity.STATUS_TRANSFER_SOCKET_ERROR);
 
         //set error dialog and go back to activity
         Intent intent=new Intent(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_SOCKET_ERROR);
@@ -241,7 +241,7 @@ public class ServiceFileShare extends Service implements
         manager.cancel(NOTIFICATION_ID);
 
         //we deactivate the transfer status
-        switchTransfer(false);
+        switchTransfer(TransferProgressActivity.STATUS_TRANSFER_OUT_OF_SPACE_ERROR);
 
         //set error dialog and go back to activity
         Intent intent=new Intent(TransferProgressActivity.ACTION_OUT_OF_SPACE);
@@ -252,7 +252,7 @@ public class ServiceFileShare extends Service implements
     //receive client interfaces
     @Override
     public void startedReceiveTransfer(){
-        switchTransfer(true);
+        switchTransfer(TransferProgressActivity.STATUS_TRANSFER_ACTIVE);
     }
 
     public void finishedReceiveTransfer() {
@@ -264,7 +264,7 @@ public class ServiceFileShare extends Service implements
         manager.cancel(NOTIFICATION_ID);
 
         //we deactivate the transfer status
-        switchTransfer(false);
+        switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
 
         //set the widget on its initial state
         updateWidgetService.startActionUpdateWidget(this,TransferProgressWidget.STATE_NORMAL,"",0,0);
@@ -305,7 +305,7 @@ public class ServiceFileShare extends Service implements
     //sender client interface
     @Override
     public void startedSenderTransfer(){
-        switchTransfer(true);
+        switchTransfer(TransferProgressActivity.STATUS_TRANSFER_ACTIVE);
     }
 
     @Override
@@ -323,7 +323,7 @@ public class ServiceFileShare extends Service implements
         manager.cancel(NOTIFICATION_ID);
 
         //we set the database as not transferring so if they restart the app i goes to the main menu
-        switchTransfer(false);
+        switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
 
         //set the widget on its initial state
         updateWidgetService.startActionUpdateWidget(this,TransferProgressWidget.STATE_NORMAL,"",0,0);

@@ -30,12 +30,12 @@ public class UserInfoRepository {
     }
 
     //switching the transfer status
-    public void switchTransfer(Boolean activateTransfer){
+    public void switchTransfer(int transferValue){
         //we switch the transfer status to on or off
-        new updateDatabaseAsyncTask(database).execute(activateTransfer);
+        new updateDatabaseAsyncTask(database).execute(transferValue);
     }
 
-    private static class updateDatabaseAsyncTask extends AsyncTask<Boolean,Void,Void> {
+    private static class updateDatabaseAsyncTask extends AsyncTask<Integer,Void,Void> {
         private AppDatabase database;
 
         updateDatabaseAsyncTask(AppDatabase recDatabase){
@@ -43,19 +43,11 @@ public class UserInfoRepository {
         }
 
         @Override
-        protected Void doInBackground(final Boolean... params) {
-            int status;
-            //we read the status
-            if (params[0]){
-                status=1;
-            }else{
-                status=0;
-            }
-
+        protected Void doInBackground(final Integer... params) {
             UserInfoEntry userInfoEntry=database.userInfoDao().loadUserWidget().get(0);
-            userInfoEntry.setIsTransferInProgress(status);
+            userInfoEntry.setIsTransferInProgress(params[0]);
             database.userInfoDao().updateTask(userInfoEntry);
-            Log.d(TAG,"The transfer file status activation is: "+status);
+            Log.d(TAG,"The transfer file status activation is: "+params[0]);
 
             return null;
         }
