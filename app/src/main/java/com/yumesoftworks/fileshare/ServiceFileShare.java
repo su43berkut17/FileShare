@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -15,11 +16,9 @@ import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.FileListRepository;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
-import com.yumesoftworks.fileshare.data.UserInfoEntry;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -39,6 +38,7 @@ public class ServiceFileShare extends Service implements
     private NotificationManager manager;
     private int mTotalFiles;
     private int mCurrentFile;
+    private String mCurrentFileName;
     private int mCounterTimesWidget=0;
 
     //socket stuff
@@ -55,6 +55,10 @@ public class ServiceFileShare extends Service implements
 
     //intent stuff
     private Bundle receivedBundle;
+    private Boolean isServiceStarted=false;
+
+    //service binding
+    private final IBinder binder=new ServiceFileShareBinder();
 
     @Override
     public void onCreate() {
@@ -63,8 +67,7 @@ public class ServiceFileShare extends Service implements
         repositoryFile=new FileListRepository(getApplication());
         repositoryUser=new UserInfoRepository(getApplication());
 
-        //AppDatabase database = AppDatabase.getInstance(this);
-        new loadDatabaseAsyncTask().execute();
+        isServiceStarted=true;
     }
 
     @Override
@@ -77,7 +80,7 @@ public class ServiceFileShare extends Service implements
         //deactivate the switch transfer
         repositoryUser.switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
 
-        Boolean isItDestroyed=false;
+        Boolean isItDestroyed;
 
         do {
             isItDestroyed=mTransferFileCoordinatorHelper.userCancelled();
@@ -87,6 +90,8 @@ public class ServiceFileShare extends Service implements
                 Log.e(TAG,"Couldn't interrupt");
             }
         }while (isItDestroyed==false);
+
+        isServiceStarted=false;
 
         super.onDestroy();
     }
@@ -106,46 +111,64 @@ public class ServiceFileShare extends Service implements
     //start the transfer
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //check the API
-        manager= (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        //we check is the service has been started
+        if (!isServiceStarted) {
+            //check the API
+            manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
-            //we set the channel
-            channel = new NotificationChannel(NOTIFICATION_CHANNEL,
-                    getString(R.string.app_name),
-                    NotificationManager.IMPORTANCE_DEFAULT);
-            channel.setLightColor(Color.BLUE);
-            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-            manager.createNotificationChannel(channel);
-            Notification notification=new NotificationCompat.Builder(getApplicationContext(),NOTIFICATION_CHANNEL)
-                    .setContentTitle(getString(R.string.app_name))
-                    .setContentText(getString(R.string.service_notification_text_initialize))
-                    .setOnlyAlertOnce(true)
-                    .build();
-            startForeground(NOTIFICATION_ID,notification);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                //we set the channel
+                channel = new NotificationChannel(NOTIFICATION_CHANNEL,
+                        getString(R.string.app_name),
+                        NotificationManager.IMPORTANCE_DEFAULT);
+                channel.setLightColor(Color.BLUE);
+                channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+                manager.createNotificationChannel(channel);
+                Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
+                        .setContentTitle(getString(R.string.app_name))
+                        .setContentText(getString(R.string.service_notification_text_initialize))
+                        .setOnlyAlertOnce(true)
+                        .build();
+                startForeground(NOTIFICATION_ID, notification);
+            } else {
+                manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
+                        , getString(R.string.service_notification_text_initialize)
+                        , false)
+                        .setOnlyAlertOnce(true)
+                        .build());
+            }
+
+            //we initialize the files
+            mTotalFiles = 0;
+            mCurrentFile = 0;
+
+            //we get the bundle of extras
+            try {
+                //we call the initialize sockets
+                receivedBundle = intent.getExtras();
+                initializeSockets();
+            } catch (Exception e) {
+                Log.d(TAG, "No extra information sent to the service, we stop it.");
+                stopSelf();
+            }
         }else{
-            manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
-                    ,getString(R.string.service_notification_text_initialize)
-                    ,false)
-                    .setOnlyAlertOnce(true)
-                    .build());
-        }
-
-        //we initialize the files
-        mTotalFiles=0;
-        mCurrentFile=0;
-
-        //we get the bundle of extras
-        try {
-            //we call the initialize sockets
-            receivedBundle = intent.getExtras();
-            initializeSockets();
-        }catch (Exception e){
-            Log.d(TAG,"No extra information sent to the service, we stop it.");
-            stopSelf();
+            Log.d(TAG,"Service already started");
         }
 
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
+
+    //bind
+    public class ServiceFileShareBinder extends Binder {
+        ServiceFileShare getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return ServiceFileShare.this;
+        }
     }
 
     //initialize sockets
@@ -191,11 +214,6 @@ public class ServiceFileShare extends Service implements
                 }
             }
         }
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
     }
 
     //notification build
@@ -369,6 +387,7 @@ public class ServiceFileShare extends Service implements
         //we change the member variables of the progress
         mTotalFiles=Integer.parseInt(currentNumbers[1]);
         mCurrentFile=Integer.parseInt(currentNumbers[0]);
+        mCurrentFileName =fileName;
 
         //bundle
         Bundle bundle=new Bundle();
@@ -395,5 +414,19 @@ public class ServiceFileShare extends Service implements
         }else{
             mCounterTimesWidget++;
         }
+    }
+
+    //activity asked for information
+    public void updateUIOnly(){
+        TextInfoSendObject textInfoSendObject=new TextInfoSendObject(0, mCurrentFileName, mCurrentFileName +","+mTotalFiles);
+
+        //bundle
+        Bundle bundle=new Bundle();
+        bundle.putSerializable(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI_DATA,textInfoSendObject);
+
+        //we update the UI
+        Intent intent=new Intent(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI);
+        intent.putExtras(bundle);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 }

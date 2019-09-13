@@ -52,7 +52,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     private int mSelectedAvatar=-1;
     private int mFilesTransferred=0;
     private int mVersion=-1;
-    private int mIsTransferInProgress=0;
+    private int mIsTransferInProgress=TransferProgressActivity.STATUS_TRANSFER_INACTIVE;
 
     //recycler view
     private RecyclerView rvAvatars;

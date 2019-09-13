@@ -128,8 +128,8 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         String finalTextNumbers=currentNumbers[0]+" of "+currentNumbers[1];
 
         //we change the member variables of the progress
-        int totalFiles=Integer.parseInt(currentNumbers[1]);
         int currentFile=Integer.parseInt(currentNumbers[0]);
+        int totalFiles=Integer.parseInt(currentNumbers[1]);
         int percentage=currentFile*100/totalFiles;
 
         //if this is the percentage of bytes

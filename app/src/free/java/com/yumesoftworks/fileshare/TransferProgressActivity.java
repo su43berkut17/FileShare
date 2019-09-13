@@ -3,10 +3,12 @@ package com.yumesoftworks.fileshare;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.Build;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentManager;
@@ -15,6 +17,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
+
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -95,6 +99,9 @@ public class TransferProgressActivity extends AppCompatActivity implements
     //type
     private int typeOfService;
 
+    //service binding
+    private ServiceFileShare mService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,6 +117,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         try {
             //get the data to see how do we start the service
             typeOfService = extras.getInt(EXTRA_TYPE_TRANSFER);
+            Log.d(TAG,"The extras are: "+typeOfService);
         }catch (Exception e){
             Log.d(TAG,"There are no extras");
             typeOfService=RELAUNCH_APP;
@@ -167,6 +175,22 @@ public class TransferProgressActivity extends AppCompatActivity implements
         //toolbar
         Toolbar myToolbar = findViewById(R.id.tp_toolbar);
         setSupportActionBar(myToolbar);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent serviceIntent=new Intent(this,ServiceFileShare.class);
+
+        //we bind the service
+        bindService(serviceIntent,serConnection,Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        unbindService(serConnection);
     }
 
     @Override
@@ -314,55 +338,24 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     fragmentFileTransferProgress.updateData(bundle);
 
                     break;
-                //case ACTION_FINISHED_TRANSFER:
-                    /*
-                    //we show dialog that transfer is done
-                    mProgressBarHide.setVisibility(View.GONE);
-                    AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
-                    builder.setMessage(R.string.service_finished_transfer)
-                            .setCancelable(true)
-                            .setNeutralButton(R.string.gen_button_ok,
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                        }
-                                    });
-                    builder.show();
-                    //change button to ok
-                    fragmentFileTransferProgress.changeButton();
-                    break;*/
-                //case ACTION_SOCKET_ERROR:
-                    /*mProgressBarHide.setVisibility(View.GONE);
-                    //we show dialog that there was an error and return to the main menu
-                    AlertDialog.Builder builder2 = new AlertDialog.Builder(thisActivity);
-                    builder2.setMessage(R.string.service_socket_error)
-                            .setCancelable(true)
-                            .setNeutralButton(R.string.gen_button_ok,
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                        }
-                                    });
-
-                    builder2.show();
-                    //change button to ok
-                    fragmentFileTransferProgress.changeButton();
-                    break;*/
-                //case ACTION_OUT_OF_SPACE:
-                    /*mProgressBarHide.setVisibility(View.GONE);
-                    //we show dialog we ran out of space and return to the main menu
-                    AlertDialog.Builder builder3 = new AlertDialog.Builder(thisActivity);
-                    builder3.setMessage(R.string.service_out_of_space_error)
-                            .setCancelable(true)
-                            .setNeutralButton(R.string.gen_button_ok,
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                        }
-                                    });
-
-                    builder3.show();
-                    //change button to ok
-                    fragmentFileTransferProgress.changeButton();
-                    break;*/
             }
+        }
+    };
+
+    //service connection
+    private ServiceConnection serConnection=new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            ServiceFileShare.ServiceFileShareBinder binder = (ServiceFileShare.ServiceFileShareBinder) service;
+            mService = binder.getService();
+
+            //update the UI with data from the service
+            mService.updateUIOnly();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
         }
     };
 
