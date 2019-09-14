@@ -17,7 +17,7 @@ import android.util.Log;
 public class updateWidgetService extends IntentService {
 
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    private static final String TAG="WidgetUpdaterService";
+    private static final String TAG="updateWidgetService";
     private static final String WIDGET_CHANNEL="Widget Channel";
     private static final int WIDGET_NOTIFICATION_ID=1001;
     public static final String ACTION_UPDATE = "com.yumesoftworks.fileshare.action.APPWIDGET_UPDATE";
@@ -56,6 +56,7 @@ public class updateWidgetService extends IntentService {
 
         try {
             startForeground(WIDGET_NOTIFICATION_ID, notification);
+            Log.d(TAG,"Successfully started foreground notification");
         }catch (Exception e){
             Log.d(TAG,e.getMessage());
         }
@@ -134,12 +135,14 @@ public class updateWidgetService extends IntentService {
         //we check if it is before android O
         if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
             try {
+                Log.i(TAG,"starting widget update Android O and above");
                 context.startForegroundService(intent);
             }catch (Exception e){
                 Log.d(TAG,e.getMessage());
             }
         }else {
             try {
+                Log.i(TAG,"starting widget update Android N and below");
                 context.startService(intent);
             }catch (Exception e){
                 Log.d(TAG,e.getMessage());

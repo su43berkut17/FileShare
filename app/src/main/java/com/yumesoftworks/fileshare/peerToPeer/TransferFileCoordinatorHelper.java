@@ -53,7 +53,7 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
     }
 
     public TransferFileCoordinatorHelper(Context context, int recPort, int recType){
-        Log.d(TAG,"initializinf coordinator helper");
+        Log.d(TAG,"initializing coordinator helper");
         mContext=context;
         typeOfTransfer=recType;
 

@@ -121,41 +121,49 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         //process data
         TextInfoSendObject textInfoSendObject=(TextInfoSendObject) bundle.getSerializable(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI_DATA);
 
-        //name of file, current number and total number
-        String fileName=textInfoSendObject.getMessageContent();
-        String stringNumbers=textInfoSendObject.getAdditionalInfo();
-        String[] currentNumbers = stringNumbers.split(",");
-        String finalTextNumbers=currentNumbers[0]+" of "+currentNumbers[1];
+        try {
+            //name of file, current number and total number
+            String fileName = textInfoSendObject.getMessageContent();
+            String stringNumbers = textInfoSendObject.getAdditionalInfo();
+            String[] currentNumbers = stringNumbers.split(",");
+            String finalTextNumbers = currentNumbers[0] + " of " + currentNumbers[1];
 
-        //we change the member variables of the progress
-        int currentFile=Integer.parseInt(currentNumbers[0]);
-        int totalFiles=Integer.parseInt(currentNumbers[1]);
-        int percentage=currentFile*100/totalFiles;
+            //we change the member variables of the progress
+            int currentFile = Integer.parseInt(currentNumbers[0]);
+            int totalFiles = Integer.parseInt(currentNumbers[1]);
+            int percentage = currentFile * 100 / totalFiles;
 
-        //if this is the percentage of bytes
-        if (currentNumbers.length>3){
-            //percentage based on the bytes sent
-            long totalBytes = Long.parseLong(currentNumbers[2]);
-            long currentBytes = Long.parseLong(currentNumbers[3]);
-            long percentageBytes = currentBytes * 100 / totalBytes;
-            int percentageBytesInt=(int)percentageBytes;
+            //if this is the percentage of bytes
+            if (currentNumbers.length > 3) {
+                //percentage based on the bytes sent
+                long totalBytes = Long.parseLong(currentNumbers[2]);
+                long currentBytes = Long.parseLong(currentNumbers[3]);
+                long percentageBytes = currentBytes * 100 / totalBytes;
+                int percentageBytesInt = (int) percentageBytes;
 
-            if (percentageBytesInt>100){
-                percentageBytesInt=100;
+                if (percentageBytesInt > 100) {
+                    percentageBytesInt = 100;
+                }
+
+                //percentage based on the total
+                int singlePercentage = 100 / totalFiles;
+
+                //final percentage
+                percentage = percentage + (percentageBytesInt * singlePercentage / 100);
             }
 
-            //percentage based on the total
-            int singlePercentage=100/totalFiles;
-
-            //final percentage
-            percentage=percentage+(percentageBytesInt*singlePercentage/100);
+            //we update the data
+            mTvFileName.setText(fileName);
+            mTvOutOf.setText(finalTextNumbers);
+            mtvPercentage.setText(String.valueOf(percentage) + "%");
+            mTvProgress.setProgress(percentage);
+        }catch (Exception e){
+            Log.e(TAG,"There was an exception while updating UI");
+            mTvFileName.setText("--");
+            mTvOutOf.setText("--");
+            mtvPercentage.setText("0%");
+            mTvProgress.setProgress(0);
         }
-
-        //we update the data
-        mTvFileName.setText(fileName);
-        mTvOutOf.setText(finalTextNumbers);
-        mtvPercentage.setText(String.valueOf(percentage)+"%");
-        mTvProgress.setProgress(percentage);
     }
 
     //update ui completed

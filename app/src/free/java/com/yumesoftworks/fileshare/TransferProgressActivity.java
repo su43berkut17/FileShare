@@ -260,6 +260,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         public void onChanged(List<UserInfoEntry> userInfoEntries) {
             //we check if the transfer has been completed before
             int isTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
+            Log.d(TAG,"It has changed, the value is "+isTransferInProgress);
 
             //if the app is relaunched and the transfer has finished and hasnt captured the broadcast events
             switch (isTransferInProgress){
@@ -325,7 +326,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         @Override
         public void onReceive(Context context, Intent intent) {
             String action=intent.getAction();
-            Log.d(TAG,"Received message from service "+action);
+            //Log.d(TAG,"Received message from service "+action);
 
             //we check what to do depending on what the service needs to do
             switch (action){
@@ -351,6 +352,8 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
             //update the UI with data from the service
             mService.updateUIOnly();
+
+            Log.d(TAG,"Service has been bound");
         }
 
         @Override

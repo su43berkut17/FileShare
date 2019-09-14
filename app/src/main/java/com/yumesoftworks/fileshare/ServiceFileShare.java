@@ -36,8 +36,8 @@ public class ServiceFileShare extends Service implements
     private static final int NOTIFICATION_ID=1002;
     private NotificationChannel channel;
     private NotificationManager manager;
-    private int mTotalFiles;
-    private int mCurrentFile;
+    private int mTotalFiles=0;
+    private int mCurrentFile=0;
     private String mCurrentFileName;
     private int mCounterTimesWidget=0;
 
@@ -67,7 +67,9 @@ public class ServiceFileShare extends Service implements
         repositoryFile=new FileListRepository(getApplication());
         repositoryUser=new UserInfoRepository(getApplication());
 
-        isServiceStarted=true;
+        switchTransfer(TransferProgressActivity.STATUS_TRANSFER_ACTIVE);
+
+        new loadDatabaseAsyncTask().execute();
     }
 
     @Override
@@ -75,21 +77,29 @@ public class ServiceFileShare extends Service implements
         Log.d(TAG,"Destroying service");
         //we cancel everything
         //cancel notification
-        manager.cancel(NOTIFICATION_ID);
+        try {
+            manager.cancel(NOTIFICATION_ID);
+        }catch (Exception e){
+            Log.d(TAG,"Notification doesnt exist");
+        }
 
         //deactivate the switch transfer
-        repositoryUser.switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
+        if (isServiceStarted) {
+            repositoryUser.switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
+        }
 
         Boolean isItDestroyed;
 
-        do {
-            isItDestroyed=mTransferFileCoordinatorHelper.userCancelled();
-            try {
-                TimeUnit.SECONDS.sleep(1);
-            }catch (Exception e){
-                Log.e(TAG,"Couldn't interrupt");
-            }
-        }while (isItDestroyed==false);
+        if (mTransferFileCoordinatorHelper!=null) {
+            do {
+                isItDestroyed = mTransferFileCoordinatorHelper.userCancelled();
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (Exception e) {
+                    Log.e(TAG, "Couldn't interrupt");
+                }
+            } while (isItDestroyed == false);
+        }
 
         isServiceStarted=false;
 
@@ -113,6 +123,9 @@ public class ServiceFileShare extends Service implements
     public int onStartCommand(Intent intent, int flags, int startId) {
         //we check is the service has been started
         if (!isServiceStarted) {
+            //change the flag
+            isServiceStarted=true;
+
             //check the API
             manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
