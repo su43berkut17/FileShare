@@ -297,6 +297,10 @@ public class ReceiverSocketTransfer {
                         //we finish
                         doWeRepeat = false;
                         mReceiverInterface.finishedReceiveTransfer(mNextActionDetail);
+                    }else if (mCurrentAction==ACTION_EXCEPTION){
+                        doWeRepeat=false;
+                        mReceiverInterface.socketReceiveFailedClient();
+                        return;
                     }else{
                         doWeRepeat=false;
                         return;

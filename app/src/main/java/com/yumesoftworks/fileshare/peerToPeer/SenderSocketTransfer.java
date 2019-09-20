@@ -238,6 +238,10 @@ public class SenderSocketTransfer{
                         //we finish
                         doWeRepeat = false;
                         mSenderInterface.finishedSendTransfer(mNextActionDetail);
+                    }else if(mCurrentAction==ACTION_EXCEPTION){
+                        doWeRepeat=false;
+                        mSenderInterface.socketErrorSend();
+                        return;
                     }else{
                         doWeRepeat=false;
                         return;

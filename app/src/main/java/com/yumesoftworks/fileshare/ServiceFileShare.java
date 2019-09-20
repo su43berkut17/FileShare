@@ -56,6 +56,7 @@ public class ServiceFileShare extends Service implements
     //intent stuff
     private Bundle receivedBundle;
     private Boolean isServiceStarted=false;
+    private Boolean isTransferActive=false;
 
     //service binding
     private final IBinder binder=new ServiceFileShareBinder();
@@ -80,28 +81,45 @@ public class ServiceFileShare extends Service implements
         try {
             manager.cancel(NOTIFICATION_ID);
         }catch (Exception e){
-            Log.d(TAG,"Notification doesnt exist");
+            Log.e(TAG,"on Destroy Notification doesnt exist");
         }
 
         //deactivate the switch transfer
-        if (isServiceStarted) {
+        if (isServiceStarted && !isTransferActive) {
             repositoryUser.switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
         }
 
+        //make sure to destroy the transfer and threads by any chance if it is still active
         Boolean isItDestroyed;
 
         if (mTransferFileCoordinatorHelper!=null) {
             do {
-                isItDestroyed = mTransferFileCoordinatorHelper.userCancelled();
+                //try
                 try {
-                    TimeUnit.SECONDS.sleep(1);
-                } catch (Exception e) {
-                    Log.e(TAG, "Couldn't interrupt");
+                    isItDestroyed = mTransferFileCoordinatorHelper.userCancelled();
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Couldn't interrupt "+e.getMessage());
+                    }
+                }catch (Exception e){
+                    Log.e(TAG,"couldn't complete user cancelled action is destroyed");
+                    isItDestroyed=true;
                 }
             } while (isItDestroyed == false);
         }
 
+        //return the widget to its normal state
+        try {
+            updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_NORMAL, "", 0, 0);
+        }catch (Exception e){
+            Log.e(TAG,"Couldn't set widget as normal");
+        }
+
         isServiceStarted=false;
+        isTransferActive=false;
+
+        Log.d(TAG,"Service destroyed successfully");
 
         super.onDestroy();
     }
@@ -121,10 +139,13 @@ public class ServiceFileShare extends Service implements
     //start the transfer
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //we check is the service has been started
-        if (!isServiceStarted) {
+        //we set the service as started
+        isServiceStarted=true;
+
+        //we check if the service has been started before or a transfer is active
+        if (!isTransferActive) {
             //change the flag
-            isServiceStarted=true;
+            isTransferActive=true;
 
             //check the API
             manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -142,7 +163,12 @@ public class ServiceFileShare extends Service implements
                         .setContentText(getString(R.string.service_notification_text_initialize))
                         .setOnlyAlertOnce(true)
                         .build();
-                startForeground(NOTIFICATION_ID, notification);
+                try {
+                    startForeground(NOTIFICATION_ID, notification);
+                }catch (Exception e){
+                    Log.e(TAG,"Couldn't start foreground notification");
+                    connectionError();
+                }
             } else {
                 manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
                         , getString(R.string.service_notification_text_initialize)
@@ -161,7 +187,7 @@ public class ServiceFileShare extends Service implements
                 receivedBundle = intent.getExtras();
                 initializeSockets();
             } catch (Exception e) {
-                Log.d(TAG, "No extra information sent to the service, we stop it.");
+                Log.e(TAG, "No extra information sent to the service, we stop it.");
                 stopSelf();
             }
         }else{
@@ -208,7 +234,7 @@ public class ServiceFileShare extends Service implements
                             mFileListEntry,action);
 
                 }catch (Exception e){
-                    Log.d(TAG,"There was an error creating the send client socket");
+                    Log.e(TAG,"There was an error creating the send client socket");
                     e.printStackTrace();
                     connectionError();
                 }
@@ -221,7 +247,7 @@ public class ServiceFileShare extends Service implements
 
                     mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,mPort,action);
                 }catch (Exception e){
-                    Log.d(TAG,"There was an error creating the receive client socket"+e.getMessage());
+                    Log.e(TAG,"There was an error creating the receive client socket"+e.getMessage());
                     e.printStackTrace();
                     connectionError();
                 }
@@ -254,14 +280,16 @@ public class ServiceFileShare extends Service implements
     private void connectionError(){
         //the socket failed
         //we hide the notification
-        manager.cancel(NOTIFICATION_ID);
+        try {
+            manager.cancel(NOTIFICATION_ID);
+        }catch (Exception e){
+            Log.e(TAG,"Connection error couldnt cancel notification "+e.getMessage());
+        }
 
         //we deactivate the transfer status
         switchTransfer(TransferProgressActivity.STATUS_TRANSFER_SOCKET_ERROR);
+        isTransferActive=false;
 
-        //set error dialog and go back to activity
-        Intent intent=new Intent(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_SOCKET_ERROR);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         stopSelf();
     }
 
@@ -269,14 +297,16 @@ public class ServiceFileShare extends Service implements
     private void transferErrorOutOfSpace(){
         //the socket failed
         //we hide the notification
-        manager.cancel(NOTIFICATION_ID);
+        try {
+            manager.cancel(NOTIFICATION_ID);
+        }catch (Exception e){
+            Log.e(TAG,"Out of space error couldnt cancel notification "+e.getMessage());
+        }
 
         //we deactivate the transfer status
         switchTransfer(TransferProgressActivity.STATUS_TRANSFER_OUT_OF_SPACE_ERROR);
+        isTransferActive=false;
 
-        //set error dialog and go back to activity
-        Intent intent=new Intent(TransferProgressActivity.ACTION_OUT_OF_SPACE);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         stopSelf();
     }
 
@@ -292,17 +322,22 @@ public class ServiceFileShare extends Service implements
         updateGeneralUI(endObject);
 
         //we hide the notification
-        manager.cancel(NOTIFICATION_ID);
+        try {
+            manager.cancel(NOTIFICATION_ID);
+        }catch (Exception e){
+            Log.e(TAG,"Finished receive transfer couldnt cancel notification "+e.getMessage());
+        }
 
         //we deactivate the transfer status
         switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
+        isTransferActive=false;
 
         //set the widget on its initial state
-        updateWidgetService.startActionUpdateWidget(this,TransferProgressWidget.STATE_NORMAL,"",0,0);
-
-        //the transfer is done, set dialog and go back to activity
-        Intent intent=new Intent(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_FINISHED_TRANSFER);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        try {
+            updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_NORMAL, "", 0, 0);
+        }catch (Exception e){
+            Log.e(TAG,"Couldnt update widget back to normal "+e.getMessage());
+        }
         stopSelf();
     }
 
@@ -351,17 +386,23 @@ public class ServiceFileShare extends Service implements
         updateGeneralUI(endObject);
 
         //we hide the notification
-        manager.cancel(NOTIFICATION_ID);
+        try {
+            manager.cancel(NOTIFICATION_ID);
+        }catch (Exception e){
+            Log.e(TAG,"Finished send transfer couldnt cancel notification "+e.getMessage());
+        }
 
-        //we set the database as not transferring so if they restart the app i goes to the main menu
+        //we set the database as not transferring so if they restart the app goes to the main menu
         switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
+        isTransferActive=false;
 
         //set the widget on its initial state
-        updateWidgetService.startActionUpdateWidget(this,TransferProgressWidget.STATE_NORMAL,"",0,0);
+        try {
+            updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_NORMAL, "", 0, 0);
+        }catch (Exception e){
+            Log.e(TAG,"Couldnt update widget back to normal "+e.getMessage());
+        }
 
-        //the transfer is done, set dialog and go back to activity
-        Intent intent=new Intent(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_FINISHED_TRANSFER);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         stopSelf();
     }
 
@@ -400,7 +441,7 @@ public class ServiceFileShare extends Service implements
         //we change the member variables of the progress
         mTotalFiles=Integer.parseInt(currentNumbers[1]);
         mCurrentFile=Integer.parseInt(currentNumbers[0]);
-        mCurrentFileName =fileName;
+        mCurrentFileName = fileName;
 
         //bundle
         Bundle bundle=new Bundle();
@@ -420,10 +461,14 @@ public class ServiceFileShare extends Service implements
 
         //update the widget
         //we will set a counter to prevent calling an update on the widget several times
-        if (mCounterTimesWidget>20 || textInfoSendObject.getMessageType()==com.yumesoftworks.fileshare.TransferProgressActivity.TYPE_END) {
+        if (mCounterTimesWidget>30 || textInfoSendObject.getMessageType()==com.yumesoftworks.fileshare.TransferProgressActivity.TYPE_END) {
             Log.d(TAG,fileName+": "+currentNumbers.toString());
             mCounterTimesWidget=0;
-            updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_TRANSFER, fileName, mTotalFiles, mCurrentFile);
+            try {
+                updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_TRANSFER, fileName, mTotalFiles, mCurrentFile);
+            }catch (Exception e){
+                Log.e(TAG,"Couldnt update widget "+e.getMessage());
+            }
         }else{
             mCounterTimesWidget++;
         }

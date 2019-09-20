@@ -139,7 +139,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         //we get the instance of the indeterminate progress bar
         mProgressBarHide=findViewById(R.id.pb_atp_waitingForConnection);
 
-        if (typeOfService!=RELAUNCH_APP){
+        if (typeOfService!=RELAUNCH_APP) {
             //first initialization
             //choose data in the intent
             if (typeOfService == FILES_SENDING) {
@@ -152,11 +152,14 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
             //start the service
             serviceIntent.putExtras(extras);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(serviceIntent);
-            } else {
-                startService(serviceIntent);
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(serviceIntent);
+                } else {
+                    startService(serviceIntent);
+                }
+            }catch (Exception e){
+                Log.e(TAG,"Couldnt start service "+e.getMessage());
             }
         }
 
@@ -165,11 +168,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
         //get the broadcast receivers for responses from the service
         IntentFilter intentFilter=new IntentFilter(LOCAL_BROADCAST_REC);
-        //intentFilter.addAction(ACTION_FINISHED_TRANSFER);
-        //intentFilter.addAction(ACTION_SOCKET_ERROR);
-        //intentFilter.addAction(ACTION_OUT_OF_SPACE);
         intentFilter.addAction(ACTION_UPDATE_UI);
-        //intentFilter.addAction(ACTION_UPDATE_UI_DATA);
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceived, intentFilter);
 
         //toolbar
@@ -183,14 +182,22 @@ public class TransferProgressActivity extends AppCompatActivity implements
         Intent serviceIntent=new Intent(this,ServiceFileShare.class);
 
         //we bind the service
-        bindService(serviceIntent,serConnection,Context.BIND_AUTO_CREATE);
+        try {
+            bindService(serviceIntent, serConnection, Context.BIND_AUTO_CREATE);
+        }catch (Exception e){
+            Log.e(TAG,"Couldnt bind service "+e.getMessage());
+        }
     }
 
     @Override
     protected void onStop() {
-        super.onStop();
+        try {
+            unbindService(serConnection);
+        }catch (Exception e){
+            Log.e(TAG,"Couldnt unbind the service "+e.getMessage());
+        }
 
-        unbindService(serConnection);
+        super.onStop();
     }
 
     @Override
@@ -282,6 +289,14 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     mProgressBarHide.setVisibility(View.GONE);
                     //set values to completed
                     fragmentFileTransferProgress.setComplete();
+
+                    //we unbind the service
+                    try {
+                        unbindService(serConnection);
+                    }catch (Exception e){
+                        Log.e(TAG,"Couldnt unbind the service "+e.getMessage());
+                    }
+
                     break;
 
                 case STATUS_TRANSFER_OUT_OF_SPACE_ERROR:
@@ -299,6 +314,14 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     builder3.show();
                     //change button to ok
                     fragmentFileTransferProgress.changeButton();
+
+                    //we unbind the service
+                    try {
+                        unbindService(serConnection);
+                    }catch (Exception e){
+                        Log.e(TAG,"Couldnt unbind the service "+e.getMessage());
+                    }
+
                     break;
 
                 case STATUS_TRANSFER_SOCKET_ERROR:
@@ -316,6 +339,14 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     builder2.show();
                     //change button to ok
                     fragmentFileTransferProgress.changeButton();
+
+                    //we unbind the service
+                    try {
+                        unbindService(serConnection);
+                    }catch (Exception e){
+                        Log.e(TAG,"Couldnt unbind the service "+e.getMessage());
+                    }
+
                     break;
             }
         }
@@ -358,7 +389,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-
+            Log.d(TAG,"Service has been unbound");
         }
     };
 
