@@ -3,8 +3,7 @@ package com.yumesoftworks.fileshare.utils;
 import android.util.Log;
 
 public class ChangeShownPath {
-    public void ChangeShownPath(){
-    }
+    static final String TAG="ChangeShownPath";
 
     public String filterString(String recPath){
         //divide the path
@@ -14,10 +13,10 @@ public class ChangeShownPath {
         int depthCounter=0;
         int finalDepth=2;
         for (String storage:storageDivided) {
-            Log.d("aa",storage);
+            //Log.d(TAG,storage);
             if (storage.toLowerCase().contains("self") || storage.toLowerCase().contains("emulated") && depthCounter<=2){
                 //internal storage
-                Log.d("aa","internal");
+                //Log.d(TAG,"internal");
                 finalDepth=3;
             }
             depthCounter++;
@@ -27,14 +26,14 @@ public class ChangeShownPath {
         depthCounter=0;
 
         for (String storage: storageDivided) {
-            Log.d("aa",storage);
+            //Log.d(TAG,storage);
             if (depthCounter>finalDepth) {
                 finalPath += storage+"/";
             }
             depthCounter++;
         }
 
-        Log.d("aa",finalPath);
+        //Log.d(TAG,finalPath);
 
         return finalPath;
     }

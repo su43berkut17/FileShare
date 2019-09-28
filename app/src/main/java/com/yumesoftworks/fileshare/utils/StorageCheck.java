@@ -7,15 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StorageCheck {
-    public void StorageCheck(){
-    }
-
     public List<File> getStorageList(){
         //List of storage
         File fullStorage=new File("/storage");
 
         //Internal path
         File internalStorage=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "");
+        //go up 1 level to get the root
+        internalStorage=new File(internalStorage.getParent());
 
         //list inside fullStorage
         File[] listStorage=fullStorage.listFiles();

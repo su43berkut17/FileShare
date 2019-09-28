@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.fragment.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -31,8 +32,7 @@ import java.util.List;
 
 public class FileViewer extends Fragment implements
         FileListAdapter.FileClickListener,
-        View.OnClickListener,
-        AdapterView.OnItemSelectedListener {
+        View.OnClickListener{
 
     private static final String TAG="FileViewerFrag";
     private static final String RECYCLER_VIEW_POSITION="rvPosition";
@@ -41,7 +41,6 @@ public class FileViewer extends Fragment implements
     //recycler view
     private RecyclerView rvFileList;
     private FileListAdapter rvAdapter;
-    private static List<FileListEntry> fileList;
     private int mRvPosition;
     private LinearLayoutManager mLinearLayoutManager;
 
@@ -54,7 +53,7 @@ public class FileViewer extends Fragment implements
     //spinner
     private ArrayAdapter<StorageListEntry> storageAdapter;
     private String mSelectedStorage="";
-    private Boolean mIsSpinnerInit;
+    private SpinnerInteractionListener mSpinnerInteractionListener;
 
     //interfaces
     private OnFragmentFileInteractionListener mListener;
@@ -134,21 +133,27 @@ public class FileViewer extends Fragment implements
         //listeners button queue
         btnQueue.setOnClickListener(this);
 
+        //create the spinner
+        createSpinner();
+
         return mainView;
     }
 
     //spinner creation
-    public void createSpinner(List<File> list,String selectedItem){
+    private void createSpinner(){
+        List<File> list = new StorageCheck().getStorageList();
         List<StorageListEntry> storageList=new ArrayList<>();
 
-        Log.d(TAG,"creating spinner, selected item "+selectedItem);
+        Log.d(TAG,"creating spinner:");
 
         //populate
         for (File file:list) {
             String absolutePath=file.getAbsolutePath();
+            String absolutePathLower=absolutePath.toLowerCase();
+
             String name=file.getName()+":";
 
-            if (absolutePath.contains("emulated/")||absolutePath.contains("EMULATED/")){
+            if (absolutePathLower.contains("emulated/")){
                 name="Internal Storage"+":";
             }
 
@@ -160,29 +165,59 @@ public class FileViewer extends Fragment implements
                 R.layout.item_spn_content,
                 storageList);
         storageAdapter.setDropDownViewResource(R.layout.item_spn_content_dropdown);
-        //android.R.layout.simple_spinner_item,
 
         storagePicker.setAdapter(storageAdapter);
-        storagePicker.setOnItemSelectedListener(this);
+        mSpinnerInteractionListener=new SpinnerInteractionListener();
 
-        updateSpinner(selectedItem);
+        storagePicker.setOnItemSelectedListener(mSpinnerInteractionListener);
+        storagePicker.setOnTouchListener(mSpinnerInteractionListener);
+    }
+
+    //custom listener for the spinner
+    private class SpinnerInteractionListener implements AdapterView.OnItemSelectedListener, View.OnTouchListener{
+        Boolean isSpinnerTouched=false;
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            Log.d(TAG,"interaction with spinner");
+            isSpinnerTouched=true;
+            return false;
+        }
+
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            if (isSpinnerTouched) {
+                Log.d(TAG, "We have clicked the item " + storageAdapter.getItem(position).getName() + " " +
+                        storageAdapter.getItem(position).getPath());
+                mListener.fileFragmentSpinner(storageAdapter.getItem(position));
+                isSpinnerTouched = false;
+            }
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+
+        }
     }
 
     //spinner update selection
     public void updateSpinner(String selectedItem){
+        Log.d(TAG,"Update spinner called");
         int selectedIndex=0;
 
         if (selectedItem!=null && selectedItem.isEmpty()==false){
             for (int i=0;i<storageAdapter.getCount();i++){
                 StorageListEntry entry=storageAdapter.getItem(i);
-                Log.d(TAG,"Spinner comparing: Selected item: "+selectedItem+" with entry: "+entry.getName());
-                if (entry.getPath().contains(selectedItem)){
+                Log.d(TAG,"Spinner comparing: Selected item: "+selectedItem+" with entry: "+entry.getName()+"-"+entry.getPath());
+                if (selectedItem.contains(entry.getPath())){
+                //if (entry.getPath().contains(selectedItem)){
                     Log.d(TAG,"IT CONTAINS THE PATH");
                     selectedIndex=i;
                 }
             }
         }
 
+        Log.d(TAG,"Setting the selection to index number: "+selectedIndex);
         storagePicker.setSelection(selectedIndex);
     }
 
@@ -197,10 +232,10 @@ public class FileViewer extends Fragment implements
     }
 
     //update the path
-    public void updatePath(String path){
+    public void updatePath(String path,String realPath){
         if (textPath!=null) {
             textPath.setText(path);
-            mSelectedStorage=path;
+            mSelectedStorage=realPath;
             Log.d(TAG,"we update the path to "+mSelectedStorage);
         }
     }
@@ -232,18 +267,16 @@ public class FileViewer extends Fragment implements
     @Override
     public void onResume() {
         super.onResume();
-        //start storage data
-        Log.d(TAG,"onResume");
-        List<File> list=new StorageCheck().getStorageList();
-        createSpinner(list,mSelectedStorage);
+
+        updateSpinner(mSelectedStorage);
     }
 
     @Override
     public void onDetach() {
+        Log.d(TAG,"detaching");
         super.onDetach();
         mListener = null;
         mQueueButton=null;
-        mIsSpinnerInit=null;
     }
 
     //clicks
@@ -268,7 +301,7 @@ public class FileViewer extends Fragment implements
             Intent myIntent = new Intent(Intent.ACTION_VIEW);
             myIntent.setDataAndType(Uri.parse(rvAdapter.getFileItem(itemId).getPath()),rvAdapter.getFileItem(itemId).getMimeType());
             try {
-                startActivity(myIntent);
+                this.startActivity(Intent.createChooser(myIntent,"Pick a viewer"));
             }catch (Exception e){
                 Toast.makeText(getActivity().getBaseContext(), R.string.fb_incompatible_file,Toast.LENGTH_LONG).show();
             }
@@ -280,25 +313,6 @@ public class FileViewer extends Fragment implements
         if (mListener != null) {
             mListener.onFragmentFileInteraction(fileListEntry);
         }
-    }
-
-    //spinner
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        if (mIsSpinnerInit==null){
-            mIsSpinnerInit=true;
-            Log.d(TAG,"initializing spinner");
-            return;
-        }
-        Log.d(TAG,"We have clicked the item "+storageAdapter.getItem(position).getName()+" "+
-                storageAdapter.getItem(position).getPath());
-        mListener.fileFragmentSpinner(storageAdapter.getItem(position));
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-        Log.d(TAG,"Nothing is selected");
-        return;
     }
 
     //interface to interact with the main activity

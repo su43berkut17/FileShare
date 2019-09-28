@@ -90,6 +90,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         if(savedInstanceState!=null){
             mCurrentFragment=savedInstanceState.getInt(CURRENT_FRAGMENT_TAG);
             mPath=savedInstanceState.getString(CURRENT_PATH_TAG);
+            Log.d(TAG,"Restoring the path: "+mPath);
         }else{
             mCurrentFragment=FILE_FRAGMENT;
             mPath=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "").getAbsolutePath();
@@ -118,6 +119,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         super.onSaveInstanceState(outState);
         outState.putInt(CURRENT_FRAGMENT_TAG,mCurrentFragment);
         outState.putString(CURRENT_PATH_TAG,mPath);
+        Log.d(TAG,"Were saving the path: "+mPath);
     }
 
     private void initializeVariables(){
@@ -271,7 +273,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             finalList=new MergeFileListAndDatabase().mergeFileListAndDatabase(fileViewerViewModel.getData().getValue(),mPath);
         }
 
-        fragmentFileViewer.updatePath(new ChangeShownPath().filterString(mPath));
+        fragmentFileViewer.updatePath(new ChangeShownPath().filterString(mPath),mPath);
         fragmentFileViewer.updateFileRV(finalList);
     }
 
