@@ -184,9 +184,9 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         Intent myIntent = new Intent(Intent.ACTION_VIEW);
         myIntent.setDataAndType(Uri.parse(rvAdapter.getFileItem(itemId).getPath()),rvAdapter.getFileItem(itemId).getMimeType());
         try {
-            startActivity(myIntent);
+            this.startActivity(myIntent.createChooser(myIntent,"Pick a viewer"));
         }catch (Exception e){
-            Toast.makeText(getActivity().getBaseContext(), R.string.fb_incompatible_file,Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity().getBaseContext(), R.string.fb_incompatible_file, Toast.LENGTH_SHORT).show();
         }
     }
 

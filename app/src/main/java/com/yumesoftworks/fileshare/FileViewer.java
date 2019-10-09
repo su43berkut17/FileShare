@@ -298,12 +298,15 @@ public class FileViewer extends Fragment implements
         if (type==rvAdapter.TYPE_CHECKBOX) {
             onButtonPressed(rvAdapter.getFileItem(itemId));
         }else{
-            Intent myIntent = new Intent(Intent.ACTION_VIEW);
-            myIntent.setDataAndType(Uri.parse(rvAdapter.getFileItem(itemId).getPath()),rvAdapter.getFileItem(itemId).getMimeType());
-            try {
-                this.startActivity(Intent.createChooser(myIntent,"Pick a viewer"));
-            }catch (Exception e){
-                Toast.makeText(getActivity().getBaseContext(), R.string.fb_incompatible_file,Toast.LENGTH_LONG).show();
+            //check if it is directory
+            if (!rvAdapter.getFileItem(itemId).getDirectory()) {
+                Intent myIntent = new Intent(Intent.ACTION_VIEW);
+                myIntent.setDataAndType(Uri.parse(rvAdapter.getFileItem(itemId).getPath()), rvAdapter.getFileItem(itemId).getMimeType());
+                try {
+                    this.startActivity(Intent.createChooser(myIntent, "Pick a viewer"));
+                } catch (Exception e) {
+                    Toast.makeText(getActivity().getBaseContext(), R.string.fb_incompatible_file, Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }
