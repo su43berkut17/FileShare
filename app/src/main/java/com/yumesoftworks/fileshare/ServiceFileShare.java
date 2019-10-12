@@ -3,6 +3,7 @@ package com.yumesoftworks.fileshare;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -257,12 +258,25 @@ public class ServiceFileShare extends Service implements
 
     //notification build
     private NotificationCompat.Builder notificationBuilder(String title, String filename, boolean showProgress){
+        //intent to open the activity
+        Intent intentApp=new Intent(getApplicationContext(),TransferProgressActivity.class);
+
+        //set the extra
+        Bundle extras=new Bundle();
+        extras.putInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER, TransferProgressActivity.RELAUNCH_APP);
+        intentApp.putExtras(extras);
+
+        //clear backstack
+        intentApp.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        PendingIntent pendingIntentApp=PendingIntent.getActivity(this,0,intentApp,0);
+
         //we set the notification
         return new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
                     .setContentTitle(title)
                     .setContentText(filename)
                     .setSmallIcon(R.drawable.logo_128)
                     .setProgress(mTotalFiles, mCurrentFile, showProgress)
+                    .setContentIntent(pendingIntentApp)
                     .setAutoCancel(true);
     }
 
