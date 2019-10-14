@@ -176,7 +176,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     public void updateUserDataSocket(UserSendEntry userSendEntry) {
         //look in the list
         for (int i=0;i<mUserList.size();i++){
-            if (mUserList.get(i).getInfoToSend()==userSendEntry.getInfoToSend()){
+            if (mUserList.get(i).getInfoToSend().equals(userSendEntry.getInfoToSend())){
                 mUserList.get(i).setUsername(userSendEntry.getUsername());
                 mUserList.get(i).setAvatar(userSendEntry.getAvatar());
             }
@@ -200,7 +200,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         //cycle
         for (int i=0;i<mUserList.size();i++){
             Log.d(TAG,"comparing "+mUserList.get(i).getInfoToSend());
-            if (mUserList.get(i).getInfoToSend()==serviceInfo.getServiceName()){
+            if (mUserList.get(i).getInfoToSend().equals(serviceInfo.getServiceName())){
                 Log.d(TAG,"We remove "+mUserList.get(i).getUsername());
                 mUserList.remove(i);
             }
@@ -255,7 +255,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
         //we call the activity that will start the service with the info
         Intent intent = new Intent(this, TransferProgressActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         //data to send on the intent
         Bundle bundleSend = new Bundle();

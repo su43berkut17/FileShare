@@ -64,10 +64,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
     public static final int STATUS_TRANSFER_OUT_OF_SPACE_ERROR =3004;
 
     //broadcast actions
-    public static final String ACTION_FINISHED_TRANSFER="finishedTransfer";
     public static final String ACTION_UPDATE_UI="updateUI";
-    public static final String ACTION_SOCKET_ERROR="connectionError";
-    public static final String ACTION_OUT_OF_SPACE="noSpaceAvailable";
 
     //name of bundle objects coming from service
     public static final String ACTION_UPDATE_UI_DATA="updateUIData";
@@ -94,6 +91,10 @@ public class TransferProgressActivity extends AppCompatActivity implements
     private FileTransferViewModel fileTransferViewModel;
     private TransferProgressActivityViewModel transferProgressActivityViewModel;
 
+    //Dialog
+    private AlertDialog mGeneralDialog;
+
+    //Ads
     private AdView mAdView;
 
     //type
@@ -282,7 +283,12 @@ public class TransferProgressActivity extends AppCompatActivity implements
                                         public void onClick(DialogInterface dialog, int id) {
                                         }
                                     });
-                    builder.show();
+                    mGeneralDialog=builder.create();
+
+                    if (!mGeneralDialog.isShowing()){
+                        mGeneralDialog.show();
+                    }
+
                     //change button to ok
                     fragmentFileTransferProgress.changeButton();
                     //hide the progress bar
@@ -311,7 +317,12 @@ public class TransferProgressActivity extends AppCompatActivity implements
                                         }
                                     });
 
-                    builder3.show();
+                    mGeneralDialog=builder3.create();
+
+                    if (!mGeneralDialog.isShowing()){
+                        mGeneralDialog.show();
+                    }
+
                     //change button to ok
                     fragmentFileTransferProgress.changeButton();
 
@@ -336,7 +347,12 @@ public class TransferProgressActivity extends AppCompatActivity implements
                                         }
                                     });
 
-                    builder2.show();
+                    mGeneralDialog=builder2.create();
+
+                    if (!mGeneralDialog.isShowing()) {
+                        mGeneralDialog.show();
+                    }
+
                     //change button to ok
                     fragmentFileTransferProgress.changeButton();
 
@@ -360,16 +376,13 @@ public class TransferProgressActivity extends AppCompatActivity implements
             //Log.d(TAG,"Received message from service "+action);
 
             //we check what to do depending on what the service needs to do
-            switch (action){
-                case ACTION_UPDATE_UI:
-                    mProgressBarHide.setVisibility(View.GONE);
-                    //update ui
-                    Bundle bundle=intent.getExtras();
+            if (action==ACTION_UPDATE_UI){
+                mProgressBarHide.setVisibility(View.GONE);
+                //update ui
+                Bundle bundle=intent.getExtras();
 
-                    //send the data to the fragment
-                    fragmentFileTransferProgress.updateData(bundle);
-
-                    break;
+                //send the data to the fragment
+                fragmentFileTransferProgress.updateData(bundle);
             }
         }
     };
@@ -409,7 +422,12 @@ public class TransferProgressActivity extends AppCompatActivity implements
                                     reopenApp();
                                 }
                             });
-            cancelDialog.show();
+
+            mGeneralDialog=cancelDialog.create();
+
+            if (!mGeneralDialog.isShowing()){
+                mGeneralDialog.show();
+            }
         }else{
             reopenApp();
         }
@@ -425,7 +443,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
         //reopen the activity
         Intent intent=new Intent(getApplicationContext(),WelcomeScreenActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
         finish();
     }
