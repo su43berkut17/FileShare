@@ -363,7 +363,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             fragmentQueueViewer=new QueueViewer();
 
             fragmentManager.beginTransaction()
-                    .setCustomAnimations(android.R.anim.slide_in_left,android.R.anim.slide_out_right)
+                    .setCustomAnimations(R.anim.anim_enter_right,R.anim.anim_exit_left)
                     .replace(R.id.frag_afv_main, fragmentQueueViewer)
                     .commit();
 
@@ -450,7 +450,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
                 //we reload the  fragment
                 fragmentManager.beginTransaction()
-                        .setCustomAnimations(R.anim.anim_enter_right,R.anim.anim_exit_left)
+                        .setCustomAnimations(R.anim.anim_enter_left,R.anim.anim_exit_right)
                         .replace(R.id.frag_afv_main, fragmentFileViewer)
                         .commit();
 
