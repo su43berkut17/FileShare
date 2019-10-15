@@ -4,7 +4,7 @@
     android:shape="oval">
 
     <solid
-        android:color="#999999"/>
+        android:color="@color/colorAccent"/>
     <size
         android:width="@dimen/avatar_size"
         android:height="@dimen/avatar_size"/>

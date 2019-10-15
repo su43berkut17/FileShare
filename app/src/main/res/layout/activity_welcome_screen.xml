@@ -34,7 +34,7 @@
                     android:id="@+id/image_aws_logo"
                     android:layout_width="@dimen/welcome_icon_size"
                     android:layout_height="@dimen/welcome_icon_size"
-                    android:layout_marginTop="@dimen/default_padding"
+                    android:layout_marginTop="32dp"
                     android:contentDescription="@string/app_name"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -47,7 +47,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/default_padding"
                     android:layout_marginLeft="@dimen/default_padding"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="32dp"
                     android:layout_marginEnd="@dimen/default_padding"
                     android:layout_marginRight="@dimen/default_padding"
                     android:background="@color/common_google_signin_btn_text_dark_default"
@@ -94,7 +94,7 @@
                         android:inputType="text"
                         android:maxLines="1"
                         android:singleLine="true"
-                        android:text="@string/aws_input_username" />
+                        android:text="@string/aws_input_username"/>
                 </LinearLayout>
 
                 <LinearLayout
