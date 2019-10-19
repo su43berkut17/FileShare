@@ -49,7 +49,7 @@ public class ReceiverPickSocket {
         @Override
         public void run() {
             Boolean repeatSocketConnection=true;
-            while(repeatSocketConnection){
+            while(repeatSocketConnection && !socketThread.isInterrupted()){
                 // Socket object
                 try {
                     //wait for a connection
@@ -69,7 +69,8 @@ public class ReceiverPickSocket {
                                 //messageOut.close();
                                 isInitialized=true;
                             }catch (Exception e){
-                                Log.d(TAG,"Error"+e.getMessage());
+                                Log.d(TAG,"Error:"+e.getMessage());
+                                keepLooping=false;
                             }
                         }
 

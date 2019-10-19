@@ -54,7 +54,7 @@ public class SenderPickSocket {
         public void run() {
             Boolean doWeRepeat=true;
 
-            while (doWeRepeat) {
+            while (doWeRepeat && !socketThread.isInterrupted()) {
                 // block the call until connection is created and return
                 // Socket object
                 try {
