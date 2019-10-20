@@ -72,7 +72,7 @@ public class SenderPickSocket {
                     Boolean streamLoop=true;
                     Boolean isInitialized=false;
 
-                    while(streamLoop) {
+                    while(streamLoop && !socketThread.isInterrupted()) {
                        // try {
                         if(!isInitialized) {
                             Log.d(TAG, "Object input stream started");

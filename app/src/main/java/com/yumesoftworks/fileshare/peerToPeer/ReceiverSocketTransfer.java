@@ -3,8 +3,6 @@ package com.yumesoftworks.fileshare.peerToPeer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.StatFs;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -202,7 +200,31 @@ public class ReceiverSocketTransfer {
                             //Log.d(TAG,"Starting stream of the file");
                             //know the final name of the file
                             String realName=mTextInfoSendObject.getMessageContent();
-                            String finalName=new Date().toString()+"-"+realName;
+                            String finalName;
+                            String finalExtension;
+                            File tempFileName=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + realName);
+                            int fileNumber=0;
+                            boolean doesFileExist=false;
+
+                            do {
+                                //final name
+                                //tempFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + realName);
+
+                                if (tempFileName.exists()) {
+                                    //we need to create a new file
+                                    fileNumber++;
+
+                                    //separate name and extension so it can be incremented
+                                    finalName=realName.substring(0,realName.lastIndexOf("."));
+                                    finalExtension=realName.substring(realName.lastIndexOf("."));
+
+                                    tempFileName=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + finalName+"("+fileNumber+")"+finalExtension);
+                                }else{
+                                    finalName=tempFileName.getName();
+                                    doesFileExist=true;
+                                }
+                            }while(!doesFileExist);
+                            //String finalName=new Date().toString()+"-"+realName;
 
                             //we create the file
                             byte[] bytes = new byte[16 * 1024];

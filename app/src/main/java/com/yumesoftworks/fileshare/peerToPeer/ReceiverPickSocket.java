@@ -59,7 +59,7 @@ public class ReceiverPickSocket {
 
                     Boolean keepLooping=true;
                     Boolean isInitialized=false;
-                    while (keepLooping){
+                    while (keepLooping && !socketThread.isInterrupted()){
                         //on 1st connection we send the data
                         if (!isInitialized){
                             try{
