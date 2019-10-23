@@ -85,9 +85,12 @@ public class ServiceFileShare extends Service implements
             Log.e(TAG,"on Destroy Notification doesnt exist");
         }
 
-        //deactivate the switch transfer
-        if (isServiceStarted && !isTransferActive) {
-            repositoryUser.switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
+        //check if the current status is an error so it wont change it to success
+        if (repositoryUser.getTransferStatus().getValue().get(0).getIsTransferInProgress()!=TransferProgressActivity.STATUS_TRANSFER_OUT_OF_SPACE_ERROR || repositoryUser.getTransferStatus().getValue().get(0).getIsTransferInProgress()!=TransferProgressActivity.STATUS_TRANSFER_SOCKET_ERROR) {
+            //deactivate the switch transfer
+            if (isServiceStarted && !isTransferActive){
+                repositoryUser.switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
+            }
         }
 
         //make sure to destroy the transfer and threads by any chance if it is still active
