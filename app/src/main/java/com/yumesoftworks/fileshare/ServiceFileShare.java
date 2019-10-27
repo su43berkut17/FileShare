@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import androidx.core.app.NotificationCompat;
+import androidx.lifecycle.LiveData;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -24,6 +25,7 @@ import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.data.UserInfoRepository;
 import com.yumesoftworks.fileshare.peerToPeer.TransferFileCoordinatorHelper;
 
@@ -50,6 +52,7 @@ public class ServiceFileShare extends Service implements
     //private AppDatabase database;
     private FileListRepository repositoryFile;
     private UserInfoRepository repositoryUser;
+    private int mCurrentStatus;
 
     //loaded entry
     private List<FileListEntry> mFileListEntry;
@@ -86,9 +89,9 @@ public class ServiceFileShare extends Service implements
         }
 
         //check if the current status is an error so it wont change it to success
-        if (repositoryUser.getTransferStatus().getValue().get(0).getIsTransferInProgress()!=TransferProgressActivity.STATUS_TRANSFER_OUT_OF_SPACE_ERROR || repositoryUser.getTransferStatus().getValue().get(0).getIsTransferInProgress()!=TransferProgressActivity.STATUS_TRANSFER_SOCKET_ERROR) {
+        if (mCurrentStatus != TransferProgressActivity.STATUS_TRANSFER_OUT_OF_SPACE_ERROR || mCurrentStatus != TransferProgressActivity.STATUS_TRANSFER_SOCKET_ERROR) {
             //deactivate the switch transfer
-            if (isServiceStarted && !isTransferActive){
+            if (isServiceStarted && !isTransferActive) {
                 repositoryUser.switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
             }
         }
@@ -256,6 +259,11 @@ public class ServiceFileShare extends Service implements
                     connectionError();
                 }
             }
+        }else{
+            //we set the service as not transferring
+            Log.d(TAG,"The service has nothing so we stop");
+            switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
+            stopSelf();
         }
     }
 
@@ -285,6 +293,7 @@ public class ServiceFileShare extends Service implements
 
     //dabatase stuff
     private void switchTransfer(int activateTransfer){
+        mCurrentStatus=activateTransfer;
         repositoryUser.switchTransfer(activateTransfer);
     }
 
@@ -493,15 +502,27 @@ public class ServiceFileShare extends Service implements
 
     //activity asked for information
     public void updateUIOnly(){
-        TextInfoSendObject textInfoSendObject=new TextInfoSendObject(0, mCurrentFileName, mCurrentFileName +","+mTotalFiles);
+        //only update if service is doing a transfer
+        if (isTransferActive) {
+            TextInfoSendObject textInfoSendObject = new TextInfoSendObject(0, mCurrentFileName, mCurrentFileName + "," + mTotalFiles);
 
-        //bundle
-        Bundle bundle=new Bundle();
-        bundle.putSerializable(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI_DATA,textInfoSendObject);
+            //bundle
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI_DATA, textInfoSendObject);
 
-        //we update the UI
-        Intent intent=new Intent(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI);
-        intent.putExtras(bundle);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+            //we update the UI
+            Intent intent = new Intent(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI);
+            intent.putExtras(bundle);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        }
+    }
+
+    //activity asked is transfer is active
+    public boolean methodIsTransferActive(){
+        if (!isTransferActive){
+            Log.d(TAG,"Transfer is not active, we will stop the service");
+            stopSelf();
+        }
+        return isTransferActive;
     }
 }

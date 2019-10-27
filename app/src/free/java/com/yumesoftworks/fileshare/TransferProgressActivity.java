@@ -275,19 +275,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 case STATUS_TRANSFER_FINISHED:
                     //transfer is over, show dialog and change button
                     //we show dialog that transfer is done
-                    AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
-                    builder.setMessage(R.string.service_finished_transfer)
-                            .setCancelable(true)
-                            .setNeutralButton(R.string.gen_button_ok,
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                        }
-                                    });
-                    mGeneralDialog=builder.create();
-
-                    if (!mGeneralDialog.isShowing()){
-                        mGeneralDialog.show();
-                    }
+                    createDialog(R.string.service_finished_transfer);
 
                     //change button to ok
                     fragmentFileTransferProgress.changeButton();
@@ -308,20 +296,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 case STATUS_TRANSFER_OUT_OF_SPACE_ERROR:
                     mProgressBarHide.setVisibility(View.GONE);
                     //we show dialog we ran out of space and return to the main menu
-                    AlertDialog.Builder builder3 = new AlertDialog.Builder(thisActivity);
-                    builder3.setMessage(R.string.service_out_of_space_error)
-                            .setCancelable(true)
-                            .setNeutralButton(R.string.gen_button_ok,
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                        }
-                                    });
-
-                    mGeneralDialog=builder3.create();
-
-                    if (!mGeneralDialog.isShowing()){
-                        mGeneralDialog.show();
-                    }
+                    createDialog(R.string.service_out_of_space_error);
 
                     //change button to ok
                     fragmentFileTransferProgress.changeButton();
@@ -338,20 +313,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 case STATUS_TRANSFER_SOCKET_ERROR:
                     mProgressBarHide.setVisibility(View.GONE);
                     //we show dialog that there was an error and return to the main menu
-                    AlertDialog.Builder builder2 = new AlertDialog.Builder(thisActivity);
-                    builder2.setMessage(R.string.service_socket_error)
-                            .setCancelable(true)
-                            .setNeutralButton(R.string.gen_button_ok,
-                                    new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                        }
-                                    });
-
-                    mGeneralDialog=builder2.create();
-
-                    if (!mGeneralDialog.isShowing()) {
-                        mGeneralDialog.show();
-                    }
+                    createDialog(R.string.service_socket_error);
 
                     //change button to ok
                     fragmentFileTransferProgress.changeButton();
@@ -367,6 +329,36 @@ public class TransferProgressActivity extends AppCompatActivity implements
             }
         }
     };
+
+    //create OK dialog
+    private void createDialog(int dialogText){
+        //we show dialog that transfer is done
+        if (mGeneralDialog!=null) {
+            if (!mGeneralDialog.isShowing()) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
+                builder.setMessage(dialogText)
+                        .setCancelable(true)
+                        .setNeutralButton(R.string.gen_button_ok,
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                    }
+                                });
+                mGeneralDialog = builder.create();
+                mGeneralDialog.show();
+            }
+        }else{
+            AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
+            builder.setMessage(dialogText)
+                    .setCancelable(true)
+                    .setNeutralButton(R.string.gen_button_ok,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                }
+                            });
+            mGeneralDialog = builder.create();
+            mGeneralDialog.show();
+        }
+    }
 
     //broadcast receiving
     private BroadcastReceiver mMessageReceived=new BroadcastReceiver() {
@@ -396,6 +388,13 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
             //update the UI with data from the service
             mService.updateUIOnly();
+
+            //check if service is doing a transfer
+            if (!mService.methodIsTransferActive()){
+                Log.d(TAG,"the transfer is not active we hide the progrss var");
+                //it is not active
+                mProgressBarHide.setVisibility(View.GONE);
+            }
 
             Log.d(TAG,"Service has been bound");
         }
