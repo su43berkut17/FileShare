@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -46,7 +47,8 @@
 
         <service
             android:name=".updateWidgetService"
-            android:exported="false"></service>
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE"></service>
 
         <service android:name=".ServiceFileShare"
             android:exported="false"></service>

@@ -5,6 +5,9 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.appwidget.AppWidgetManager;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.JobIntentService;
 import androidx.room.Database;
 import android.content.ComponentName;
 import android.content.Context;
@@ -14,14 +17,14 @@ import android.os.Build;
 import androidx.core.app.NotificationCompat;
 import android.util.Log;
 
-public class updateWidgetService extends IntentService {
+public class updateWidgetService extends JobIntentService {
 
-    // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String TAG="updateWidgetService";
     private static final String WIDGET_CHANNEL="Widget Channel";
     private static final int WIDGET_NOTIFICATION_ID=1001;
     public static final String ACTION_UPDATE = "com.yumesoftworks.fileshare.action.APPWIDGET_UPDATE";
     public static final String ACTION_UPDATE_APP = "com.yumesoftworks.fileshare.action.APPWIDGET_UPDATE_APP";
+    private static final int JOB_ID = 20671;
 
     //we create the variables
     private static String mCurrentState;
@@ -29,9 +32,9 @@ public class updateWidgetService extends IntentService {
     private static int mTotalNumberOfFiles;
     private static int mCurrentNumberOfFiles;
 
-    public updateWidgetService() {
+    /*public updateWidgetService() {
         super("updateWidgetService");
-    }
+    }*/
 
     @Override
     public void onCreate() {
@@ -72,7 +75,7 @@ public class updateWidgetService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void onHandleWork(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_UPDATE.equals(action)) {
@@ -132,6 +135,10 @@ public class updateWidgetService extends IntentService {
         Intent intent=new Intent(context,updateWidgetService.class);
         intent.setAction(ACTION_UPDATE_APP);
 
+        //enqueue work
+        enqueueWork(context,updateWidgetService.class,JOB_ID,intent);
+
+        /*
         //we check if it is before android O
         if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
             try {
@@ -147,6 +154,6 @@ public class updateWidgetService extends IntentService {
             }catch (Exception e){
                 Log.d(TAG,e.getMessage());
             }
-        }
+        }*/
     }
 }
