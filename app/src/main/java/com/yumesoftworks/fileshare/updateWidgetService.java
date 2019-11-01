@@ -40,6 +40,7 @@ public class updateWidgetService extends JobIntentService {
     public void onCreate() {
         super.onCreate();
 
+        /*
         //channel
         //check the API
         NotificationManager manager= (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -62,17 +63,18 @@ public class updateWidgetService extends JobIntentService {
             Log.d(TAG,"Successfully started foreground notification");
         }catch (Exception e){
             Log.d(TAG,e.getMessage());
-        }
+        }*/
     }
 
     //notification build
+    /*
     private NotificationCompat.Builder notificationBuilder(){
         //we set the notification
         return new NotificationCompat.Builder(this, WIDGET_CHANNEL)
                 .setContentTitle(getString(R.string.app_name))
                 .setAutoCancel(true)
                 .setOnlyAlertOnce(true);
-    }
+    }*/
 
     @Override
     protected void onHandleWork(Intent intent) {
@@ -109,10 +111,6 @@ public class updateWidgetService extends JobIntentService {
                                                int recCurrentNumberOfFiles){
 
         //we store the data if it is sent, if it is not the widget doesn't need to update
-        Log.d(TAG,"this is startActionUpdateWidget "+
-                mCurrentState+"-"+mNameOfCurrentFile+"-"+
-                mTotalNumberOfFiles+" of "+mCurrentNumberOfFiles);
-
         if (recCurrentState!=null) {
             mCurrentState=recCurrentState;
             mNameOfCurrentFile=recNameOfCurrentFile;
@@ -130,6 +128,10 @@ public class updateWidgetService extends JobIntentService {
             //read it from the database
             Log.d(TAG,"update current state is null so it is scheduled update");
         }
+
+        Log.d(TAG,"this is startActionUpdateWidget "+
+                mCurrentState+"-"+mNameOfCurrentFile+"-"+
+                mTotalNumberOfFiles+" of "+mCurrentNumberOfFiles);
 
         //we start the intent
         Intent intent=new Intent(context,updateWidgetService.class);

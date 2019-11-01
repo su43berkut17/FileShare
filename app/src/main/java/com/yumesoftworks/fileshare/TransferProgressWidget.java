@@ -43,10 +43,20 @@ public class TransferProgressWidget extends AppWidgetProvider {
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.transfer_progress_widget);
 
-        mCurrentState=currentState;
+        Log.d(TAG,"updateAppWidget starts");
+        if (currentState!=null) {
+            mCurrentState = currentState;
+        }else{
+            mCurrentState=STATE_NORMAL;
+       }
 
-        //set the values
-        if (mCurrentState.equals(STATE_NORMAL)) {
+        Log.d(TAG,"updateAppWidget starts, current state is "+mCurrentState);
+
+        if (mCurrentState.equals(STATE_TRANSFER)){
+            mNameOfCurrentFile=nameOfCurrentFile;
+            mTotalNumberOfFiles=totalNumberOfFiles;
+            mCurrentNumberOfFiles=currentNumberOfFiles;
+        }else{
             //we load the database
             AppDatabase database=AppDatabase.getInstance(context);
             List<UserInfoEntry> listUser=database.userInfoDao().loadUserWidget();
@@ -54,30 +64,10 @@ public class TransferProgressWidget extends AppWidgetProvider {
 
             Log.d(TAG,"The number of transfers is "+user +" "+user.getNumberFilesTransferred());
             mTotalNumberOfTransfers=user.getNumberFilesTransferred();
-        }else if (mCurrentState.equals(STATE_TRANSFER)){
-            mNameOfCurrentFile=nameOfCurrentFile;
-            mTotalNumberOfFiles=totalNumberOfFiles;
-            mCurrentNumberOfFiles=currentNumberOfFiles;
         }
+
         //depending on the state we hide or show the layouts
         switch (mCurrentState){
-            case STATE_NORMAL:
-                //We hide the stuff
-                views.setViewVisibility(R.id.widget_default_state, View.VISIBLE);
-                views.setViewVisibility(R.id.widget_transfer_state, View.GONE);
-
-                //update the texts
-                views.setTextViewText(R.id.tv_widget_total_number,String.valueOf(mTotalNumberOfTransfers));
-
-                //we set the pending intent to launch the main app when the widget is in its default mode
-                Intent intent = new Intent(context, WelcomeScreenActivity.class);
-                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-
-                //we set the pending intent for the widget
-                views.setOnClickPendingIntent(R.id.widget_default_state, pendingIntent);
-
-                break;
-
             case STATE_TRANSFER:
                 //we hide the stuff
                 views.setViewVisibility(R.id.widget_default_state, View.GONE);
@@ -112,7 +102,20 @@ public class TransferProgressWidget extends AppWidgetProvider {
 
                 break;
             default:
-                //nothing happens
+                //We hide the stuff
+                views.setViewVisibility(R.id.widget_default_state, View.VISIBLE);
+                views.setViewVisibility(R.id.widget_transfer_state, View.GONE);
+
+                //update the texts
+                views.setTextViewText(R.id.tv_widget_total_number,String.valueOf(mTotalNumberOfTransfers));
+
+                //we set the pending intent to launch the main app when the widget is in its default mode
+                Intent intent = new Intent(context, WelcomeScreenActivity.class);
+                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+
+                //we set the pending intent for the widget
+                views.setOnClickPendingIntent(R.id.widget_default_state, pendingIntent);
+
                 break;
         }
 
