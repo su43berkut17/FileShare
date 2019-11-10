@@ -14,7 +14,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import androidx.core.app.NotificationCompat;
-import androidx.lifecycle.LiveData;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -25,7 +24,6 @@ import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.data.UserInfoRepository;
 import com.yumesoftworks.fileshare.peerToPeer.TransferFileCoordinatorHelper;
 
@@ -59,8 +57,9 @@ public class ServiceFileShare extends Service implements
 
     //intent stuff
     private Bundle receivedBundle;
-    private Boolean isServiceStarted=false;
-    private Boolean isTransferActive=false;
+    private static Boolean isServiceStarted=false;
+    private static Boolean isTransferActive=false;
+    private int mStepsBeforeSelfDestruction=0;
 
     //service binding
     private final IBinder binder=new ServiceFileShareBinder();
@@ -69,24 +68,52 @@ public class ServiceFileShare extends Service implements
     public void onCreate() {
         super.onCreate();
 
+        //foreground service 1st
+        //check the API
+        manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            //we set the channel
+            channel = new NotificationChannel(NOTIFICATION_CHANNEL,
+                    getString(R.string.app_name),
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setLightColor(Color.BLUE);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            manager.createNotificationChannel(channel);
+            Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText(getString(R.string.service_notification_text_initialize))
+                    .setOnlyAlertOnce(true)
+                    .setOngoing(true)
+                    .build();
+
+            try {
+                startForeground(NOTIFICATION_ID, notification);
+            }catch (Exception e){
+                Log.e(TAG,"Couldn't start foreground notification");
+                connectionError();
+            }
+        } else {
+            manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
+                    , getString(R.string.service_notification_text_initialize)
+                    , false)
+                    .setOnlyAlertOnce(true)
+                    .setOngoing(true)
+                    .build());
+        }
+
+        Log.d(TAG,"Creating service");
         repositoryFile=new FileListRepository(getApplication());
         repositoryUser=new UserInfoRepository(getApplication());
-
-        switchTransfer(TransferProgressActivity.STATUS_TRANSFER_ACTIVE);
 
         new loadDatabaseAsyncTask().execute();
     }
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
         Log.d(TAG,"Destroying service");
         //we cancel everything
-        //cancel notification
-        try {
-            manager.cancel(NOTIFICATION_ID);
-        }catch (Exception e){
-            Log.e(TAG,"on Destroy Notification doesnt exist");
-        }
 
         //check if the current status is an error so it wont change it to success
         if (mCurrentStatus != TransferProgressActivity.STATUS_TRANSFER_OUT_OF_SPACE_ERROR || mCurrentStatus != TransferProgressActivity.STATUS_TRANSFER_SOCKET_ERROR) {
@@ -126,9 +153,14 @@ public class ServiceFileShare extends Service implements
         isServiceStarted=false;
         isTransferActive=false;
 
-        Log.d(TAG,"Service destroyed successfully");
+        //cancel notification
+        try {
+            manager.cancel(NOTIFICATION_ID);
+        }catch (Exception e){
+            Log.e(TAG,"on Destroy Notification doesnt exist");
+        }
 
-        super.onDestroy();
+        Log.d(TAG,"Service destroyed successfully");
     }
 
     private class loadDatabaseAsyncTask extends AsyncTask<Void,Void,Void> {
@@ -137,6 +169,8 @@ public class ServiceFileShare extends Service implements
         protected Void doInBackground(final Void... params) {
             mFileListEntry=repositoryFile.getFilesDirect();
             Log.d(TAG,"Database loaded, file list entry is "+mFileListEntry);
+
+            mStepsBeforeSelfDestruction++;
 
             initializeSockets();
             return null;
@@ -148,41 +182,15 @@ public class ServiceFileShare extends Service implements
     public int onStartCommand(Intent intent, int flags, int startId) {
         //we set the service as started
         isServiceStarted=true;
-
+        Log.d(TAG,"OnStar command");
         //we check if the service has been started before or a transfer is active
         if (!isTransferActive) {
+            Log.d(TAG,"No active transfer, we start one");
+            //change the active on the file
+            switchTransfer(TransferProgressActivity.STATUS_TRANSFER_ACTIVE);
+
             //change the flag
             isTransferActive=true;
-
-            //check the API
-            manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                //we set the channel
-                channel = new NotificationChannel(NOTIFICATION_CHANNEL,
-                        getString(R.string.app_name),
-                        NotificationManager.IMPORTANCE_DEFAULT);
-                channel.setLightColor(Color.BLUE);
-                channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-                manager.createNotificationChannel(channel);
-                Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
-                        .setContentTitle(getString(R.string.app_name))
-                        .setContentText(getString(R.string.service_notification_text_initialize))
-                        .setOnlyAlertOnce(true)
-                        .build();
-                try {
-                    startForeground(NOTIFICATION_ID, notification);
-                }catch (Exception e){
-                    Log.e(TAG,"Couldn't start foreground notification");
-                    connectionError();
-                }
-            } else {
-                manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
-                        , getString(R.string.service_notification_text_initialize)
-                        , false)
-                        .setOnlyAlertOnce(true)
-                        .build());
-            }
 
             //we initialize the files
             mTotalFiles = 0;
@@ -192,26 +200,56 @@ public class ServiceFileShare extends Service implements
             try {
                 //we call the initialize sockets
                 receivedBundle = intent.getExtras();
+                mStepsBeforeSelfDestruction++;
                 initializeSockets();
             } catch (Exception e) {
                 Log.e(TAG, "No extra information sent to the service, we stop it.");
+                //create he start foreground command
+                Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
+                        .setContentTitle(getString(R.string.app_name))
+                        .setContentText(getString(R.string.service_notification_text_initialize))
+                        .setOnlyAlertOnce(true)
+                        .setOngoing(true)
+                        .build();
+
+                startForeground(NOTIFICATION_ID, notification);
                 stopSelf();
             }
         }else{
-            Log.d(TAG,"Service already started");
+            Log.d(TAG,"A transfer has already started");
         }
 
         return super.onStartCommand(intent, flags, startId);
+        //return START_STICKY;
     }
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d(TAG,"onBind");
+
+        //create he start foreground command
+        Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.service_notification_text_initialize))
+                .setOnlyAlertOnce(true)
+                .setOngoing(true)
+                .build();
+
+        startForeground(NOTIFICATION_ID, notification);
+
         return binder;
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.d(TAG,"onUnbind");
+        return super.onUnbind(intent);
     }
 
     //bind
     public class ServiceFileShareBinder extends Binder {
         ServiceFileShare getService() {
+            Log.d(TAG,"returning this service");
             // Return this instance of LocalService so clients can call public methods
             return ServiceFileShare.this;
         }
@@ -220,6 +258,7 @@ public class ServiceFileShare extends Service implements
     //initialize sockets
     //should only work when database has been loaded and after receiving the intents
     private void initializeSockets(){
+        Log.d(TAG,"initializing sockets");
         if (mFileListEntry!=null && receivedBundle!=null){
             //do stuff
             //get action
@@ -260,10 +299,21 @@ public class ServiceFileShare extends Service implements
                 }
             }
         }else{
-            //we set the service as not transferring
-            Log.d(TAG,"The service has nothing so we stop");
-            switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
-            stopSelf();
+            //only if the database has been read and the
+            if (receivedBundle==null && mStepsBeforeSelfDestruction>=2){
+                //stop the service
+                //create he start foreground command
+                Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
+                        .setContentTitle(getString(R.string.app_name))
+                        .setContentText(getString(R.string.service_notification_text_initialize))
+                        .setOnlyAlertOnce(true)
+                        .setOngoing(true)
+                        .build();
+
+                startForeground(NOTIFICATION_ID, notification);
+
+                stopSelf();
+            }
         }
     }
 
@@ -273,13 +323,13 @@ public class ServiceFileShare extends Service implements
         Intent intentApp=new Intent(getApplicationContext(),TransferProgressActivity.class);
 
         //set the extra
-        Bundle extras=new Bundle();
+        /*Bundle extras=new Bundle();
         extras.putInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER, TransferProgressActivity.RELAUNCH_APP);
         intentApp.putExtras(extras);
 
         //clear backstack
-        intentApp.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent pendingIntentApp=PendingIntent.getActivity(this,0,intentApp,0);
+        intentApp.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);*/
+        PendingIntent pendingIntentApp=PendingIntent.getActivity(this,0,intentApp,PendingIntent.FLAG_UPDATE_CURRENT);
 
         //we set the notification
         return new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
@@ -288,6 +338,7 @@ public class ServiceFileShare extends Service implements
                     .setSmallIcon(R.drawable.logo_128)
                     .setProgress(mTotalFiles, mCurrentFile, showProgress)
                     .setContentIntent(pendingIntentApp)
+                    .setOngoing(true)
                     .setAutoCancel(true);
     }
 
@@ -412,11 +463,21 @@ public class ServiceFileShare extends Service implements
         updateGeneralUI(endObject);
 
         //we hide the notification
+        /*
         try {
             manager.cancel(NOTIFICATION_ID);
         }catch (Exception e){
             Log.e(TAG,"Finished send transfer couldnt cancel notification "+e.getMessage());
-        }
+        }*/
+
+        //we update the notification
+        manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
+                ,"Transfer successful"
+                ,false)
+                .setOnlyAlertOnce(true)
+                .setOngoing(true)
+                .setAutoCancel(true)
+                .build());
 
         //we set the database as not transferring so if they restart the app goes to the main menu
         switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
@@ -478,6 +539,8 @@ public class ServiceFileShare extends Service implements
                 ,finalNotificationText
                 ,true)
                 .setOnlyAlertOnce(true)
+                .setOngoing(true)
+                .setAutoCancel(true)
                 .build());
 
         //we update the UI
@@ -520,7 +583,7 @@ public class ServiceFileShare extends Service implements
     //activity asked is transfer is active
     public boolean methodIsTransferActive(){
         if (!isTransferActive){
-            Log.d(TAG,"Transfer is not active, we will stop the service");
+            Log.e(TAG,"Transfer is not active, we will stop the service");
             stopSelf();
         }
         return isTransferActive;

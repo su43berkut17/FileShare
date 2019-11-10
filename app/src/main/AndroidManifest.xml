@@ -24,7 +24,6 @@
         <activity android:name=".WelcomeScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -33,7 +32,7 @@
         <activity android:name=".FileBrowserAndQueueActivity" />
         <activity android:name=".SenderPickDestinationActivity" />
         <activity android:name=".ReceiverPickDestinationActivity" />
-        <activity android:name=".TransferProgressActivity" />
+        <activity android:name=".TransferProgressActivity"/>
 
         <receiver android:name=".TransferProgressWidget">
             <intent-filter>

@@ -49,7 +49,6 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
@@ -57,6 +56,8 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
                              Bundle savedInstanceState) {
         //create the view
         View fileProgressView=inflater.inflate(R.layout.fragment_file_transfer_progress, container,false);
+
+        Log.d(TAG,"Creating the views for the fragment");
 
         //get the type via arguments
         Bundle bundle=getArguments();
@@ -90,6 +91,8 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         //listener of he button
         mButton.setOnClickListener(this);
 
+        Log.d(TAG,"Creating the views for the fragment COMPLETED");
+
         return fileProgressView;
     }
 
@@ -98,6 +101,7 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
+            Log.d(TAG,"Added the interface on attach");
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -158,7 +162,7 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
             mtvPercentage.setText(String.valueOf(percentage) + "%");
             mTvProgress.setProgress(percentage);
         }catch (Exception e){
-            Log.e(TAG,"There was an exception while updating UI");
+            Log.e(TAG,"There was an exception while updating UI "+e.getMessage());
             mTvFileName.setText("--");
             mTvOutOf.setText("--");
             mtvPercentage.setText("0%");
@@ -168,6 +172,7 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
 
     //update ui completed
     public void setComplete(){
+        Log.d(TAG,"Called on complete method to update to success");
         mTvFileName.setText(R.string.service_success);
         mTvOutOf.setText("");
         mtvPercentage.setText("100%");
