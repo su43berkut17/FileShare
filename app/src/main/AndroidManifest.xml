@@ -21,14 +21,14 @@
         android:theme="@style/AppTheme"
         >
 
-        <activity android:name=".WelcomeScreenActivity">
+        <activity android:name=".MainMenuActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".MainMenuActivity" />
+        <activity android:name=".WelcomeScreenActivity" />
         <activity android:name=".FileBrowserAndQueueActivity" />
         <activity android:name=".SenderPickDestinationActivity" />
         <activity android:name=".ReceiverPickDestinationActivity" />

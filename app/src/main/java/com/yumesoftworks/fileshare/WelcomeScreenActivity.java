@@ -52,7 +52,6 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     private int mSelectedAvatar=-1;
     private int mFilesTransferred=0;
     private int mVersion=-1;
-    private int mIsTransferInProgress=TransferProgressActivity.STATUS_TRANSFER_INACTIVE;
 
     //recycler view
     private RecyclerView rvAvatars;
@@ -62,34 +61,25 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     private TextView tvUsername;
     private Button buttonGo;
     private Button buttonCancel;
-    private LinearLayout mLoadingScreen;
 
     //database
     private WelcomeScreenViewModel viewModel;
-
-    //context
-    private Context thisActivity;
+    private int mIsTransferInProgress=TransferProgressActivity.STATUS_TRANSFER_INACTIVE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome_screen);
 
-        //this activity
-        thisActivity=this;
-
         //analytics
         mFireAnalytics=FirebaseAnalytics.getInstance(this);
-
-        //loading screen
-        mLoadingScreen=findViewById(R.id.aws_loading_layout);
 
         //rotation values
         if (savedInstanceState==null){
             //we load the avatar value from the intent or default value if the intent does not exist
             //is this settings
             Intent intent = getIntent();
-            mIsThisSettings = intent.getBooleanExtra(EXTRA_SETTINGS_NAME,false);
+            mIsThisSettings = intent.getBooleanExtra(EXTRA_SETTINGS_NAME, false);
         }else{
             //we load it from the previous state
             mSelectedAvatar=savedInstanceState.getInt(NAME_ROTATION_AVATAR_STATE);
@@ -141,7 +131,6 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         if (mIsThisSettings==false) {
             getSupportActionBar().hide();
         }else{
-            mLoadingScreen.setVisibility(View.INVISIBLE);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
@@ -161,16 +150,15 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         viewModel.getUserInfo().observe(this, new Observer<List<UserInfoEntry>>() {
             @Override
             public void onChanged(@Nullable List<UserInfoEntry> userInfoEntries) {
+                //for 1st run
                 if (userInfoEntries.isEmpty()){
                     //we hide the cancel button and the loading screen
                     buttonCancel.setVisibility(View.GONE);
-                    mLoadingScreen.setVisibility(View.INVISIBLE);
                 }else{
-                    //we go to the next activity if it is not settings
+                    //for settings
                     if (mIsThisSettings){
                         //we change the go button text to save changes
                         buttonGo.setText(R.string.aws_button_save);
-                        mLoadingScreen.setVisibility(View.INVISIBLE);
 
                         //we set the loaded data to the ui
                         mSelectedAvatar=userInfoEntries.get(0).getPickedAvatar();
@@ -178,45 +166,13 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                         mFilesTransferred=userInfoEntries.get(0).getNumberFilesTransferred();
                         tvUsername.setText(userInfoEntries.get(0).getUsername());
                         mIsTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
-                    }else{
-                        //we open the main activity
-                        //we check if a transfer is in progress
-                        mIsTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
-                        if (mIsTransferInProgress==TransferProgressActivity.STATUS_TRANSFER_INACTIVE){
-                            goMainActivity();
-                        }else {
-                            //we relaunch the transfer activity
-                            Intent intent= new Intent(getApplicationContext(), com.yumesoftworks.fileshare.TransferProgressActivity.class);
-
-                            //set the extra
-                            Bundle extras=new Bundle();
-                            extras.putInt(com.yumesoftworks.fileshare.TransferProgressActivity.EXTRA_TYPE_TRANSFER, com.yumesoftworks.fileshare.TransferProgressActivity.RELAUNCH_APP);
-                            intent.putExtras(extras);
-
-                            //clear backstack
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                            //basic transition to main menu
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                                Bundle bundle = ActivityOptions.makeSceneTransitionAnimation((Activity)thisActivity).toBundle();
-                                startActivity(intent, bundle);
-                            } else {
-                                startActivity(intent);
-                            }
-
-                            //finish this activity
-                            finish();
-
-                            //for debug we open the activity for now
-                            //goMainActivity();
-                        }
                     }
                 }
             }
         });
     }
 
-    private void goMainActivity(){
+    /*private void goMainActivity(){
         Intent mainMenuActivity=new Intent(getApplicationContext(), com.yumesoftworks.fileshare.MainMenuActivity.class);
 
         //delete the backstack if it is not settings
@@ -233,7 +189,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         } else {
             startActivity(mainMenuActivity);
         }
-    }
+    }*/
 
     @Override
     public void onClick(View view){

@@ -1,6 +1,12 @@
 package com.yumesoftworks.fileshare;
 
+import androidx.annotation.Nullable;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+
+import android.app.Activity;
+import android.app.ActivityOptions;
+import android.content.Context;
 import android.content.Intent;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,11 +16,15 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.yumesoftworks.fileshare.data.UserInfoEntry;
+
+import java.util.List;
 
 public class MainMenuActivity extends AppCompatActivity implements View.OnClickListener{
     //buttons
@@ -28,10 +38,23 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
     private FirebaseAnalytics mFireAnalytics;
     private AdView mAdView;
 
+    //loading for 1st run
+    private LinearLayout mLoadingScreen;
+    private int mIsTransferInProgress=TransferProgressActivity.STATUS_TRANSFER_INACTIVE;
+
+    //database
+    private WelcomeScreenViewModel viewModel;
+
+    //context
+    private Context thisActivity;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
+
+        //this activity
+        thisActivity=this;
 
         //analytics
         mFireAnalytics=FirebaseAnalytics.getInstance(this);
@@ -43,6 +66,9 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         mAdView = findViewById(R.id.ad_view_main_menu);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
+
+        //loading screen
+        mLoadingScreen=findViewById(R.id.wel_loading_layout);
 
         //we set the values of the constraint layouts
         sendFilesButton=(ConstraintLayout)findViewById(R.id.mm_surf_sendFileArea);
@@ -59,6 +85,57 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         //toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.mm_toolbar);
         setSupportActionBar(myToolbar);
+
+        //detect if this is the 1st run
+        setupViewModel();
+    }
+
+    //view model
+    private void setupViewModel(){
+        viewModel=ViewModelProviders.of(this).get(WelcomeScreenViewModel.class);
+        viewModel.getUserInfo().observe(this, new Observer<List<UserInfoEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<UserInfoEntry> userInfoEntries) {
+
+                if (userInfoEntries.isEmpty()){
+                    //we open the setup
+                    Intent settingsActivityIntent=new Intent(getApplicationContext(), WelcomeScreenActivity.class);
+                    //clear backstack
+                    settingsActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                    startActivity(settingsActivityIntent);
+                    finish();
+                }else{
+                    //we check if a transfer is in progress
+                    mIsTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
+                    if (mIsTransferInProgress!=TransferProgressActivity.STATUS_TRANSFER_INACTIVE){
+                        //we relaunch the transfer activity
+                        Intent intent= new Intent(getApplicationContext(), com.yumesoftworks.fileshare.TransferProgressActivity.class);
+
+                        //set the extra
+                        Bundle extras=new Bundle();
+                        extras.putInt(com.yumesoftworks.fileshare.TransferProgressActivity.EXTRA_TYPE_TRANSFER, com.yumesoftworks.fileshare.TransferProgressActivity.RELAUNCH_APP);
+                        intent.putExtras(extras);
+
+                        //clear backstack
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                        //basic transition to main menu
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                            Bundle bundle = ActivityOptions.makeSceneTransitionAnimation((Activity)thisActivity).toBundle();
+                            startActivity(intent, bundle);
+                        } else {
+                            startActivity(intent);
+                        }
+
+                        //finish this activity
+                        finish();
+                    }else {
+                        mLoadingScreen.setVisibility(View.GONE);
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -90,7 +167,6 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
             case R.id.mm_surf_sendFileArea:
                 //we open the file explorer
                 Intent intent=new Intent(this, FileBrowserAndQueueActivity.class);
-                //Intent intent=new Intent(this,SenderPickDestinationActivity.class);
                 startActivity(intent);
                 break;
             case R.id.mm_surf_receiveArea:
