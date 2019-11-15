@@ -378,6 +378,9 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     doUnbind();
 
                     break;
+                case STATUS_TRANSFER_INACTIVE:
+                    reopenApp();
+                    break;
             }
         }
     };

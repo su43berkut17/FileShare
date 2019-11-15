@@ -41,6 +41,7 @@ public class ServiceFileShare extends Service implements
     private int mCurrentFile=0;
     private String mCurrentFileName;
     private int mCounterTimesWidget=0;
+    private static final String ACTION_STOP_SERVICE="stopServiceAction";
 
     //socket stuff
     private TransferFileCoordinatorHelper mTransferFileCoordinatorHelper;
@@ -183,40 +184,48 @@ public class ServiceFileShare extends Service implements
         //we set the service as started
         isServiceStarted=true;
         Log.d(TAG,"OnStar command");
-        //we check if the service has been started before or a transfer is active
-        if (!isTransferActive) {
-            Log.d(TAG,"No active transfer, we start one");
-            //change the active on the file
-            switchTransfer(TransferProgressActivity.STATUS_TRANSFER_ACTIVE);
 
-            //change the flag
-            isTransferActive=true;
+        //check if it is stopped by notification
+        if (intent.getAction()==ACTION_STOP_SERVICE){
+            //we deactivate the transfer status
+            switchTransfer(TransferProgressActivity.STATUS_TRANSFER_INACTIVE);
+            stopSelf();
+        }else {
+            //we check if the service has been started before or a transfer is active
+            if (!isTransferActive) {
+                Log.d(TAG, "No active transfer, we start one");
+                //change the active on the file
+                switchTransfer(TransferProgressActivity.STATUS_TRANSFER_ACTIVE);
 
-            //we initialize the files
-            mTotalFiles = 0;
-            mCurrentFile = 0;
+                //change the flag
+                isTransferActive = true;
 
-            //we get the bundle of extras
-            try {
-                //we call the initialize sockets
-                receivedBundle = intent.getExtras();
-                mStepsBeforeSelfDestruction++;
-                initializeSockets();
-            } catch (Exception e) {
-                Log.e(TAG, "No extra information sent to the service, we stop it.");
-                //create he start foreground command
-                Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
-                        .setContentTitle(getString(R.string.app_name))
-                        .setContentText(getString(R.string.service_notification_text_initialize))
-                        .setOnlyAlertOnce(true)
-                        .setOngoing(true)
-                        .build();
+                //we initialize the files
+                mTotalFiles = 0;
+                mCurrentFile = 0;
 
-                startForeground(NOTIFICATION_ID, notification);
-                stopSelf();
+                //we get the bundle of extras
+                try {
+                    //we call the initialize sockets
+                    receivedBundle = intent.getExtras();
+                    mStepsBeforeSelfDestruction++;
+                    initializeSockets();
+                } catch (Exception e) {
+                    Log.e(TAG, "No extra information sent to the service, we stop it.");
+                    //create he start foreground command
+                    Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
+                            .setContentTitle(getString(R.string.app_name))
+                            .setContentText(getString(R.string.service_notification_text_initialize))
+                            .setOnlyAlertOnce(true)
+                            .setOngoing(true)
+                            .build();
+
+                    startForeground(NOTIFICATION_ID, notification);
+                    stopSelf();
+                }
+            } else {
+                Log.d(TAG, "A transfer has already started");
             }
-        }else{
-            Log.d(TAG,"A transfer has already started");
         }
 
         return super.onStartCommand(intent, flags, startId);
@@ -321,6 +330,12 @@ public class ServiceFileShare extends Service implements
     private NotificationCompat.Builder notificationBuilder(String title, String filename, boolean showProgress){
         //intent to open the activity
         Intent intentApp=new Intent(getApplicationContext(),TransferProgressActivity.class);
+        PendingIntent pendingIntentApp=PendingIntent.getActivity(this,0,intentApp,PendingIntent.FLAG_UPDATE_CURRENT);
+
+        //intent to stop the transfer
+        Intent intentStop=new Intent(getApplicationContext(),ServiceFileShare.class);
+        intentStop.setAction(ACTION_STOP_SERVICE);
+        PendingIntent pendingIntentStopService=PendingIntent.getActivity(this,0,intentStop,0);
 
         //set the extra
         /*Bundle extras=new Bundle();
@@ -329,7 +344,7 @@ public class ServiceFileShare extends Service implements
 
         //clear backstack
         intentApp.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);*/
-        PendingIntent pendingIntentApp=PendingIntent.getActivity(this,0,intentApp,PendingIntent.FLAG_UPDATE_CURRENT);
+
 
         //we set the notification
         return new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
@@ -339,7 +354,9 @@ public class ServiceFileShare extends Service implements
                     .setProgress(mTotalFiles, mCurrentFile, showProgress)
                     .setContentIntent(pendingIntentApp)
                     .setOngoing(true)
-                    .setAutoCancel(true);
+                    .setAutoCancel(true)
+                    .addAction(R.drawable.icon_file_128,getString(R.string.service_notification_action_stop_service),pendingIntentStopService);
+
     }
 
     //dabatase stuff

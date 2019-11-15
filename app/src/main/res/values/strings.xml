@@ -66,11 +66,9 @@
     <string name="ats_tv_received_files">Files received:</string>
     <string name="ats_try_again_dialog">Cannot connect to device. Try again?</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
     <!-- Service -->
     <string name="service_notification_text_initialize">Starting transfer...</string>
+    <string name="service_notification_action_stop_service">Stop</string>
     <string name="service_finished_transfer">File transfer has been completed.</string>
     <string name="service_socket_error">There was a connection error. Please ty again.</string>
     <string name="service_out_of_space_error">The receiver device ran out of space and the transfer cannot continue.</string>
