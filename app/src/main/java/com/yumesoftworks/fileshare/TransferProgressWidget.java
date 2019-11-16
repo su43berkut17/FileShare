@@ -38,7 +38,8 @@ public class TransferProgressWidget extends AppWidgetProvider {
                                 String currentState,
                                 String nameOfCurrentFile,
                                 int totalNumberOfFiles,
-                                int currentNumberOfFiles) {
+                                int currentNumberOfFiles,
+                                int percentage) {
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.transfer_progress_widget);
@@ -56,6 +57,7 @@ public class TransferProgressWidget extends AppWidgetProvider {
             mNameOfCurrentFile=nameOfCurrentFile;
             mTotalNumberOfFiles=totalNumberOfFiles;
             mCurrentNumberOfFiles=currentNumberOfFiles;
+            mPercentage=percentage;
         }else{
             //we load the database
             AppDatabase database=AppDatabase.getInstance(context);
@@ -78,11 +80,11 @@ public class TransferProgressWidget extends AppWidgetProvider {
                 views.setTextViewText(R.id.tv_widget_number_of_transfers,String.valueOf(mCurrentNumberOfFiles)+" of "+String.valueOf(mTotalNumberOfFiles));
 
                 //calculate the percentage
-                try {
+                /*try {
                     mPercentage = mCurrentNumberOfFiles *100 / mTotalNumberOfFiles;
                 }catch (Exception e){
                     mPercentage=0;
-                }
+                }*/
 
                 //update the progress bar
                 views.setProgressBar(R.id.pb_widget_progress,100,mPercentage,false);
@@ -127,7 +129,7 @@ public class TransferProgressWidget extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
-        updateWidgetService.startActionUpdateWidget(context,mCurrentState,mNameOfCurrentFile,mTotalNumberOfFiles,mCurrentNumberOfFiles);
+        updateWidgetService.startActionUpdateWidget(context,mCurrentState,mNameOfCurrentFile,mTotalNumberOfFiles,mCurrentNumberOfFiles,mPercentage);
     }
 
     //method that updates all; the widgets since it is only 1 widget for all
@@ -137,10 +139,11 @@ public class TransferProgressWidget extends AppWidgetProvider {
                                         String currentState,
                                          String nameOfCurrentFile,
                                          int totalNumberOfFiles,
-                                         int currentNumberOfFiles){
+                                         int currentNumberOfFiles,
+                                         int percentage){
         // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId, currentState,nameOfCurrentFile,totalNumberOfFiles,currentNumberOfFiles);
+            updateAppWidget(context, appWidgetManager, appWidgetId, currentState,nameOfCurrentFile,totalNumberOfFiles,currentNumberOfFiles,percentage);
         }
     }
 

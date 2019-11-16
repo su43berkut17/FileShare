@@ -63,6 +63,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
     public static final int STATUS_TRANSFER_FINISHED =3002;
     public static final int STATUS_TRANSFER_SOCKET_ERROR =3003;
     public static final int STATUS_TRANSFER_OUT_OF_SPACE_ERROR =3004;
+    public static final int STATUS_TRANSFER_NOTIFICATION_CANCEL =3005;
 
     //broadcast actions
     public static final String ACTION_UPDATE_UI="updateUI";
@@ -378,7 +379,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     doUnbind();
 
                     break;
-                case STATUS_TRANSFER_INACTIVE:
+                case STATUS_TRANSFER_NOTIFICATION_CANCEL:
                     reopenApp();
                     break;
             }

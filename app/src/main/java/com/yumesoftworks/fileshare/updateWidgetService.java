@@ -31,6 +31,7 @@ public class updateWidgetService extends JobIntentService {
     private static String mNameOfCurrentFile;
     private static int mTotalNumberOfFiles;
     private static int mCurrentNumberOfFiles;
+    private static int mPercentage;
 
     /*public updateWidgetService() {
         super("updateWidgetService");
@@ -101,14 +102,15 @@ public class updateWidgetService extends JobIntentService {
         AppWidgetManager appWidgetManager=AppWidgetManager.getInstance(this);
         int[] appWidgetsIds = appWidgetManager.getAppWidgetIds(new ComponentName(this,TransferProgressWidget.class));
 
-        TransferProgressWidget.updateAllWidgets(this,appWidgetManager,appWidgetsIds, mCurrentState,mNameOfCurrentFile,mTotalNumberOfFiles,mCurrentNumberOfFiles);
+        TransferProgressWidget.updateAllWidgets(this,appWidgetManager,appWidgetsIds, mCurrentState,mNameOfCurrentFile,mTotalNumberOfFiles,mCurrentNumberOfFiles,mPercentage);
     }
 
     public static void startActionUpdateWidget(Context context,
                                                String recCurrentState,
                                                String recNameOfCurrentFile,
                                                int recTotalNumberOfFiles,
-                                               int recCurrentNumberOfFiles){
+                                               int recCurrentNumberOfFiles,
+                                               int percentage){
 
         //we store the data if it is sent, if it is not the widget doesn't need to update
         if (recCurrentState!=null) {
@@ -116,6 +118,7 @@ public class updateWidgetService extends JobIntentService {
             mNameOfCurrentFile=recNameOfCurrentFile;
             mTotalNumberOfFiles=recTotalNumberOfFiles;
             mCurrentNumberOfFiles=recCurrentNumberOfFiles;
+            mPercentage=percentage;
 
             Log.i(TAG,"updates received on the service");
         }else{
@@ -124,6 +127,7 @@ public class updateWidgetService extends JobIntentService {
             mNameOfCurrentFile="";
             mTotalNumberOfFiles=0;
             mCurrentNumberOfFiles=0;
+            mPercentage=0;
 
             //read it from the database
             Log.d(TAG,"update current state is null so it is scheduled update");

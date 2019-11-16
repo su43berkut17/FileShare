@@ -133,9 +133,13 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
             String finalTextNumbers = currentNumbers[0] + " of " + currentNumbers[1];
 
             //we change the member variables of the progress
-            int currentFile = Integer.parseInt(currentNumbers[0]);
-            int totalFiles = Integer.parseInt(currentNumbers[1]);
-            int percentage = currentFile * 100 / totalFiles;
+            //int currentFile = Integer.parseInt(currentNumbers[0]);
+            //int totalFiles = Integer.parseInt(currentNumbers[1]);
+            int percentage=0;
+            if (currentNumbers.length>2) {
+                percentage = Integer.parseInt(currentNumbers[3]);
+            }
+            /*int percentage = currentFile * 100 / totalFiles;
 
             //if this is the percentage of bytes
             if (currentNumbers.length > 3) {
@@ -154,7 +158,7 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
 
                 //final percentage
                 percentage = percentage + (percentageBytesInt * singlePercentage / 100);
-            }
+            }*/
 
             //we update the data
             mTvFileName.setText(fileName);

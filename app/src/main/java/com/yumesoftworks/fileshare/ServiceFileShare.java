@@ -117,7 +117,7 @@ public class ServiceFileShare extends Service implements
         //we cancel everything
 
         //check if the current status is an error so it wont change it to success
-        if (mCurrentStatus != TransferProgressActivity.STATUS_TRANSFER_OUT_OF_SPACE_ERROR || mCurrentStatus != TransferProgressActivity.STATUS_TRANSFER_SOCKET_ERROR) {
+        if (mCurrentStatus != TransferProgressActivity.STATUS_TRANSFER_OUT_OF_SPACE_ERROR || mCurrentStatus != TransferProgressActivity.STATUS_TRANSFER_SOCKET_ERROR || mCurrentStatus!=TransferProgressActivity.STATUS_TRANSFER_NOTIFICATION_CANCEL) {
             //deactivate the switch transfer
             if (isServiceStarted && !isTransferActive) {
                 repositoryUser.switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
@@ -146,7 +146,7 @@ public class ServiceFileShare extends Service implements
 
         //return the widget to its normal state
         try {
-            updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_NORMAL, "", 0, 0);
+            updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_NORMAL, "", 0, 0,100);
         }catch (Exception e){
             Log.e(TAG,"Couldn't set widget as normal");
         }
@@ -188,7 +188,7 @@ public class ServiceFileShare extends Service implements
         //check if it is stopped by notification
         if (intent.getAction()==ACTION_STOP_SERVICE){
             //we deactivate the transfer status
-            switchTransfer(TransferProgressActivity.STATUS_TRANSFER_INACTIVE);
+            switchTransfer(TransferProgressActivity.STATUS_TRANSFER_NOTIFICATION_CANCEL);
             stopSelf();
         }else {
             //we check if the service has been started before or a transfer is active
@@ -428,7 +428,7 @@ public class ServiceFileShare extends Service implements
 
         //set the widget on its initial state
         try {
-            updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_NORMAL, "", 0, 0);
+            updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_NORMAL, "", 0, 0,100);
         }catch (Exception e){
             Log.e(TAG,"Couldnt update widget back to normal "+e.getMessage());
         }
@@ -502,7 +502,7 @@ public class ServiceFileShare extends Service implements
 
         //set the widget on its initial state
         try {
-            updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_NORMAL, "", 0, 0);
+            updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_NORMAL, "", 0, 0,100);
         }catch (Exception e){
             Log.e(TAG,"Couldnt update widget back to normal "+e.getMessage());
         }
@@ -543,6 +543,34 @@ public class ServiceFileShare extends Service implements
         String finalNotificationText=fileName+" "+currentNumbers[0]+" of "+currentNumbers[1];
 
         //we change the member variables of the progress
+        int currentFile = Integer.parseInt(currentNumbers[0]);
+        int totalFiles = Integer.parseInt(currentNumbers[1]);
+        int percentage = currentFile * 100 / totalFiles;
+
+        textInfoSendObject.setAdditionalInfo(currentFile+","+totalFiles+",0");
+
+        //if this is the percentage of bytes
+        if (currentNumbers.length > 3) {
+            //percentage based on the bytes sent
+            long totalBytes = Long.parseLong(currentNumbers[2]);
+            long currentBytes = Long.parseLong(currentNumbers[3]);
+            long percentageBytes = currentBytes * 100 / totalBytes;
+            int percentageBytesInt = (int) percentageBytes;
+
+            if (percentageBytesInt > 100) {
+                percentageBytesInt = 100;
+            }
+
+            //percentage based on the total
+            int singlePercentage = 100 / totalFiles;
+
+            //final percentage
+            percentage = percentage + (percentageBytesInt * singlePercentage / 100);
+
+            textInfoSendObject.setAdditionalInfo(currentFile+","+totalFiles+","+percentage);
+        }
+
+        //we change the member variables of the progress
         mTotalFiles=Integer.parseInt(currentNumbers[1]);
         mCurrentFile=Integer.parseInt(currentNumbers[0]);
         mCurrentFileName = fileName;
@@ -558,6 +586,7 @@ public class ServiceFileShare extends Service implements
                 .setOnlyAlertOnce(true)
                 .setOngoing(true)
                 .setAutoCancel(true)
+                .setProgress(100,percentage,false)
                 .build());
 
         //we update the UI
@@ -571,7 +600,7 @@ public class ServiceFileShare extends Service implements
             Log.d(TAG,fileName+": "+currentNumbers.toString());
             mCounterTimesWidget=0;
             try {
-                updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_TRANSFER, fileName, mTotalFiles, mCurrentFile);
+                updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_TRANSFER, fileName, mTotalFiles, mCurrentFile,percentage);
             }catch (Exception e){
                 Log.e(TAG,"Couldnt update widget "+e.getMessage());
             }
