@@ -172,24 +172,22 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         });
     }
 
-    /*private void goMainActivity(){
+    private void goMainActivity(){
         Intent mainMenuActivity=new Intent(getApplicationContext(), com.yumesoftworks.fileshare.MainMenuActivity.class);
 
-        //delete the backstack if it is not settings
-        if (!mIsThisSettings) {
-            Log.d(TAG,"it is not settings, we");
-            mainMenuActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            finish();
-        }
+        //delete the backstack
+        mainMenuActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 
         //basic transition to main menu
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle();
             startActivity(mainMenuActivity, bundle);
+            finish();
         } else {
             startActivity(mainMenuActivity);
+            finish();
         }
-    }*/
+    }
 
     @Override
     public void onClick(View view){
@@ -234,9 +232,12 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
             UserInfoEntry dataToSave=new UserInfoEntry(tvUsername.getText().toString(),mSelectedAvatar,mFilesTransferred,mVersion,mIsTransferInProgress);
             viewModel.saveData(dataToSave);
 
-            //go to main activity
-            //goMainActivity();
-            super.onBackPressed();
+            //check if it is setup or settings
+            if (mIsThisSettings){
+                super.onBackPressed();
+            }else{
+                goMainActivity();
+            }
         }
     }
 

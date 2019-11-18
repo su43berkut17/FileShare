@@ -42,6 +42,7 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
     private Button mButton;
 
     private int mType;
+    private int mContinuousPercentage;
 
     public FileTransferProgress(){
     }
@@ -137,7 +138,7 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
             //int totalFiles = Integer.parseInt(currentNumbers[1]);
             int percentage=0;
             if (currentNumbers.length>2) {
-                percentage = Integer.parseInt(currentNumbers[3]);
+                percentage = Integer.parseInt(currentNumbers[2]);
             }
             /*int percentage = currentFile * 100 / totalFiles;
 
@@ -159,12 +160,15 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
                 //final percentage
                 percentage = percentage + (percentageBytesInt * singlePercentage / 100);
             }*/
+            if (mContinuousPercentage !=percentage && percentage<=100 && percentage>=1){
+                mContinuousPercentage = percentage;
+            }
 
             //we update the data
             mTvFileName.setText(fileName);
             mTvOutOf.setText(finalTextNumbers);
-            mtvPercentage.setText(String.valueOf(percentage) + "%");
-            mTvProgress.setProgress(percentage);
+            mtvPercentage.setText(String.valueOf(mContinuousPercentage) + "%");
+            mTvProgress.setProgress(mContinuousPercentage);
         }catch (Exception e){
             Log.e(TAG,"There was an exception while updating UI "+e.getMessage());
             mTvFileName.setText("--");

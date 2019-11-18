@@ -188,6 +188,7 @@ public class ServiceFileShare extends Service implements
         //check if it is stopped by notification
         if (intent.getAction()==ACTION_STOP_SERVICE){
             //we deactivate the transfer status
+            Log.d(TAG,"trying to stop service by notification");
             switchTransfer(TransferProgressActivity.STATUS_TRANSFER_NOTIFICATION_CANCEL);
             stopSelf();
         }else {
@@ -333,9 +334,10 @@ public class ServiceFileShare extends Service implements
         PendingIntent pendingIntentApp=PendingIntent.getActivity(this,0,intentApp,PendingIntent.FLAG_UPDATE_CURRENT);
 
         //intent to stop the transfer
-        Intent intentStop=new Intent(getApplicationContext(),ServiceFileShare.class);
+        Intent intentStop=new Intent(this,ServiceFileShare.class);
         intentStop.setAction(ACTION_STOP_SERVICE);
-        PendingIntent pendingIntentStopService=PendingIntent.getActivity(this,0,intentStop,0);
+        //PendingIntent pendingIntentStopService=PendingIntent.getActivity(this,0,intentStop,0);
+        PendingIntent pendingIntentStopService=PendingIntent.getService(this,0,intentStop,PendingIntent.FLAG_UPDATE_CURRENT);
 
         //set the extra
         /*Bundle extras=new Bundle();
@@ -557,7 +559,7 @@ public class ServiceFileShare extends Service implements
             long percentageBytes = currentBytes * 100 / totalBytes;
             int percentageBytesInt = (int) percentageBytes;
 
-            if (percentageBytesInt > 100) {
+            if (percentageBytesInt >= 100) {
                 percentageBytesInt = 100;
             }
 
@@ -568,6 +570,13 @@ public class ServiceFileShare extends Service implements
             percentage = percentage + (percentageBytesInt * singlePercentage / 100);
 
             textInfoSendObject.setAdditionalInfo(currentFile+","+totalFiles+","+percentage);
+        }else{
+            //check if the total files is not 0
+            if (totalFiles==0){
+                textInfoSendObject.setAdditionalInfo(currentFile+","+totalFiles+","+0);
+            }else{
+                textInfoSendObject.setAdditionalInfo(currentFile+","+totalFiles+","+currentFile*100/totalFiles);
+            }
         }
 
         //we change the member variables of the progress
@@ -613,7 +622,7 @@ public class ServiceFileShare extends Service implements
     public void updateUIOnly(){
         //only update if service is doing a transfer
         if (isTransferActive) {
-            TextInfoSendObject textInfoSendObject = new TextInfoSendObject(0, mCurrentFileName, mCurrentFileName + "," + mTotalFiles);
+            TextInfoSendObject textInfoSendObject = new TextInfoSendObject(0, mCurrentFileName,  mCurrentFile + "," + mTotalFiles);
 
             //bundle
             Bundle bundle = new Bundle();

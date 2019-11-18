@@ -113,7 +113,7 @@ public class TransferProgressWidget extends AppWidgetProvider {
                 views.setTextViewText(R.id.tv_widget_total_number,String.valueOf(mTotalNumberOfTransfers));
 
                 //we set the pending intent to launch the main app when the widget is in its default mode
-                Intent intent = new Intent(context, WelcomeScreenActivity.class);
+                Intent intent = new Intent(context, MainMenuActivity.class);
                 PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
                 //we set the pending intent for the widget
