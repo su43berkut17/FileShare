@@ -71,6 +71,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
     //name of bundle objects coming from service
     public static final String ACTION_UPDATE_UI_DATA="updateUIData";
     private static final String SERVICE_STARTED_STATUS="serviceStatusInitial";
+    private static final String SEND_OR_RECEIVE_BUNDLE="sendOrReceiveBundle";
 
     private LinearLayout mProgressBarHide;
 
@@ -102,6 +103,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
     //type
     private int typeOfService;
+    private int mSendOrReceive;
     private int mHasServiceStarted;
     private boolean mIsServiceBound=false;
 
@@ -116,6 +118,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         //we heck if the service was started once
         if (savedInstanceState!=null){
             mHasServiceStarted = savedInstanceState.getInt(SERVICE_STARTED_STATUS);
+            mSendOrReceive=savedInstanceState.getInt(SEND_OR_RECEIVE_BUNDLE);
             Log.e(TAG,"we have saved the value which is "+mHasServiceStarted);
         }else{
             Log.e(TAG,"we havent saved an instance yet, service started set to 0");
@@ -149,6 +152,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
             try {
                 //get the data to see how do we start the service
                 typeOfService = extras.getInt(EXTRA_TYPE_TRANSFER);
+                mSendOrReceive=typeOfService;
                 Log.d(TAG, "The extras are: " + typeOfService);
             } catch (Exception e) {
                 Log.d(TAG, "There are no extras");
@@ -224,6 +228,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         super.onSaveInstanceState(outState);
         Log.e(TAG,"we save the value os has service started "+mHasServiceStarted);
         outState.putInt(SERVICE_STARTED_STATUS,mHasServiceStarted);
+        outState.putInt(SEND_OR_RECEIVE_BUNDLE,mSendOrReceive);
     }
 
     @Override
@@ -316,7 +321,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
             if (typeOfService==FILES_SENDING) {
                 fragmentFileTransferProgress.updateRV(tempNotSent);
-            }else{
+            }else if (typeOfService==FILES_RECEIVING){
                 fragmentFileTransferProgress.updateRV(fileListEntries);
             }
         }
