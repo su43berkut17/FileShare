@@ -9,6 +9,8 @@ import androidx.lifecycle.LiveData;
 import com.yumesoftworks.fileshare.ServiceFileShare;
 
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 
 public class UserInfoRepository {
@@ -30,12 +32,23 @@ public class UserInfoRepository {
     }
 
     //switching the transfer status
-    public void switchTransfer(int transferValue){
+    public void switchTransfer(final int transferValue){
         //we switch the transfer status to on or off
-        new updateDatabaseAsyncTask(database).execute(transferValue);
+        Executor myExecutor = Executors.newSingleThreadExecutor();
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                UserInfoEntry userInfoEntry=database.userInfoDao().loadUserWidget().get(0);
+                userInfoEntry.setIsTransferInProgress(transferValue);
+                database.userInfoDao().updateTask(userInfoEntry);
+                Log.d(TAG,"The transfer file status activation is: "+transferValue);
+            }
+        });
+
+        //new updateDatabaseAsyncTask(database).execute(transferValue);
     }
 
-    private static class updateDatabaseAsyncTask extends AsyncTask<Integer,Void,Void> {
+    /*private static class updateDatabaseAsyncTask extends AsyncTask<Integer,Void,Void> {
         private AppDatabase database;
 
         updateDatabaseAsyncTask(AppDatabase recDatabase){
@@ -51,15 +64,27 @@ public class UserInfoRepository {
 
             return null;
         }
-    }
+    }*/
 
     //adding transfer numbers
     public void addSuccessfulTransferCounter(){
-        new updateDatabaseCounterAsyncTask(database).execute();
+        Executor myExecutor = Executors.newSingleThreadExecutor();
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                UserInfoEntry userInfoEntry=database.userInfoDao().loadUserWidget().get(0);
+                int currentCount=userInfoEntry.getNumberFilesTransferred();
+                currentCount++;
+                userInfoEntry.setNumberFilesTransferred(currentCount);
+                database.userInfoDao().updateTask(userInfoEntry);
+                Log.d(TAG,"We add a number more to the total transfers: "+currentCount);
+            }
+        });
+        //new updateDatabaseCounterAsyncTask(database).execute();
     }
 
     //save transfer
-    private static class updateDatabaseCounterAsyncTask extends AsyncTask<Void,Void,Void> {
+    /*private static class updateDatabaseCounterAsyncTask extends AsyncTask<Void,Void,Void> {
         private AppDatabase database;
 
         updateDatabaseCounterAsyncTask(AppDatabase recDatabase){
@@ -77,5 +102,5 @@ public class UserInfoRepository {
 
             return null;
         }
-    }
+    }*/
 }

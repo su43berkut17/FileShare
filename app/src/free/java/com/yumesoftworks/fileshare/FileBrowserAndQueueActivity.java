@@ -32,6 +32,7 @@ import com.yumesoftworks.fileshare.utils.ChangeShownPath;
 import com.yumesoftworks.fileshare.utils.MergeFileListAndDatabase;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 //this activity will change depending if it is a tablet view
@@ -71,6 +72,10 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     //for checkbox interaction
     private boolean mAllowLivedataUpdate = true;
 
+    //history
+    private ArrayList<String> mFileHistory=new ArrayList<>();
+    private static final String HISTORY_TAG="HistoryTag";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,10 +95,13 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         if(savedInstanceState!=null){
             mCurrentFragment=savedInstanceState.getInt(CURRENT_FRAGMENT_TAG);
             mPath=savedInstanceState.getString(CURRENT_PATH_TAG);
+            mFileHistory=savedInstanceState.getStringArrayList(HISTORY_TAG);
             Log.d(TAG,"Restoring the path: "+mPath);
         }else{
             mCurrentFragment=FILE_FRAGMENT;
-            mPath=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "").getAbsolutePath();
+            //mPath=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "").getAbsolutePath();
+            mPath=new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "").getAbsolutePath();
+            mFileHistory.add(mPath);
         }
 
         //we check if it is 1 or 2 panels
@@ -119,6 +127,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         super.onSaveInstanceState(outState);
         outState.putInt(CURRENT_FRAGMENT_TAG,mCurrentFragment);
         outState.putString(CURRENT_PATH_TAG,mPath);
+        outState.putStringArrayList(HISTORY_TAG,mFileHistory);
         Log.d(TAG,"Were saving the path: "+mPath);
     }
 
@@ -333,6 +342,14 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             //fileViewerViewModel.refreshData(fileListEntry.getPath());
             //fileViewerViewModel.updateFileListPath(fileListEntry.getPath());
             mPath=fileListEntry.getPath();
+
+            //check if it is an upper level for history
+            if (mFileHistory.get(mFileHistory.size()-1).contains(mPath)){
+                mFileHistory.remove(mFileHistory.size()-1);
+            }else{
+                mFileHistory.add(mPath);
+            }
+
             mAllowLivedataUpdate=true;
             mergeFileAndData(fileViewerViewModel.getData().getValue(),FILETREE_UPDATE);
         }else{
@@ -390,7 +407,9 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     @Override
     public void fileFragmentSpinner(StorageListEntry entry) {
         //update path from spinner
+        mFileHistory.clear();
         mPath=entry.getPath();
+        mFileHistory.add(mPath);
         mAllowLivedataUpdate=true;
         mergeFileAndData(fileViewerViewModel.getData().getValue(),FILETREE_UPDATE);
     }
@@ -418,10 +437,6 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         //we go to the send activity
         Intent intent=new Intent(this, com.yumesoftworks.fileshare.SenderPickDestinationActivity.class);
         startActivity(intent);
-
-        //this is a test to open directly the file progress
-        //Intent intent=new Intent(this,TransferProgressActivity.class);
-        //startActivity(intent);
     }
 
     //override the back button normal behaviour
@@ -439,33 +454,43 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        //if we are in 1 or 2 panel mode
-        if (mTwoPanel){
-            //we go back
-            super.onBackPressed();
-        }else {
-            //we check the current fragment
-            if (mCurrentFragment == QUEUE_FRAGMENT) {
-                Log.d(TAG,"current is queue fragment so we reload the file fragment");
-
-                //we reload the  fragment
-                fragmentManager.beginTransaction()
-                        .setCustomAnimations(R.anim.anim_enter_left,R.anim.anim_exit_right)
-                        .replace(R.id.frag_afv_main, fragmentFileViewer)
-                        .commit();
-
-                mAllowLivedataUpdate=true;
-
-                //we update the data and path
-                fileFragmentRequestUpdate();
-
-                //we set the current fragment
-                mCurrentFragment=FILE_FRAGMENT;
-                changeActionBarName("FileShare - Send Files");
-            } else {
-                //we are on the 1st fragment so we can go back
+        //check if there is history
+        Log.d(TAG,"The file history size is: "+mFileHistory.size());
+        if (mFileHistory.size()<=1) {
+            //if we are in 1 or 2 panel mode
+            if (mTwoPanel) {
+                //we go back
                 super.onBackPressed();
+            } else {
+                //we check the current fragment
+                if (mCurrentFragment == QUEUE_FRAGMENT) {
+                    Log.d(TAG, "current is queue fragment so we reload the file fragment");
+
+                    //we reload the  fragment
+                    fragmentManager.beginTransaction()
+                            .setCustomAnimations(R.anim.anim_enter_left, R.anim.anim_exit_right)
+                            .replace(R.id.frag_afv_main, fragmentFileViewer)
+                            .commit();
+
+                    mAllowLivedataUpdate = true;
+
+                    //we update the data and path
+                    fileFragmentRequestUpdate();
+
+                    //we set the current fragment
+                    mCurrentFragment = FILE_FRAGMENT;
+                    changeActionBarName("FileShare - Send Files");
+                } else {
+                    //we are on the 1st fragment so we can go back
+                    super.onBackPressed();
+                }
             }
+        }else{
+            //we browse to the upper level
+            mFileHistory.remove(mFileHistory.size()-1);
+            mPath=mFileHistory.get(mFileHistory.size()-1);
+            mAllowLivedataUpdate=true;
+            mergeFileAndData(fileViewerViewModel.getData().getValue(),FILETREE_UPDATE);
         }
     }
 

@@ -7,6 +7,8 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class FileListRepository {
 
@@ -35,11 +37,19 @@ public class FileListRepository {
     }
 
     //add file to the list
-    public void saveFile(FileListEntry fileListEntry){
-        new saveDatabaseAsyncTask(database).execute(fileListEntry);
+    public void saveFile(final FileListEntry fileListEntry){
+        Executor myExecutor = Executors.newSingleThreadExecutor();
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                database.fileListDao().insertFile(fileListEntry);
+            }
+        });
+
+        //new saveDatabaseAsyncTask(database).execute(fileListEntry);
     }
 
-    private static class saveDatabaseAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
+    /*private static class saveDatabaseAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
         private AppDatabase database;
 
         saveDatabaseAsyncTask(AppDatabase recDatabase){
@@ -52,14 +62,22 @@ public class FileListRepository {
             database.fileListDao().insertFile(params[0]);
             return null;
         }
-    }
+    }*/
 
     //update file
-    public void updateFileSetTransferred(FileListEntry fileListEntry){
-        new updateDatabaseSentAsyncTask(database).execute(fileListEntry);
+    public void updateFileSetTransferred(final FileListEntry fileListEntry){
+        Executor myExecutor = Executors.newSingleThreadExecutor();
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                fileListEntry.setIsTransferred(1);
+                database.fileListDao().updateFile(fileListEntry);
+            }
+        });
+        //new updateDatabaseSentAsyncTask(database).execute(fileListEntry);
     }
 
-    private static class updateDatabaseSentAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
+    /*private static class updateDatabaseSentAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
         private AppDatabase database;
 
         updateDatabaseSentAsyncTask(AppDatabase recDatabase){
@@ -73,14 +91,21 @@ public class FileListRepository {
             database.fileListDao().updateFile(updateEntry);
             return null;
         }
-    }
+    }*/
 
     //delete file
-    public void deleteFile(FileListEntry fileListEntry){
-        new deleteDatabaseAsyncTask(database).execute(fileListEntry);
+    public void deleteFile(final FileListEntry fileListEntry){
+        Executor myExecutor = Executors.newSingleThreadExecutor();
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                database.fileListDao().deleteFile(fileListEntry);
+            }
+        });
+        //new deleteDatabaseAsyncTask(database).execute(fileListEntry);
     }
 
-    private static class deleteDatabaseAsyncTask extends AsyncTask<FileListEntry, Void, Void>{
+    /*private static class deleteDatabaseAsyncTask extends AsyncTask<FileListEntry, Void, Void>{
         private AppDatabase database;
 
         deleteDatabaseAsyncTask(AppDatabase recDatabase){
@@ -93,14 +118,24 @@ public class FileListRepository {
             database.fileListDao().deleteFile(fileListEntries[0]);
             return null;
         }
-    }
+    }*/
 
     //delete with checkbox
-    public void deleteFileCheckbox(FileListEntry fileListEntry){
-        new deletePathAsyncTask(database).execute(fileListEntry);
+    public void deleteFileCheckbox(final FileListEntry fileListEntry){
+        Executor myExecutor = Executors.newSingleThreadExecutor();
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                //we delete the file checkbox
+                Log.d(TAG,"Deleting "+fileListEntry.getFileName()+" is selected "+fileListEntry.getIsSelected());
+                int retInt=database.fileListDao().deleteFileNotSameId(fileListEntry.getPath());
+                Log.d(TAG,"retInt is "+retInt);
+            }
+        });
+        //new deletePathAsyncTask(database).execute(fileListEntry);
     }
 
-    private static class deletePathAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
+    /*private static class deletePathAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
         private AppDatabase database;
 
         deletePathAsyncTask(AppDatabase recDatabase){database = recDatabase;}
@@ -113,14 +148,23 @@ public class FileListRepository {
             Log.d(TAG,"retInt is "+retInt);
             return null;
         }
-    }
+    }*/
 
     //clear the file list
     public void deleteTable(){
-        new deleteTableDatabaseAsyncTask(database).execute();
+        Executor myExecutor = Executors.newSingleThreadExecutor();
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                //we delete the file checkbox
+                Log.d(TAG,"Deleting the table");
+                database.fileListDao().clearFileList();
+            }
+        });
+        //new deleteTableDatabaseAsyncTask(database).execute();
     }
 
-    private static class deleteTableDatabaseAsyncTask extends AsyncTask<Void, Void, Void>{
+    /*private static class deleteTableDatabaseAsyncTask extends AsyncTask<Void, Void, Void>{
         private AppDatabase database;
 
         deleteTableDatabaseAsyncTask(AppDatabase recDatabase){database = recDatabase;}
@@ -131,5 +175,5 @@ public class FileListRepository {
             database.fileListDao().clearFileList();
             return null;
         }
-    }
+    }*/
 }

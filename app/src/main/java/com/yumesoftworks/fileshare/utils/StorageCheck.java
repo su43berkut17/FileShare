@@ -12,9 +12,11 @@ public class StorageCheck {
         File fullStorage=new File("/storage");
 
         //Internal path
-        File internalStorage=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "");
+        /*File internalStorage=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "");
         //go up 1 level to get the root
-        internalStorage=new File(internalStorage.getParent());
+        internalStorage=new File(internalStorage.getParent());*/
+
+        File internalStorage=new File(Environment.getExternalStorageDirectory().getAbsolutePath());
 
         //list inside fullStorage
         File[] listStorage=fullStorage.listFiles();
