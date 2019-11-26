@@ -454,44 +454,44 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        //check if there is history
-        Log.d(TAG,"The file history size is: "+mFileHistory.size());
-        if (mFileHistory.size()<=1) {
-            //if we are in 1 or 2 panel mode
-            if (mTwoPanel) {
-                //we go back
-                super.onBackPressed();
+        //if we are in 1 or 2 panel mode
+        if (mTwoPanel) {
+            //we go back
+            super.onBackPressed();
+        } else {
+            //we check the current fragment
+            if (mCurrentFragment == QUEUE_FRAGMENT) {
+                Log.d(TAG, "current is queue fragment so we reload the file fragment");
+
+                //we reload the  fragment
+                fragmentManager.beginTransaction()
+                        .setCustomAnimations(R.anim.anim_enter_left, R.anim.anim_exit_right)
+                        .replace(R.id.frag_afv_main, fragmentFileViewer)
+                        .commit();
+
+                mAllowLivedataUpdate = true;
+
+                //we update the data and path
+                fileFragmentRequestUpdate();
+
+                //we set the current fragment
+                mCurrentFragment = FILE_FRAGMENT;
+                changeActionBarName("FileShare - Send Files");
             } else {
-                //we check the current fragment
-                if (mCurrentFragment == QUEUE_FRAGMENT) {
-                    Log.d(TAG, "current is queue fragment so we reload the file fragment");
-
-                    //we reload the  fragment
-                    fragmentManager.beginTransaction()
-                            .setCustomAnimations(R.anim.anim_enter_left, R.anim.anim_exit_right)
-                            .replace(R.id.frag_afv_main, fragmentFileViewer)
-                            .commit();
-
-                    mAllowLivedataUpdate = true;
-
-                    //we update the data and path
-                    fileFragmentRequestUpdate();
-
-                    //we set the current fragment
-                    mCurrentFragment = FILE_FRAGMENT;
-                    changeActionBarName("FileShare - Send Files");
-                } else {
-                    //we are on the 1st fragment so we can go back
+                //we are on the 1st fragment so we can go back
+                Log.d(TAG,"The file history size is: "+mFileHistory.size());
+                if (mFileHistory.size()<=1) {
                     super.onBackPressed();
+                }else {
+                    //we browse to the upper level
+                    mFileHistory.remove(mFileHistory.size()-1);
+                    mPath=mFileHistory.get(mFileHistory.size()-1);
+                    mAllowLivedataUpdate=true;
+                    mergeFileAndData(fileViewerViewModel.getData().getValue(),FILETREE_UPDATE);
                 }
             }
-        }else{
-            //we browse to the upper level
-            mFileHistory.remove(mFileHistory.size()-1);
-            mPath=mFileHistory.get(mFileHistory.size()-1);
-            mAllowLivedataUpdate=true;
-            mergeFileAndData(fileViewerViewModel.getData().getValue(),FILETREE_UPDATE);
         }
+
     }
 
     //action bar
