@@ -36,7 +36,7 @@ public class JsonAvatarParser {
         context=contextSent;
         loadData();
     }
-
+    //TODO: migrate to executors
     public void loadData(){
         new AsyncTask<Void,Void, AvatarAndVersion>(){
 

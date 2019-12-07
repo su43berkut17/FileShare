@@ -10,6 +10,8 @@ import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class FileTransferViewModel extends AndroidViewModel {
     private static LiveData<List<FileListEntry>> data;
@@ -21,7 +23,6 @@ public class FileTransferViewModel extends AndroidViewModel {
 
         //we load the database
         database=AppDatabase.getInstance(this.getApplication());
-
         data=database.fileListDao().loadFileList();
     }
 
@@ -30,11 +31,20 @@ public class FileTransferViewModel extends AndroidViewModel {
     }
 
     //update the data, once it has been copied
-    public void updateFile(FileListEntry fileListEntry){
-        new updateDatabaseAsyncTask(database).execute(fileListEntry);
+    public void updateFile(final FileListEntry fileListEntry){
+        Executor myExecutor = Executors.newSingleThreadExecutor();
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                database.fileListDao().updateFile(fileListEntry);
+            }
+        });
+
+
+        //new updateDatabaseAsyncTask(database).execute(fileListEntry);
     }
 
-    private static class updateDatabaseAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
+    /*private static class updateDatabaseAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
         private AppDatabase database;
 
         updateDatabaseAsyncTask(AppDatabase recDatabase){
@@ -47,5 +57,5 @@ public class FileTransferViewModel extends AndroidViewModel {
             database.fileListDao().updateFile(params[0]);
             return null;
         }
-    }
+    }*/
 }

@@ -10,6 +10,8 @@ import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class WelcomeScreenViewModel extends AndroidViewModel {
     private static final String TAG=WelcomeScreenViewModel.class.getSimpleName();
@@ -28,11 +30,21 @@ public class WelcomeScreenViewModel extends AndroidViewModel {
         return userInfo;
     }
 
-    public void saveData(UserInfoEntry userInfoEntry){
-        new saveDatabaseAsyncTask(database).execute(userInfoEntry);
+    public void saveData(final UserInfoEntry userInfoEntry){
+        Executor myExecutor = Executors.newSingleThreadExecutor();
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                database.userInfoDao().emptyTable();
+                database.userInfoDao().insertTask(userInfoEntry);
+            }
+        });
+
+
+        //new saveDatabaseAsyncTask(database).execute(userInfoEntry);
     }
 
-    private static class saveDatabaseAsyncTask extends AsyncTask<UserInfoEntry,Void,Void>{
+    /*private static class saveDatabaseAsyncTask extends AsyncTask<UserInfoEntry,Void,Void>{
         private AppDatabase database;
 
         saveDatabaseAsyncTask(AppDatabase recDatabase){
@@ -45,5 +57,5 @@ public class WelcomeScreenViewModel extends AndroidViewModel {
             database.userInfoDao().insertTask(params[0]);
             return null;
         }
-    }
+    }*/
 }

@@ -19,7 +19,6 @@ import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 
 import android.os.IBinder;
-import android.os.PersistableBundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -31,7 +30,6 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.FileListRepository;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
-import com.yumesoftworks.fileshare.data.UserInfoRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,7 +100,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
     private AdView mAdView;
 
     //type
-    private int typeOfService;
+    private int mTypeServiceOrRelaunch;
     private int mSendOrReceive;
     private int mHasServiceStarted;
     private boolean mIsServiceBound=false;
@@ -151,21 +149,21 @@ public class TransferProgressActivity extends AppCompatActivity implements
             //get the bundle with the extras to start the service
             try {
                 //get the data to see how do we start the service
-                typeOfService = extras.getInt(EXTRA_TYPE_TRANSFER);
-                mSendOrReceive=typeOfService;
-                Log.d(TAG, "The extras are: " + typeOfService);
+                mTypeServiceOrRelaunch = extras.getInt(EXTRA_TYPE_TRANSFER);
+                mSendOrReceive= mTypeServiceOrRelaunch;
+                Log.d(TAG, "The extras are: " + mTypeServiceOrRelaunch);
             } catch (Exception e) {
                 Log.d(TAG, "There are no extras");
-                typeOfService = RELAUNCH_APP;
+                mTypeServiceOrRelaunch = RELAUNCH_APP;
             }
 
-            if (typeOfService != RELAUNCH_APP) {
+            if (mTypeServiceOrRelaunch != RELAUNCH_APP) {
                 //first initialization
                 //choose data in the intent
-                if (typeOfService == FILES_SENDING) {
+                if (mTypeServiceOrRelaunch == FILES_SENDING) {
                     //we start the services as sending stuff
                     extras.putInt(ACTION_SERVICE, FILES_SENDING);
-                } else if (typeOfService == FILES_RECEIVING) {
+                } else if (mTypeServiceOrRelaunch == FILES_RECEIVING) {
                     //we start the service as receiving stuff
                     extras.putInt(ACTION_SERVICE, FILES_RECEIVING);
                 }
@@ -285,7 +283,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         fragmentFileTransferProgress=new FileTransferProgress();
 
         Bundle bundleFrag=new Bundle();
-        bundleFrag.putInt(EXTRA_TYPE_TRANSFER,typeOfService);
+        bundleFrag.putInt(EXTRA_TYPE_TRANSFER,mSendOrReceive);
         fragmentFileTransferProgress.setArguments(bundleFrag);
 
         //transaction
@@ -319,9 +317,9 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 }
             }
 
-            if (typeOfService==FILES_SENDING) {
+            if (mTypeServiceOrRelaunch ==FILES_SENDING) {
                 fragmentFileTransferProgress.updateRV(tempNotSent);
-            }else if (typeOfService==FILES_RECEIVING){
+            }else if (mTypeServiceOrRelaunch ==FILES_RECEIVING){
                 fragmentFileTransferProgress.updateRV(fileListEntries);
             }
         }

@@ -163,7 +163,7 @@ public class ServiceFileShare extends Service implements
 
         Log.d(TAG,"Service destroyed successfully");
     }
-
+    //TODO: migrate to livedata or executor
     private class loadDatabaseAsyncTask extends AsyncTask<Void,Void,Void> {
 
         @Override
