@@ -3,7 +3,8 @@ package com.yumesoftworks.fileshare.utils;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import com.yumesoftworks.fileshare.data.AvatarAndVersion;
@@ -27,6 +28,10 @@ public class JsonAvatarParser {
     //interface
     private OnLoadedAvatars mOnLoadedAvatars;
 
+    //threading
+    private Handler parserHandler;
+    private Thread parseThread;
+
     public JsonAvatarParser(Context contextSent){
         //initialize the interface
         if (contextSent instanceof WelcomeScreenActivity) {
@@ -34,14 +39,15 @@ public class JsonAvatarParser {
         }
 
         context=contextSent;
+
         loadData();
     }
-    //TODO: migrate to executors
-    public void loadData(){
-        new AsyncTask<Void,Void, AvatarAndVersion>(){
 
+    public void loadData(){
+        //create handler and thread
+        parseThread=new Thread(new Runnable() {
             @Override
-            protected AvatarAndVersion doInBackground(Void... voids) {
+            public void run() {
                 //we check if there's internet
                 ConnectivityManager cm =
                         (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -50,6 +56,10 @@ public class JsonAvatarParser {
                 boolean isConnected = activeNetwork != null &&
                         activeNetwork.isConnectedOrConnecting();
 
+                //message
+                Message message=new Message();
+                message.what=0;
+
                 if (isConnected){
                     //we load
                     try {
@@ -57,39 +67,54 @@ public class JsonAvatarParser {
                         Log.d(TAG,"before parsing "+AvatarListString);
 
                         if (AvatarListString!=null){
-                            return parse(AvatarListString);
+                            message.obj=parse(AvatarListString);
+                            parserHandler.sendMessage(message);
+                            //return parse(AvatarListString);
                         }else{
-                            return null;
+                            message.obj=null;
+                            parserHandler.sendMessage(message);
                         }
                     }catch (IOException e){
                         Log.d(TAG,"read error on the parser, we return null");
                         e.printStackTrace();
-                        return null;
+                        message.obj=null;
+                        parserHandler.sendMessage(message);
                     }
                 }else{
                     Log.d(TAG,"it is not connected");
-                    return null;
+                    message.obj=null;
+                    parserHandler.sendMessage(message);
                 }
             }
+        });
 
+        //handler
+        parserHandler=new Handler(){
             @Override
-            protected void onPostExecute(AvatarAndVersion recAvatarAndVersion) {
-                super.onPostExecute(recAvatarAndVersion);
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
 
-                if (recAvatarAndVersion!=null) {
-                    Log.d(TAG,"The async task returned "+recAvatarAndVersion.toString());
-                    //we check is it is the instance of the activity we are looking for or if it is a test
-                    if (mOnLoadedAvatars != null) {
-                        //return the results via the interface
-                        mOnLoadedAvatars.LoadedRemoteAvatars(recAvatarAndVersion);
-                    } else {
-                        avatarAndVersion = recAvatarAndVersion;
+                if (msg.obj!=null) {
+                    AvatarAndVersion recAvatarAndVersion = (AvatarAndVersion) msg.obj;
+
+                    if (msg.what == 0) {
+                        Log.d(TAG, "The thread returned " + recAvatarAndVersion.toString());
+                        //we check is it is the instance of the activity we are looking for or if it is a test
+                        if (mOnLoadedAvatars != null) {
+                            //return the results via the interface
+                            mOnLoadedAvatars.LoadedRemoteAvatars(recAvatarAndVersion);
+                        } else {
+                            avatarAndVersion = recAvatarAndVersion;
+                        }
                     }
                 }else{
-                    Log.d(TAG,"The async task returned null, we cant load the remote avatars, ignore and used the default ones");
+                    mOnLoadedAvatars.LoadedRemoteAvatars(null);
+                    Log.d(TAG, "The async task returned null, we cant load the remote avatars, ignore and used the default ones");
                 }
             }
-        }.execute();
+        };
+
+        parseThread.start();
     }
 
     private AvatarAndVersion parse(String data){

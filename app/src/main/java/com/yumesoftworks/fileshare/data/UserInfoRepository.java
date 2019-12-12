@@ -1,12 +1,9 @@
 package com.yumesoftworks.fileshare.data;
 
 import android.app.Application;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
-
-import com.yumesoftworks.fileshare.ServiceFileShare;
 
 import java.util.List;
 import java.util.concurrent.Executor;

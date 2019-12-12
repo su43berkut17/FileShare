@@ -4,7 +4,6 @@ import android.app.Application;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
 

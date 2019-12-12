@@ -23,6 +23,7 @@ public class JsonAvatarParserTest{
 
     @Test
     public void test_connection(){
+        mContext.getMainLooper().prepare();
         JsonAvatarParser mAvatarParser=new JsonAvatarParser(mContext);
 
         //we load the parser

@@ -3,7 +3,6 @@ package com.yumesoftworks.fileshare;
 import android.app.Application;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import android.os.AsyncTask;
 import androidx.annotation.NonNull;
 
 import com.yumesoftworks.fileshare.data.AppDatabase;

@@ -8,13 +8,13 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import android.util.Log;
 
 import com.yumesoftworks.fileshare.data.FileListEntry;
@@ -52,6 +52,9 @@ public class ServiceFileShare extends Service implements
     private FileListRepository repositoryFile;
     private UserInfoRepository repositoryUser;
     private int mCurrentStatus;
+
+    //threading
+    private Thread readDataThread;
 
     //loaded entry
     private List<FileListEntry> mFileListEntry;
@@ -107,8 +110,12 @@ public class ServiceFileShare extends Service implements
         repositoryFile=new FileListRepository(getApplication());
         repositoryUser=new UserInfoRepository(getApplication());
 
-        new loadDatabaseAsyncTask().execute();
+        //create a load database
+        loadDatabase();
+
+        //new loadDatabaseAsyncTask().execute();
     }
+
 
     @Override
     public void onDestroy() {
@@ -163,19 +170,23 @@ public class ServiceFileShare extends Service implements
 
         Log.d(TAG,"Service destroyed successfully");
     }
-    //TODO: migrate to livedata or executor
-    private class loadDatabaseAsyncTask extends AsyncTask<Void,Void,Void> {
 
-        @Override
-        protected Void doInBackground(final Void... params) {
-            mFileListEntry=repositoryFile.getFilesDirect();
-            Log.d(TAG,"Database loaded, file list entry is "+mFileListEntry);
+    //Load database
+    private void loadDatabase(){
+        //thread
+        readDataThread=new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mFileListEntry=repositoryFile.getFilesDirect();
+                Log.d(TAG,"Database loaded, file list entry is "+mFileListEntry);
 
-            mStepsBeforeSelfDestruction++;
+                mStepsBeforeSelfDestruction++;
 
-            initializeSockets();
-            return null;
-        }
+                initializeSockets();
+            }
+        });
+
+        readDataThread.start();
     }
 
     //start the transfer
