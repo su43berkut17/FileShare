@@ -45,6 +45,19 @@ public class UserInfoRepository {
         //new updateDatabaseAsyncTask(database).execute(transferValue);
     }
 
+    public void switchServiceType(final int serviceTypeValue){
+        Executor myExecutor=Executors.newSingleThreadExecutor();
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                UserInfoEntry userInfoEntry=database.userInfoDao().loadUserWidget().get(0);
+                userInfoEntry.setTransferTypeSendOrReceive(serviceTypeValue);
+                database.userInfoDao().updateTask(userInfoEntry);
+                Log.d(TAG,"The transfer type is: "+serviceTypeValue);
+            }
+        });
+    }
+
     /*private static class updateDatabaseAsyncTask extends AsyncTask<Integer,Void,Void> {
         private AppDatabase database;
 

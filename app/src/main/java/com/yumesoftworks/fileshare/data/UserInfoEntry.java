@@ -19,23 +19,26 @@ public class UserInfoEntry implements Serializable {
     private int numberFilesTransferred;
     private int assetVersion;
     private int isTransferInProgress;
+    private int transferTypeSendOrReceive;
 
     @Ignore
-    public UserInfoEntry(String username, int pickedAvatar, int numberFilesTransferred, int assetVersion, int isTransferInProgress){
+    public UserInfoEntry(String username, int pickedAvatar, int numberFilesTransferred, int assetVersion, int isTransferInProgress, int transferTypeSendOrReceive){
         this.username=username;
         this.pickedAvatar=pickedAvatar;
         this.numberFilesTransferred=numberFilesTransferred;
         this.assetVersion=assetVersion;
         this.isTransferInProgress=isTransferInProgress;
+        this.transferTypeSendOrReceive=transferTypeSendOrReceive;
     }
 
-    public UserInfoEntry(int id, String username, int pickedAvatar, int numberFilesTransferred, int assetVersion, int isTransferInProgress){
+    public UserInfoEntry(int id, String username, int pickedAvatar, int numberFilesTransferred, int assetVersion, int isTransferInProgress, int transferTypeSendOrReceive){
         this.id=id;
         this.username=username;
         this.pickedAvatar=pickedAvatar;
         this.numberFilesTransferred=numberFilesTransferred;
         this.assetVersion=assetVersion;
         this.isTransferInProgress=isTransferInProgress;
+        this.transferTypeSendOrReceive=transferTypeSendOrReceive;
     }
 
     //getters and setters
@@ -79,5 +82,12 @@ public class UserInfoEntry implements Serializable {
     }
     public void setIsTransferInProgress(int isTransferInProgress) {
         this.isTransferInProgress = isTransferInProgress;
+    }
+
+    public int getTransferTypeSendOrReceive() {
+        return transferTypeSendOrReceive;
+    }
+    public void setTransferTypeSendOrReceive(int transferTypeSendOrReceive) {
+        this.transferTypeSendOrReceive = transferTypeSendOrReceive;
     }
 }

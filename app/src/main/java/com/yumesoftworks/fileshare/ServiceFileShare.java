@@ -128,6 +128,7 @@ public class ServiceFileShare extends Service implements
             //deactivate the switch transfer
             if (isServiceStarted && !isTransferActive) {
                 repositoryUser.switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
+                repositoryUser.switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
             }
         }
 
@@ -201,6 +202,7 @@ public class ServiceFileShare extends Service implements
             //we deactivate the transfer status
             Log.d(TAG,"trying to stop service by notification");
             switchTransfer(TransferProgressActivity.STATUS_TRANSFER_NOTIFICATION_CANCEL);
+            switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
             stopSelf();
         }else {
             //we check if the service has been started before or a transfer is active
@@ -289,6 +291,8 @@ public class ServiceFileShare extends Service implements
             //we check if the intent is to send or to receive
             if (action== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_SENDING){
                 //we are sending files
+                //change to send or receive
+                switchServiceType(TransferProgressActivity.SERVICE_TYPE_SENDING);
                 //mFileListEntry=mFileListEntryLive;
                 Log.d(TAG,"the value of the files is "+mFileListEntry.size());
                 mTotalFiles=mFileListEntry.size();
@@ -308,6 +312,8 @@ public class ServiceFileShare extends Service implements
 
             }else if (action== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_RECEIVING){
                 //we are receiving files
+                //change to send or receive
+                switchServiceType(TransferProgressActivity.SERVICE_TYPE_RECEIVING);
                 try{
                     //create the server socket
                     mPort=receivedBundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.LOCAL_PORT);
@@ -377,6 +383,9 @@ public class ServiceFileShare extends Service implements
         mCurrentStatus=activateTransfer;
         repositoryUser.switchTransfer(activateTransfer);
     }
+    private void switchServiceType(int serviceType){
+        repositoryUser.switchServiceType(serviceType);
+    }
 
     //successful sent
     private void addSuccessfulTransferCounter(){
@@ -395,6 +404,7 @@ public class ServiceFileShare extends Service implements
 
         //we deactivate the transfer status
         switchTransfer(TransferProgressActivity.STATUS_TRANSFER_SOCKET_ERROR);
+        switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
         isTransferActive=false;
 
         stopSelf();
@@ -412,6 +422,7 @@ public class ServiceFileShare extends Service implements
 
         //we deactivate the transfer status
         switchTransfer(TransferProgressActivity.STATUS_TRANSFER_OUT_OF_SPACE_ERROR);
+        switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
         isTransferActive=false;
 
         stopSelf();
@@ -437,6 +448,7 @@ public class ServiceFileShare extends Service implements
 
         //we deactivate the transfer status
         switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
+        switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
         isTransferActive=false;
 
         //set the widget on its initial state
@@ -511,6 +523,7 @@ public class ServiceFileShare extends Service implements
 
         //we set the database as not transferring so if they restart the app goes to the main menu
         switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
+        switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
         isTransferActive=false;
 
         //set the widget on its initial state

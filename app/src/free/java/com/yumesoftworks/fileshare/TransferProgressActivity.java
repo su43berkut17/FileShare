@@ -57,11 +57,16 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
     //type of transfer statuses
     public static final int STATUS_TRANSFER_INACTIVE=3000;
-    public static final int STATUS_TRANSFER_ACTIVE =3001;
-    public static final int STATUS_TRANSFER_FINISHED =3002;
-    public static final int STATUS_TRANSFER_SOCKET_ERROR =3003;
-    public static final int STATUS_TRANSFER_OUT_OF_SPACE_ERROR =3004;
-    public static final int STATUS_TRANSFER_NOTIFICATION_CANCEL =3005;
+    public static final int STATUS_TRANSFER_ACTIVE =3101;
+    public static final int STATUS_TRANSFER_FINISHED =3102;
+    public static final int STATUS_TRANSFER_SOCKET_ERROR =3201;
+    public static final int STATUS_TRANSFER_OUT_OF_SPACE_ERROR =3202;
+    public static final int STATUS_TRANSFER_NOTIFICATION_CANCEL =3301;
+
+    //Service types
+    public static final int SERVICE_TYPE_INACTIVE =4000;
+    public static final int SERVICE_TYPE_SENDING =4001;
+    public static final int SERVICE_TYPE_RECEIVING =4002;
 
     //broadcast actions
     public static final String ACTION_UPDATE_UI="updateUI";
@@ -113,7 +118,9 @@ public class TransferProgressActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer_progress);
 
-        //we heck if the service was started once
+        thisActivity=this;
+
+        /*//we heck if the service was started once
         if (savedInstanceState!=null){
             mHasServiceStarted = savedInstanceState.getInt(SERVICE_STARTED_STATUS);
             mSendOrReceive=savedInstanceState.getInt(SEND_OR_RECEIVE_BUNDLE);
@@ -125,7 +132,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
         Log.d(TAG,"has the service started for the 1st time: "+mHasServiceStarted);
 
-        thisActivity=this;
+        thisActivity=this;*/
 
         //analytics
         mFireAnalytics=FirebaseAnalytics.getInstance(this);
@@ -141,7 +148,16 @@ public class TransferProgressActivity extends AppCompatActivity implements
         //we get the instance of the indeterminate progress bar
         mProgressBarHide=findViewById(R.id.pb_atp_waitingForConnection);
 
-        if(mHasServiceStarted==0) {
+        //get the extras
+        try {
+            Intent intent = getIntent();
+            Bundle extras = intent.getExtras();
+            mSendOrReceive=extras.getInt(EXTRA_TYPE_TRANSFER);
+        }catch (Exception e){
+            Log.e(TAG,"No extras");
+        }
+
+        /*if(mHasServiceStarted==0) {
             //we check the intent with the information to start the service
             Intent intent = getIntent();
             Bundle extras = intent.getExtras();
@@ -187,7 +203,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     mHasServiceStarted = 0;
                 }
             }
-        }
+        }*/
 
         //initialize fragments
         initializeFragments();
@@ -325,6 +341,30 @@ public class TransferProgressActivity extends AppCompatActivity implements
         }
     };
 
+    //Start service only when the status is inactive, that was we prevent the service from being
+    //started if it is not needed
+    private void startService(){
+        Bundle extras=getIntent().getExtras();
+        //start the service
+        //service intent
+        Intent serviceIntent = new Intent(this, ServiceFileShare.class);
+        serviceIntent.putExtras(extras);
+        mHasServiceStarted=1;
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Log.d(TAG, "starting on create the service 1st");
+                startForegroundService(serviceIntent);
+            } else {
+                Log.d(TAG, "starting on create the service 1st");
+                startService(serviceIntent);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Couldnt start service " + e.getMessage());
+            //we set the service start as complete
+            mHasServiceStarted = 0;
+        }
+    }
+
     //user info observer
     final Observer<List<UserInfoEntry>> transferProgressActivityViewModelObserver=new Observer<List<UserInfoEntry>>() {
         @Override
@@ -332,6 +372,11 @@ public class TransferProgressActivity extends AppCompatActivity implements
             //we check if the transfer has been completed before
             int isTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
             Log.d(TAG,"It has changed, the value is "+isTransferInProgress);
+
+            //check if the service is running
+            if (userInfoEntries.get(0).getTransferTypeSendOrReceive()==TransferProgressActivity.SERVICE_TYPE_INACTIVE){
+                startService();
+            }
 
             //if the app is relaunched and the transfer has finished and hasnt captured the broadcast events
             switch (isTransferInProgress){

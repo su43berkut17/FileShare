@@ -44,8 +44,9 @@ public class FileListDatabaseTest {
         int numberFilesTransferred=120;
         int assetVersion=1;
         int isTransferInProgress=0;
+        int transferTypeSendOrReceive=0;
 
-        UserInfoEntry userInfoEntry=new UserInfoEntry(id, username, avatar, numberFilesTransferred, assetVersion, isTransferInProgress);
+        UserInfoEntry userInfoEntry=new UserInfoEntry(id, username, avatar, numberFilesTransferred, assetVersion, isTransferInProgress,transferTypeSendOrReceive);
 
         mUserInfoDao.insertTask(userInfoEntry);
 
@@ -58,5 +59,6 @@ public class FileListDatabaseTest {
         assertThat(readInfoEntry.getNumberFilesTransferred(),equalTo(numberFilesTransferred));
         assertThat(readInfoEntry.getAssetVersion(),equalTo(assetVersion));
         assertThat(readInfoEntry.getIsTransferInProgress(),equalTo(isTransferInProgress));
+        assertThat(readInfoEntry.getTransferTypeSendOrReceive(),equalTo(transferTypeSendOrReceive));
     }
 }

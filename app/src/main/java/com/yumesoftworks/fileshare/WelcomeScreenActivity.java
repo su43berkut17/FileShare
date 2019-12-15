@@ -229,7 +229,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
         }else{
             //we save the data and open the activity
-            UserInfoEntry dataToSave=new UserInfoEntry(tvUsername.getText().toString(),mSelectedAvatar,mFilesTransferred,mVersion,mIsTransferInProgress);
+            UserInfoEntry dataToSave=new UserInfoEntry(tvUsername.getText().toString(),mSelectedAvatar,mFilesTransferred,mVersion,mIsTransferInProgress,TransferProgressActivity.SERVICE_TYPE_INACTIVE);
             viewModel.saveData(dataToSave);
 
             //check if it is setup or settings
