@@ -68,6 +68,9 @@ public class ServiceFileShare extends Service implements
     //service binding
     private final IBinder binder=new ServiceFileShareBinder();
 
+    //type of service
+    private int mAction=0;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -285,11 +288,11 @@ public class ServiceFileShare extends Service implements
         if (mFileListEntry!=null && receivedBundle!=null){
             //do stuff
             //get action
-            int action=receivedBundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_SERVICE);
-            Log.d(TAG,"the action is "+action);
+            mAction=receivedBundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_SERVICE);
+            Log.d(TAG,"the action is "+mAction);
 
             //we check if the intent is to send or to receive
-            if (action== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_SENDING){
+            if (mAction== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_SENDING){
                 //we are sending files
                 //change to send or receive
                 switchServiceType(TransferProgressActivity.SERVICE_TYPE_SENDING);
@@ -302,7 +305,7 @@ public class ServiceFileShare extends Service implements
                     mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,
                             receivedBundle.getString(com.yumesoftworks.fileshare.TransferProgressActivity.REMOTE_IP),
                             receivedBundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.REMOTE_PORT),
-                            mFileListEntry,action);
+                            mFileListEntry,mAction);
 
                 }catch (Exception e){
                     Log.e(TAG,"There was an error creating the send client socket");
@@ -310,7 +313,7 @@ public class ServiceFileShare extends Service implements
                     connectionError();
                 }
 
-            }else if (action== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_RECEIVING){
+            }else if (mAction== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_RECEIVING){
                 //we are receiving files
                 //change to send or receive
                 switchServiceType(TransferProgressActivity.SERVICE_TYPE_RECEIVING);
@@ -318,7 +321,7 @@ public class ServiceFileShare extends Service implements
                     //create the server socket
                     mPort=receivedBundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.LOCAL_PORT);
 
-                    mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,mPort,action);
+                    mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,mPort,mAction);
                 }catch (Exception e){
                     Log.e(TAG,"There was an error creating the receive client socket"+e.getMessage());
                     e.printStackTrace();
@@ -326,7 +329,7 @@ public class ServiceFileShare extends Service implements
                 }
             }
         }else{
-            //only if the database has been read and the
+            //destroy service
             if (receivedBundle==null && mStepsBeforeSelfDestruction>=2){
                 //stop the service
                 //create he start foreground command
@@ -666,5 +669,10 @@ public class ServiceFileShare extends Service implements
             stopSelf();
         }
         return isTransferActive;
+    }
+
+    //activity asked what kind of service it is
+    public int typeOfService(){
+        return mAction;
     }
 }

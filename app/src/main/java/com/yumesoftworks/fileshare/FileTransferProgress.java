@@ -83,11 +83,12 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         mButton=fileProgressView.findViewById(R.id.btn_atp_cancelOk);
 
         //get the text depending on the type
-        if (mType== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_RECEIVING){
+        transferType(mType);
+        /*if (mType== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_RECEIVING){
             mTitleQueue.setText(R.string.ats_tv_received_files);
         }else if (mType== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_SENDING){
             mTitleQueue.setText(R.string.atp_tv_files_in_queue);
-        }
+        }*/
 
         //listener of he button
         mButton.setOnClickListener(this);
@@ -95,6 +96,17 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         Log.d(TAG,"Creating the views for the fragment COMPLETED");
 
         return fileProgressView;
+    }
+
+    //change type of file
+    public void transferType(int typeOfTransfer){
+        if (typeOfTransfer== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_RECEIVING){
+            mTitleQueue.setText(R.string.ats_tv_received_files);
+        }else if (typeOfTransfer== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_SENDING){
+            mTitleQueue.setText(R.string.atp_tv_files_in_queue);
+        }else{
+            mTitleQueue.setText(R.string.ats_tv_error);
+        }
     }
 
     @Override

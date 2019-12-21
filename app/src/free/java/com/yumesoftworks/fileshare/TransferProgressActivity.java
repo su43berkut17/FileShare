@@ -104,11 +104,14 @@ public class TransferProgressActivity extends AppCompatActivity implements
     //Ads
     private AdView mAdView;
 
-    //type
+    //type of service
     private int mTypeServiceOrRelaunch;
-    private int mSendOrReceive;
-    private int mHasServiceStarted;
+    //private int mSendOrReceive;//useless
+    private int mHasServiceStarted; //useless?
     private boolean mIsServiceBound=false;
+
+    //from the intent that created the activity to indicate the service what kind of transfer
+    private Bundle mExtras;
 
     //service binding
     private ServiceFileShare mService;
@@ -151,8 +154,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         //get the extras
         try {
             Intent intent = getIntent();
-            Bundle extras = intent.getExtras();
-            mSendOrReceive=extras.getInt(EXTRA_TYPE_TRANSFER);
+            mExtras = intent.getExtras();
         }catch (Exception e){
             Log.e(TAG,"No extras");
         }
@@ -205,7 +207,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
             }
         }*/
 
-        //initialize fragments
+        //initialize fragments and view model
         initializeFragments();
 
         //get the broadcast receivers for responses from the service
@@ -219,30 +221,11 @@ public class TransferProgressActivity extends AppCompatActivity implements
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
-        //check if the service can be bound to
-        if (mHasServiceStarted==1) {
-            Intent serviceIntent = new Intent(this, ServiceFileShare.class);
-
-            //we bind the service
-            try {
-                Log.d(TAG, "binding the service 1st");
-                thisActivity.bindService(serviceIntent, serConnection, Context.BIND_AUTO_CREATE);
-                mIsServiceBound = true;
-            } catch (Exception e) {
-                Log.e(TAG, "Couldnt bind service " + e.getMessage());
-            }
-        }
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         Log.e(TAG,"we save the value os has service started "+mHasServiceStarted);
         outState.putInt(SERVICE_STARTED_STATUS,mHasServiceStarted);
-        outState.putInt(SEND_OR_RECEIVE_BUNDLE,mSendOrReceive);
+        //outState.putInt(SEND_OR_RECEIVE_BUNDLE,mSendOrReceive);
     }
 
     @Override
@@ -299,7 +282,13 @@ public class TransferProgressActivity extends AppCompatActivity implements
         fragmentFileTransferProgress=new FileTransferProgress();
 
         Bundle bundleFrag=new Bundle();
-        bundleFrag.putInt(EXTRA_TYPE_TRANSFER,mSendOrReceive);
+
+        try {
+            bundleFrag.putInt(EXTRA_TYPE_TRANSFER, mExtras.getInt(EXTRA_TYPE_TRANSFER));
+        }catch (Exception e){
+            bundleFrag.putInt(EXTRA_TYPE_TRANSFER,0);
+        }
+
         fragmentFileTransferProgress.setArguments(bundleFrag);
 
         //transaction
@@ -307,7 +296,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 .add(R.id.frag_atp_transfer_progress,fragmentFileTransferProgress)
                 .commit();
 
-        //we get the file model to populate the stuff
+        //we get the file model to get user data and transfer status
         fileTransferViewModel=ViewModelProviders.of(this).get(FileTransferViewModel.class);
         fileTransferViewModel.getFileListInfo().observe(this,fileTransferViewModelObserver);
 
@@ -321,7 +310,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
         @Override
         public void onChanged(@Nullable List<FileListEntry> fileListEntries) {
             //we create a list for the not transferred and one for the transferred
-
             List<FileListEntry> tempSent=new ArrayList<>();
             List<FileListEntry> tempNotSent=new ArrayList<>();
 
@@ -333,37 +321,13 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 }
             }
 
-            if (mTypeServiceOrRelaunch ==FILES_SENDING) {
+            if (mTypeServiceOrRelaunch == FILES_SENDING) {
                 fragmentFileTransferProgress.updateRV(tempNotSent);
-            }else if (mTypeServiceOrRelaunch ==FILES_RECEIVING){
+            }else if (mTypeServiceOrRelaunch == FILES_RECEIVING){
                 fragmentFileTransferProgress.updateRV(fileListEntries);
             }
         }
     };
-
-    //Start service only when the status is inactive, that was we prevent the service from being
-    //started if it is not needed
-    private void startService(){
-        Bundle extras=getIntent().getExtras();
-        //start the service
-        //service intent
-        Intent serviceIntent = new Intent(this, ServiceFileShare.class);
-        serviceIntent.putExtras(extras);
-        mHasServiceStarted=1;
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Log.d(TAG, "starting on create the service 1st");
-                startForegroundService(serviceIntent);
-            } else {
-                Log.d(TAG, "starting on create the service 1st");
-                startService(serviceIntent);
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Couldnt start service " + e.getMessage());
-            //we set the service start as complete
-            mHasServiceStarted = 0;
-        }
-    }
 
     //user info observer
     final Observer<List<UserInfoEntry>> transferProgressActivityViewModelObserver=new Observer<List<UserInfoEntry>>() {
@@ -391,8 +355,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     mProgressBarHide.setVisibility(View.GONE);
                     //set values to completed
                     fragmentFileTransferProgress.setComplete();
-
-                    //fragmentManager.getFragments().get(0).
 
                     //we unbind the service
                     mHasServiceStarted=0;
@@ -427,12 +389,63 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     doUnbind();
 
                     break;
+
+                case STATUS_TRANSFER_ACTIVE:
+                    if (!mIsServiceBound) {
+                        bindService();
+                    }
+                    break;
                 case STATUS_TRANSFER_NOTIFICATION_CANCEL:
                     reopenApp();
                     break;
             }
         }
     };
+
+    //Start service only when the status is inactive, that was we prevent the service from being
+    //started if it is not needed
+    private void startService(){
+        //start the service
+        //service intent
+        if (mExtras!=null) {
+            Intent serviceIntent = new Intent(this, ServiceFileShare.class);
+            serviceIntent.putExtras(mExtras);
+            mHasServiceStarted = 1;
+
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    Log.d(TAG, "starting on create the service 1st");
+                    startForegroundService(serviceIntent);
+                } else {
+                    Log.d(TAG, "starting on create the service 1st");
+                    startService(serviceIntent);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Couldnt start service " + e.getMessage());
+                //we set the service start as complete
+                mHasServiceStarted = 0;
+            }
+        }else{
+            //this is a relaunch when the service is shown as active but there are no bundles
+            //probably after a crash, if that is the case, restart the app
+            reopenApp();
+        }
+    }
+
+    //binding service
+    private void bindService(){
+        //check if the service can be bound to
+        Intent serviceIntent = new Intent(this, ServiceFileShare.class);
+
+        //we bind the service
+        try {
+            Log.d(TAG, "binding the service 1st");
+            thisActivity.bindService(serviceIntent, serConnection, Context.BIND_AUTO_CREATE);
+            mIsServiceBound = true;
+        } catch (Exception e) {
+            Log.e(TAG, "Couldnt bind service " + e.getMessage());
+        }
+    }
 
     //unbind service
     private void doUnbind(){
@@ -514,6 +527,10 @@ public class TransferProgressActivity extends AppCompatActivity implements
             }else{
                 //update the UI with data from the service
                 mService.updateUIOnly();
+
+                //check what is the type of service to communicate the fragment
+                mTypeServiceOrRelaunch=mService.typeOfService();
+                fragmentFileTransferProgress.transferType(mTypeServiceOrRelaunch);
             }
 
             Log.d(TAG,"Service has been bound");

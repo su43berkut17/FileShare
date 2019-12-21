@@ -64,6 +64,7 @@
     <string name="atp_tv_files_in_queue">Files to be sent:</string>
     <string name="ats_tv_sent_files">Files sent</string>
     <string name="ats_tv_received_files">Files received:</string>
+    <string name="ats_tv_error">Files:</string>
     <string name="ats_try_again_dialog">Cannot connect to device. Try again?</string>
 
     <!-- Service -->
