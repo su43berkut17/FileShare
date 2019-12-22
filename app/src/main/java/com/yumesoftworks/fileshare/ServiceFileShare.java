@@ -288,7 +288,7 @@ public class ServiceFileShare extends Service implements
         if (mFileListEntry!=null && receivedBundle!=null){
             //do stuff
             //get action
-            mAction=receivedBundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_SERVICE);
+            mAction=receivedBundle.getInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER);
             Log.d(TAG,"the action is "+mAction);
 
             //we check if the intent is to send or to receive
@@ -439,15 +439,18 @@ public class ServiceFileShare extends Service implements
 
     public void finishedReceiveTransfer() {
         //we update the ui as successful
+        Log.d(TAG,"Transfer receive finished");
         TextInfoSendObject endObject=new TextInfoSendObject(com.yumesoftworks.fileshare.TransferProgressActivity.TYPE_END,getResources().getString(R.string.service_success),String.valueOf(mTotalFiles)+","+String.valueOf(mTotalFiles));
         updateGeneralUI(endObject);
 
-        //we hide the notification
-        try {
-            manager.cancel(NOTIFICATION_ID);
-        }catch (Exception e){
-            Log.e(TAG,"Finished receive transfer couldnt cancel notification "+e.getMessage());
-        }
+        //we update the notification
+        manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
+                ,"Transfer successful"
+                ,false)
+                .setOnlyAlertOnce(true)
+                .setOngoing(true)
+                .setAutoCancel(true)
+                .build());
 
         //we deactivate the transfer status
         switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
@@ -503,6 +506,8 @@ public class ServiceFileShare extends Service implements
 
     @Override
     public void finishedSendTransfer() {
+        Log.d(TAG,"Transfer send finished");
+
         //we update the ui as successful
         TextInfoSendObject endObject=new TextInfoSendObject(com.yumesoftworks.fileshare.TransferProgressActivity.TYPE_END,getResources().getString(R.string.service_success),String.valueOf(mTotalFiles)+","+String.valueOf(mTotalFiles));
         updateGeneralUI(endObject);

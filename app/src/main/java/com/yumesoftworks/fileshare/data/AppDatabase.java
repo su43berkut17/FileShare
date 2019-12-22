@@ -9,7 +9,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import android.util.Log;
 
-@Database(entities = {UserInfoEntry.class, FileListEntry.class},version = 5,exportSchema = false)
+@Database(entities = {UserInfoEntry.class, FileListEntry.class},version = 6,exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     private static final String TAG=AppDatabase.class.getSimpleName();
     private static final Object LOCK=new Object();
@@ -22,7 +22,11 @@ public abstract class AppDatabase extends RoomDatabase {
                 Log.d(TAG,"Creating a new database");
                 sInstance= Room.databaseBuilder(context.getApplicationContext(),
                         AppDatabase.class, AppDatabase.DATABASE_NAME)
-                        .addMigrations(MIGRATION_1_2,MIGRATION_2_3,MIGRATION_3_4,MIGRATION_4_5)
+                        .addMigrations(MIGRATION_1_2
+                                ,MIGRATION_2_3
+                                ,MIGRATION_3_4
+                                ,MIGRATION_4_5
+                                ,MIGRATION_5_6)
                         .build();
             }
         }
@@ -70,6 +74,17 @@ public abstract class AppDatabase extends RoomDatabase {
 
             //create new table
             database.execSQL("CREATE TABLE userInfo (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, username TEXT, pickedAvatar INTEGER NOT NULL, numberFilesTransferred INTEGER NOT NULL, assetVersion INTEGER NOT NULL, isTransferInProgress INTEGER NOT NULL)");
+        }
+    };
+
+    static final Migration MIGRATION_5_6=new Migration(5,6) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            //delete old user table
+            database.execSQL("DROP TABLE userInfo");
+
+            //create new table
+            database.execSQL("CREATE TABLE userInfo (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, username TEXT, pickedAvatar INTEGER NOT NULL, numberFilesTransferred INTEGER NOT NULL, assetVersion INTEGER NOT NULL, isTransferInProgress INTEGER NOT NULL, transferTypeSendOrReceive INTEGER NOT NULL)");
         }
     };
 }

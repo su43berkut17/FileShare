@@ -30,7 +30,7 @@ public class FileTransferViewModel extends AndroidViewModel {
     }
 
     //update the data, once it has been copied
-    public void updateFile(final FileListEntry fileListEntry){
+    /*public void updateFile(final FileListEntry fileListEntry){
         Executor myExecutor = Executors.newSingleThreadExecutor();
         myExecutor.execute(new Runnable() {
             @Override
@@ -41,7 +41,7 @@ public class FileTransferViewModel extends AndroidViewModel {
 
 
         //new updateDatabaseAsyncTask(database).execute(fileListEntry);
-    }
+    }*/
 
     /*private static class updateDatabaseAsyncTask extends AsyncTask<FileListEntry,Void,Void> {
         private AppDatabase database;

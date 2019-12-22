@@ -96,17 +96,21 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
         if (mCurrentFile<mTotalFiles) {
             //we continue with the transfer
             if (typeOfTransfer == TransferProgressActivity.FILES_RECEIVING) {
+                Log.d(TAG,"Starting a transfer receiving");
                 //create a receiver socket object
                 mReceiverSocketTransfer=new ReceiverSocketTransfer(this, mPort);
             } else {
                 //create a sender socket object
+                Log.d(TAG,"Starting a transfer sending");
                 mSenderSocketTransfer=new SenderSocketTransfer(this, mIpAddress, mPort, mFileList.get(mCurrentFile),mCurrentFile,mTotalFiles);
             }
         }else{
             //we finish everything
             if (typeOfTransfer==TransferProgressActivity.FILES_RECEIVING){
+                Log.d(TAG,"Finished all the transfers receiving");
                 mReceiverInterface.finishedReceiveTransfer();
             }else{
+                Log.d(TAG,"Finished all the transfers sending");
                 mSenderInterface.finishedSendTransfer();
             }
         }

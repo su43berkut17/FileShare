@@ -60,12 +60,16 @@ public class TransferProgressWidget extends AppWidgetProvider {
             mPercentage=percentage;
         }else{
             //we load the database
-            AppDatabase database=AppDatabase.getInstance(context);
-            List<UserInfoEntry> listUser=database.userInfoDao().loadUserWidget();
-            UserInfoEntry user=listUser.get(0);
+            try {
+                AppDatabase database = AppDatabase.getInstance(context);
+                List<UserInfoEntry> listUser = database.userInfoDao().loadUserWidget();
+                UserInfoEntry user = listUser.get(0);
 
-            Log.d(TAG,"The number of transfers is "+user +" "+user.getNumberFilesTransferred());
-            mTotalNumberOfTransfers=user.getNumberFilesTransferred();
+                Log.d(TAG, "The number of transfers is " + user + " " + user.getNumberFilesTransferred());
+                mTotalNumberOfTransfers = user.getNumberFilesTransferred();
+            }catch (Exception e){
+                mTotalNumberOfTransfers=0;
+            }
         }
 
         //depending on the state we hide or show the layouts

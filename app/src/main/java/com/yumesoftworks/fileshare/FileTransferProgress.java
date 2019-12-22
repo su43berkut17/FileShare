@@ -84,11 +84,6 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
 
         //get the text depending on the type
         transferType(mType);
-        /*if (mType== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_RECEIVING){
-            mTitleQueue.setText(R.string.ats_tv_received_files);
-        }else if (mType== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_SENDING){
-            mTitleQueue.setText(R.string.atp_tv_files_in_queue);
-        }*/
 
         //listener of he button
         mButton.setOnClickListener(this);
