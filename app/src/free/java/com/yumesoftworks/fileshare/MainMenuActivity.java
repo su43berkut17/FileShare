@@ -12,6 +12,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
+
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -30,6 +32,8 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
     //buttons
     ConstraintLayout sendFilesButton;
     ConstraintLayout receiveFilesButton;
+
+    private static final String TAG="MainMenuActivity";
 
     //view model
     private CombinedDataViewModel fileViewerViewModel;
@@ -109,6 +113,7 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
                     //we check if a transfer is in progress
                     mIsTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
                     if (mIsTransferInProgress!=TransferProgressActivity.STATUS_TRANSFER_INACTIVE){
+                        Log.e(TAG,"This is a relaunch from the main menu nactivity");
                         //we relaunch the transfer activity
                         Intent intent= new Intent(getApplicationContext(), com.yumesoftworks.fileshare.TransferProgressActivity.class);
 

@@ -295,9 +295,10 @@ public class FileViewer extends Fragment implements
     //interfaces from the adapter
     @Override
     public void onItemClickListener(int itemId, int type) {
+        Log.d(TAG,"type of click: "+type+"checkbox:"+rvAdapter.TYPE_CHECKBOX+" open file:"+rvAdapter.TYPE_OPEN_FILE);
         if (type==rvAdapter.TYPE_CHECKBOX) {
             onButtonPressed(rvAdapter.getFileItem(itemId));
-        }else{
+        }else if (type==rvAdapter.TYPE_OPEN_FILE){
             //check if it is directory
             if (!rvAdapter.getFileItem(itemId).getDirectory()) {
                 Intent myIntent = new Intent(Intent.ACTION_VIEW);

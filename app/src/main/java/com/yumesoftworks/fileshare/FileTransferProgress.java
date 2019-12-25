@@ -95,9 +95,9 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
 
     //change type of file
     public void transferType(int typeOfTransfer){
-        if (typeOfTransfer== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_RECEIVING){
+        if (typeOfTransfer == com.yumesoftworks.fileshare.TransferProgressActivity.FILES_RECEIVING){
             mTitleQueue.setText(R.string.ats_tv_received_files);
-        }else if (typeOfTransfer== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_SENDING){
+        }else if (typeOfTransfer == com.yumesoftworks.fileshare.TransferProgressActivity.FILES_SENDING){
             mTitleQueue.setText(R.string.atp_tv_files_in_queue);
         }else{
             mTitleQueue.setText(R.string.ats_tv_error);

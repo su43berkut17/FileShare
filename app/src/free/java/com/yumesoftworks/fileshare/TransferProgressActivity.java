@@ -76,7 +76,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
     private static final String SERVICE_STARTED_STATUS="serviceStatusInitial";
     private static final String SEND_OR_RECEIVE_BUNDLE="sendOrReceiveBundle";
 
-    private LinearLayout mProgressBarHide;
+    private LinearLayout mWaitingScreen;
 
     //this activity context
     private Context thisActivity;
@@ -113,6 +113,9 @@ public class TransferProgressActivity extends AppCompatActivity implements
     //from the intent that created the activity to indicate the service what kind of transfer
     private Bundle mExtras;
 
+    //to check if we are ending the activity and service for good
+    private boolean mAreWeClosing=false;
+
     //service binding
     private ServiceFileShare mService;
 
@@ -122,7 +125,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_transfer_progress);
 
         thisActivity=this;
-
+        Log.d(TAG,"onCreate called");
         /*//we heck if the service was started once
         if (savedInstanceState!=null){
             mHasServiceStarted = savedInstanceState.getInt(SERVICE_STARTED_STATUS);
@@ -149,14 +152,15 @@ public class TransferProgressActivity extends AppCompatActivity implements
         mAdView.loadAd(adRequest);
 
         //we get the instance of the indeterminate progress bar
-        mProgressBarHide=findViewById(R.id.pb_atp_waitingForConnection);
+        mWaitingScreen =findViewById(R.id.pb_atp_waitingForConnection);
+        mAreWeClosing=false;
 
         //get the extras
         try {
             Intent intent = getIntent();
             mExtras = intent.getExtras();
         }catch (Exception e){
-            Log.e(TAG,"No extras");
+            Log.e(TAG,"No extras found");
         }
 
         /*if(mHasServiceStarted==0) {
@@ -221,14 +225,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        //Log.e(TAG,"we save the value os has service started "+mHasServiceStarted);
-        //outState.putInt(SERVICE_STARTED_STATUS,mHasServiceStarted);
-        //outState.putInt(SEND_OR_RECEIVE_BUNDLE,mSendOrReceive);
-    }
-
-    @Override
     protected void onStop() {
         super.onStop();
 
@@ -280,15 +276,18 @@ public class TransferProgressActivity extends AppCompatActivity implements
         //fragments
         fragmentFileTransferProgress=new FileTransferProgress();
 
+        //bundle to be sent to the new fragment
         Bundle bundleFrag=new Bundle();
-
+        int typeOfService;
         try {
-            bundleFrag.putInt(EXTRA_TYPE_TRANSFER, mExtras.getInt(EXTRA_TYPE_TRANSFER));
-            Log.d(TAG,"The transfer type is: "+mExtras.getInt(EXTRA_TYPE_TRANSFER)+ " -- 2001 for rec 2002 for send 0 for other");
+            typeOfService = mExtras.getInt(EXTRA_TYPE_TRANSFER);
+            Log.d(TAG,"The transfer type is: "+typeOfService+ " -- 2001 for rec 2002 for send 0 for other");
         }catch (Exception e){
+            typeOfService=0;
             Log.e(TAG,"couldnt get what type of transfer it is");
-            bundleFrag.putInt(EXTRA_TYPE_TRANSFER,0);
         }
+
+        bundleFrag.putInt(EXTRA_TYPE_TRANSFER,typeOfService);
 
         fragmentFileTransferProgress.setArguments(bundleFrag);
 
@@ -316,24 +315,28 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
     //file observer sorting
     private void sortFilesBySendOrReceive(List<FileListEntry> fileListEntries){
-        //we create a list for the not transferred and one for the transferred
-        List<FileListEntry> tempSent=new ArrayList<>();
-        List<FileListEntry> tempNotSent=new ArrayList<>();
+        try {
+            //we create a list for the not transferred and one for the transferred
+            List<FileListEntry> tempSent = new ArrayList<>();
+            List<FileListEntry> tempNotSent = new ArrayList<>();
 
-        for (int i=0;i<fileListEntries.size();i++){
-            if (fileListEntries.get(i).getIsTransferred()==0){
-                tempNotSent.add(fileListEntries.get(i));
-            }else{
-                tempSent.add(fileListEntries.get(i));
+            for (int i = 0; i < fileListEntries.size(); i++) {
+                if (fileListEntries.get(i).getIsTransferred() == 0) {
+                    tempNotSent.add(fileListEntries.get(i));
+                } else {
+                    tempSent.add(fileListEntries.get(i));
+                }
             }
-        }
-        Log.d(TAG,"Number of files to be sent: "+tempNotSent.size());
-        Log.d(TAG,"Number of files sent: "+tempSent.size());
-        Log.d(TAG,"Type of service: "+mTypeServiceOrRelaunch +" sending=2001 receiving =2002");
-        if (mTypeServiceOrRelaunch == FILES_SENDING) {
-            fragmentFileTransferProgress.updateRV(tempNotSent);
-        }else if (mTypeServiceOrRelaunch == FILES_RECEIVING){
-            fragmentFileTransferProgress.updateRV(fileListEntries);
+            Log.d(TAG, "Number of files to be sent: " + tempNotSent.size());
+            Log.d(TAG, "Number of files sent: " + tempSent.size());
+            Log.d(TAG, "Type of service: " + mTypeServiceOrRelaunch + " sending=2001 receiving =2002");
+            if (mTypeServiceOrRelaunch == FILES_SENDING) {
+                fragmentFileTransferProgress.updateRV(tempNotSent);
+            } else if (mTypeServiceOrRelaunch == FILES_RECEIVING) {
+                fragmentFileTransferProgress.updateRV(fileListEntries);
+            }
+        }catch (Exception e){
+            Log.e(TAG,"failed to sort files by send or receive"+ e.getMessage());
         }
     }
 
@@ -343,10 +346,11 @@ public class TransferProgressActivity extends AppCompatActivity implements
         public void onChanged(List<UserInfoEntry> userInfoEntries) {
             //we check if the transfer has been completed before
             int isTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
-            Log.d(TAG,"It has changed, the value is "+isTransferInProgress);
+            int typeOfTransfer=userInfoEntries.get(0).getTransferTypeSendOrReceive();
+            Log.d(TAG,"The is transfer in progress value is "+isTransferInProgress+" inactive 3000, active 3101, finished 3102, socket err 3201, space err 3202, cancel 3301");
 
             //check if the service is running
-            if (userInfoEntries.get(0).getTransferTypeSendOrReceive()==TransferProgressActivity.SERVICE_TYPE_INACTIVE && mHasServiceStarted==0 && isTransferInProgress==STATUS_TRANSFER_INACTIVE){
+            if (typeOfTransfer==TransferProgressActivity.SERVICE_TYPE_INACTIVE && mHasServiceStarted==0 && isTransferInProgress==STATUS_TRANSFER_INACTIVE && mAreWeClosing==false){
                 Log.d(TAG,"We start the service from observer");
                 startService();
             }
@@ -360,8 +364,8 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
                     //change button to ok
                     fragmentFileTransferProgress.changeButton();
-                    //hide the progress bar
-                    mProgressBarHide.setVisibility(View.GONE);
+                    //hide the waiting screen
+                    mWaitingScreen.setVisibility(View.GONE);
                     //set values to completed
                     fragmentFileTransferProgress.setComplete();
 
@@ -372,12 +376,14 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     break;
 
                 case STATUS_TRANSFER_OUT_OF_SPACE_ERROR:
-                    mProgressBarHide.setVisibility(View.GONE);
                     //we show dialog we ran out of space and return to the main menu
                     createDialog(R.string.service_out_of_space_error);
 
                     //change button to ok
                     fragmentFileTransferProgress.changeButton();
+
+                    //hide the waiting screen
+                    mWaitingScreen.setVisibility(View.GONE);
 
                     //we unbind the service
                     mHasServiceStarted=0;
@@ -386,12 +392,14 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     break;
 
                 case STATUS_TRANSFER_SOCKET_ERROR:
-                    mProgressBarHide.setVisibility(View.GONE);
                     //we show dialog that there was an error and return to the main menu
                     createDialog(R.string.service_socket_error);
 
                     //change button to ok
                     fragmentFileTransferProgress.changeButton();
+
+                    //hide the waiting screen
+                    mWaitingScreen.setVisibility(View.GONE);
 
                     //we unbind the service
                     mHasServiceStarted=0;
@@ -414,9 +422,19 @@ public class TransferProgressActivity extends AppCompatActivity implements
     //Start service only when the status is inactive, that way we prevent the service from being
     //started if it is not needed
     private void startService(){
+        Log.d(TAG,"Called start service");
+        int typeOfService;
+        try {
+            typeOfService = mExtras.getInt(EXTRA_TYPE_TRANSFER);
+            Log.d(TAG,"The transfer type is: "+typeOfService+ " -- 2001 for rec 2002 for send 0 for other");
+        }catch (Exception e){
+            typeOfService=0;
+            Log.e(TAG,"couldnt get what type of transfer it is");
+        }
+
         //service intent
-        if (mExtras!=null && (mExtras.getInt(EXTRA_TYPE_TRANSFER)==FILES_SENDING || mExtras.getInt(EXTRA_TYPE_TRANSFER)==FILES_RECEIVING)) {
-            Log.d(TAG,"Extras are good, we can start de service");
+        if (mHasServiceStarted==0 && (typeOfService==FILES_SENDING || typeOfService==FILES_RECEIVING)) {
+            Log.d(TAG,"Extras are good and service hasnt been started yet, we can start de service");
             Intent serviceIntent = new Intent(this, ServiceFileShare.class);
             serviceIntent.putExtras(mExtras);
             mHasServiceStarted = 1;
@@ -437,7 +455,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         }else{
             //this is a relaunch when the service is shown as active but there are no bundles
             //probably after a crash, if that is the case, restart the app
-            Log.d(TAG,"extras are bad we dont start the service and we close the app");
+            Log.d(TAG,"extras are bad, we dont start the service and we close the app");
             reopenApp();
         }
     }
@@ -451,7 +469,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
         try {
             Log.d(TAG, "binding the service 1st");
             thisActivity.bindService(serviceIntent, serConnection, Context.BIND_AUTO_CREATE);
-            mIsServiceBound = true;
         } catch (Exception e) {
             Log.e(TAG, "Couldnt bind service " + e.getMessage());
         }
@@ -512,7 +529,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
             //we check what to do depending on what the service needs to do
             if (action==ACTION_UPDATE_UI){
-                mProgressBarHide.setVisibility(View.GONE);
+                mWaitingScreen.setVisibility(View.GONE);
                 //update ui
                 Bundle bundle=intent.getExtras();
 
@@ -533,7 +550,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
             if (!mService.methodIsTransferActive()){
                 Log.d(TAG,"the transfer is not active we hide the splash screen that hides everything");
                 //it is not active
-                mProgressBarHide.setVisibility(View.GONE);
+                mWaitingScreen.setVisibility(View.GONE);
             }else{
                 //update the UI with data from the service
                 mService.updateUIOnly();
@@ -542,7 +559,12 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 mTypeServiceOrRelaunch=mService.typeOfService();
                 fragmentFileTransferProgress.transferType(mTypeServiceOrRelaunch);
                 //update the viewmodel
-                sortFilesBySendOrReceive(fileTransferViewModel.getFileListInfo().getValue());
+                try {
+                    sortFilesBySendOrReceive(fileTransferViewModel.getFileListInfo().getValue());
+                }catch (Exception e){
+                    Log.e(TAG,"cant separate send from receive yet");
+                }
+                mIsServiceBound = true;
             }
 
             Log.d(TAG,"Service has been bound");
@@ -585,6 +607,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
     private void reopenApp(){
         Log.d(TAG,"closing the app via reopenApp");
         //removing observers
+        mAreWeClosing=true;
         removeObservers();
 
         //reset the file list

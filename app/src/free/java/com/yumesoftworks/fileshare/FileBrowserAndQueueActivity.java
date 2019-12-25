@@ -353,6 +353,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             mAllowLivedataUpdate=true;
             mergeFileAndData(fileViewerViewModel.getData().getValue(),FILETREE_UPDATE);
         }else{
+            Log.d(TAG,"saving changes");
             //we check if it has been selected or not
             //mAllowLivedataUpdate=true;
             if (fileListEntry.getIsSelected()==0){
