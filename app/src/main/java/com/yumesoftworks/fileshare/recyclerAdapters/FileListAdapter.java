@@ -204,6 +204,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
         TextView tv_date;
         CheckBox cv_selected;
         Guideline gd_separator;
+        int test=0;
 
         public FileListViewHolder(View itemView){
             super(itemView);
@@ -250,10 +251,15 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
                             cv_selected.setChecked(false);
                         }
                     }
+
+                    mFileClickListener.onItemClickListener(getAdapterPosition(),TYPE_CHECKBOX);
                 }
             }
 
-            mFileClickListener.onItemClickListener(getAdapterPosition(),TYPE_CHECKBOX);
+            //for navigation only
+            if (mFileList.get(getAdapterPosition()).getDirectory()){
+                mFileClickListener.onItemClickListener(getAdapterPosition(),TYPE_CHECKBOX);
+            }
         }
     }
 
