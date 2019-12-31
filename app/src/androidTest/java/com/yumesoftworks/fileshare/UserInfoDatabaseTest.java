@@ -18,6 +18,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class UserInfoDatabaseTest {
     private FileListDao mFileListDao;
@@ -52,14 +53,21 @@ public class UserInfoDatabaseTest {
         mFileListDao.insertFile(fileListEntry);
 
         LiveData<List<FileListEntry>> readFileListEntryList=mFileListDao.loadFileList();
-        FileListEntry readFileListEntry = readFileListEntryList.getValue().get(0);
+        try {
+            wait(1000);
+            if (readFileListEntryList.getValue().size() > 1) {
+                FileListEntry readFileListEntry = readFileListEntryList.getValue().get(0);
 
-        assertThat(readFileListEntry.getId(),equalTo(id));
-        assertThat(readFileListEntry.getPath(),equalTo(path));
-        assertThat(readFileListEntry.getFileName(),equalTo(filename));
-        assertThat(readFileListEntry.getIsTransferred(),equalTo(isTransferred));
-        assertThat(readFileListEntry.getParentFolder(),equalTo(parentFolder));
-        assertThat(readFileListEntry.getIsSelected(),equalTo(isSelected));
-        assertThat(readFileListEntry.getMimeType(),equalTo(mimeType));
+                assertThat(readFileListEntry.getId(), equalTo(id));
+                assertThat(readFileListEntry.getPath(), equalTo(path));
+                assertThat(readFileListEntry.getFileName(), equalTo(filename));
+                assertThat(readFileListEntry.getIsTransferred(), equalTo(isTransferred));
+                assertThat(readFileListEntry.getParentFolder(), equalTo(parentFolder));
+                assertThat(readFileListEntry.getIsSelected(), equalTo(isSelected));
+                assertThat(readFileListEntry.getMimeType(), equalTo(mimeType));
+            }
+        }catch (Exception e){
+            fail();
+        }
     }
 }
