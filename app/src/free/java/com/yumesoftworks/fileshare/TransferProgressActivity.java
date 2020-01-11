@@ -126,19 +126,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
         thisActivity=this;
         Log.d(TAG,"onCreate called");
-        /*//we heck if the service was started once
-        if (savedInstanceState!=null){
-            mHasServiceStarted = savedInstanceState.getInt(SERVICE_STARTED_STATUS);
-            mSendOrReceive=savedInstanceState.getInt(SEND_OR_RECEIVE_BUNDLE);
-            Log.e(TAG,"we have saved the value which is "+mHasServiceStarted);
-        }else{
-            Log.e(TAG,"we havent saved an instance yet, service started set to 0");
-            mHasServiceStarted=0;
-        }
-
-        Log.d(TAG,"has the service started for the 1st time: "+mHasServiceStarted);
-
-        thisActivity=this;*/
 
         //analytics
         mFireAnalytics=FirebaseAnalytics.getInstance(this);
@@ -163,55 +150,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
             Log.e(TAG,"No extras found");
         }
 
-        /*if(mHasServiceStarted==0) {
-            //we check the intent with the information to start the service
-            Intent intent = getIntent();
-            Bundle extras = intent.getExtras();
-
-            //get the bundle with the extras to start the service
-            try {
-                //get the data to see how do we start the service
-                mTypeServiceOrRelaunch = extras.getInt(EXTRA_TYPE_TRANSFER);
-                mSendOrReceive= mTypeServiceOrRelaunch;
-                Log.d(TAG, "The extras are: " + mTypeServiceOrRelaunch);
-            } catch (Exception e) {
-                Log.d(TAG, "There are no extras");
-                mTypeServiceOrRelaunch = RELAUNCH_APP;
-            }
-
-            if (mTypeServiceOrRelaunch != RELAUNCH_APP) {
-                //first initialization
-                //choose data in the intent
-                if (mTypeServiceOrRelaunch == FILES_SENDING) {
-                    //we start the services as sending stuff
-                    extras.putInt(ACTION_SERVICE, FILES_SENDING);
-                } else if (mTypeServiceOrRelaunch == FILES_RECEIVING) {
-                    //we start the service as receiving stuff
-                    extras.putInt(ACTION_SERVICE, FILES_RECEIVING);
-                }
-
-                //start the service
-                //service intent
-                Intent serviceIntent = new Intent(this, ServiceFileShare.class);
-                serviceIntent.putExtras(extras);
-                mHasServiceStarted=1;
-                try {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        Log.d(TAG, "starting on create the service 1st");
-                        startForegroundService(serviceIntent);
-                    } else {
-                        Log.d(TAG, "starting on create the service 1st");
-                        startService(serviceIntent);
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "Couldnt start service " + e.getMessage());
-                    //we set the service start as complete
-                    mHasServiceStarted = 0;
-                }
-            }
-        }*/
-
-        //initialize fragments and view model
+        //initialize fragments
         initializeFragments();
 
         //get the broadcast receivers for responses from the service
@@ -278,7 +217,9 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
         //bundle to be sent to the new fragment
         Bundle bundleFrag=new Bundle();
+
         int typeOfService;
+
         try {
             typeOfService = mExtras.getInt(EXTRA_TYPE_TRANSFER);
             Log.d(TAG,"The transfer type is: "+typeOfService+ " -- 2001 for rec 2002 for send 0 for other");
@@ -321,10 +262,11 @@ public class TransferProgressActivity extends AppCompatActivity implements
             List<FileListEntry> tempNotSent = new ArrayList<>();
 
             for (int i = 0; i < fileListEntries.size(); i++) {
+                //files sent always will be added
+                tempSent.add(fileListEntries.get(i));
+
                 if (fileListEntries.get(i).getIsTransferred() == 0) {
                     tempNotSent.add(fileListEntries.get(i));
-                } else {
-                    tempSent.add(fileListEntries.get(i));
                 }
             }
             Log.d(TAG, "Number of files to be sent: " + tempNotSent.size());
