@@ -5,6 +5,8 @@ import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 
+import com.yumesoftworks.fileshare.TransferProgressActivity;
+
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -53,7 +55,21 @@ public class UserInfoRepository {
                 UserInfoEntry userInfoEntry=database.userInfoDao().loadUserWidget().get(0);
                 userInfoEntry.setTransferTypeSendOrReceive(serviceTypeValue);
                 database.userInfoDao().updateTask(userInfoEntry);
-                Log.d(TAG,"The transfer type is: "+serviceTypeValue);
+                Log.d(TAG,"The transfer service type is: "+serviceTypeValue);
+            }
+        });
+    }
+
+    public void setAsInactive(){
+        Executor myExecutor=Executors.newSingleThreadExecutor();
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                UserInfoEntry userInfoEntry=database.userInfoDao().loadUserWidget().get(0);
+                userInfoEntry.setIsTransferInProgress(TransferProgressActivity.STATUS_TRANSFER_INACTIVE);
+                userInfoEntry.setTransferTypeSendOrReceive(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
+                database.userInfoDao().updateTask(userInfoEntry);
+                Log.d(TAG,"The transfer has been set as inactive");
             }
         });
     }

@@ -39,4 +39,8 @@ public class TransferProgressActivityViewModel extends AndroidViewModel {
         repository.switchServiceType(value);
     }
 
+    public void setAsInactive(){
+        repository.setAsInactive();
+    }
+
 }

@@ -291,12 +291,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
             int typeOfTransfer=userInfoEntries.get(0).getTransferTypeSendOrReceive();
             Log.d(TAG,"The is transfer in progress value is "+isTransferInProgress+" inactive 3000, active 3101, finished 3102, socket err 3201, space err 3202, cancel 3301");
 
-            //check if the service is running
-            if (typeOfTransfer==TransferProgressActivity.SERVICE_TYPE_INACTIVE && mHasServiceStarted==0 && isTransferInProgress==STATUS_TRANSFER_INACTIVE && mAreWeClosing==false){
-                Log.d(TAG,"We start the service from observer");
-                startService();
-            }
-
             //if the app is relaunched and the transfer has finished and hasnt captured the broadcast events
             switch (isTransferInProgress){
                 case STATUS_TRANSFER_FINISHED:
@@ -351,12 +345,32 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
                 case STATUS_TRANSFER_ACTIVE:
                     if (!mIsServiceBound) {
-                        bindService();
+                        bindTheService();
                     }
                     break;
                 case STATUS_TRANSFER_NOTIFICATION_CANCEL:
                     reopenApp();
                     break;
+                case STATUS_TRANSFER_INACTIVE:
+                    //check if the service is running
+                    if (typeOfTransfer==TransferProgressActivity.SERVICE_TYPE_INACTIVE && mHasServiceStarted==0 && mAreWeClosing==false){
+                        Log.d(TAG,"We start the service from observer");
+                        startService();
+                    }else if(mAreWeClosing==true){
+                        //close for good
+                        removeObservers();
+
+                        //reset the file list
+                        FileListRepository fileListRepository=new FileListRepository(getApplication());
+                        fileListRepository.deleteTable();
+
+                        //reopen the activity
+                        Intent intent=new Intent(getApplicationContext(),MainMenuActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
+                        finish();
+                    }
+
             }
         }
     };
@@ -403,7 +417,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
     }
 
     //binding service
-    private void bindService(){
+    private void bindTheService(){
         //check if the service can be bound to
         Intent serviceIntent = new Intent(this, ServiceFileShare.class);
 
@@ -548,23 +562,14 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
     private void reopenApp(){
         Log.d(TAG,"closing the app via reopenApp");
-        //removing observers
-        mAreWeClosing=true;
-        removeObservers();
 
-        //reset the file list
-        FileListRepository fileListRepository=new FileListRepository(getApplication());
-        fileListRepository.deleteTable();
+        //change the closing flag
+        mAreWeClosing=true;
 
         //change the status as inactive again
-        transferProgressActivityViewModel.changeTransferStatus(STATUS_TRANSFER_INACTIVE);
-        transferProgressActivityViewModel.changeServiceTypeStatus(SERVICE_TYPE_INACTIVE);
-
-        //reopen the activity
-        Intent intent=new Intent(getApplicationContext(),MainMenuActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-        finish();
+        //transferProgressActivityViewModel.changeTransferStatus(STATUS_TRANSFER_INACTIVE);
+        //transferProgressActivityViewModel.changeServiceTypeStatus(SERVICE_TYPE_INACTIVE);
+        transferProgressActivityViewModel.setAsInactive();
     }
 
     private void removeObservers(){
