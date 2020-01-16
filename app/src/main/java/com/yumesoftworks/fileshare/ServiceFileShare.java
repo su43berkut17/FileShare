@@ -351,8 +351,10 @@ public class ServiceFileShare extends Service implements
     //notification build
     private NotificationCompat.Builder notificationBuilder(String title, String filename, boolean showProgress){
         //intent to open the activity
-        Intent intentApp=new Intent(getApplicationContext(),TransferProgressActivity.class);
-        PendingIntent pendingIntentApp=PendingIntent.getActivity(this,0,intentApp,PendingIntent.FLAG_UPDATE_CURRENT);
+        //Intent intentApp=new Intent(getApplicationContext(),TransferProgressActivity.class);
+        Intent intentApp = getApplicationContext().getPackageManager().getLaunchIntentForPackage("com.yumesoftworks.fileshare");
+        //PendingIntent pendingIntentApp=PendingIntent.getActivity(this,0,intentApp,PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntentApp=PendingIntent.getActivity(this,0,intentApp,0);
 
         //intent to stop the transfer
         Intent intentStop=new Intent(this,ServiceFileShare.class);

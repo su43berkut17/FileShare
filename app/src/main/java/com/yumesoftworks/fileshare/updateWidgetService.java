@@ -1,27 +1,15 @@
 package com.yumesoftworks.fileshare;
 
-import android.app.IntentService;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.appwidget.AppWidgetManager;
-
-import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
-import androidx.room.Database;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.os.Build;
-import androidx.core.app.NotificationCompat;
 import android.util.Log;
 
 public class updateWidgetService extends JobIntentService {
 
     private static final String TAG="updateWidgetService";
-    private static final String WIDGET_CHANNEL="Widget Channel";
-    private static final int WIDGET_NOTIFICATION_ID=1001;
     public static final String ACTION_UPDATE = "com.yumesoftworks.fileshare.action.APPWIDGET_UPDATE";
     public static final String ACTION_UPDATE_APP = "com.yumesoftworks.fileshare.action.APPWIDGET_UPDATE_APP";
     private static final int JOB_ID = 20671;
@@ -32,50 +20,6 @@ public class updateWidgetService extends JobIntentService {
     private static int mTotalNumberOfFiles;
     private static int mCurrentNumberOfFiles;
     private static int mPercentage;
-
-    /*public updateWidgetService() {
-        super("updateWidgetService");
-    }*/
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        /*
-        //channel
-        //check the API
-        NotificationManager manager= (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        NotificationChannel channel;
-
-        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O) {
-            //we set the channel
-            channel = new NotificationChannel(WIDGET_CHANNEL,
-                    getString(R.string.app_name),
-                    NotificationManager.IMPORTANCE_LOW);
-            channel.setLightColor(Color.BLUE);
-            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-            manager.createNotificationChannel(channel);
-        }
-
-        Notification notification=notificationBuilder().build();
-
-        try {
-            startForeground(WIDGET_NOTIFICATION_ID, notification);
-            Log.d(TAG,"Successfully started foreground notification");
-        }catch (Exception e){
-            Log.d(TAG,e.getMessage());
-        }*/
-    }
-
-    //notification build
-    /*
-    private NotificationCompat.Builder notificationBuilder(){
-        //we set the notification
-        return new NotificationCompat.Builder(this, WIDGET_CHANNEL)
-                .setContentTitle(getString(R.string.app_name))
-                .setAutoCancel(true)
-                .setOnlyAlertOnce(true);
-    }*/
 
     @Override
     protected void onHandleWork(Intent intent) {
@@ -143,23 +87,5 @@ public class updateWidgetService extends JobIntentService {
 
         //enqueue work
         enqueueWork(context,updateWidgetService.class,JOB_ID,intent);
-
-        /*
-        //we check if it is before android O
-        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.O){
-            try {
-                Log.i(TAG,"starting widget update Android O and above");
-                context.startForegroundService(intent);
-            }catch (Exception e){
-                Log.d(TAG,e.getMessage());
-            }
-        }else {
-            try {
-                Log.i(TAG,"starting widget update Android N and below");
-                context.startService(intent);
-            }catch (Exception e){
-                Log.d(TAG,e.getMessage());
-            }
-        }*/
     }
 }

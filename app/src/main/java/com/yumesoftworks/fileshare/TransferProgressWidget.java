@@ -98,11 +98,13 @@ public class TransferProgressWidget extends AppWidgetProvider {
                // extras.putInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER,TransferProgressActivity.RELAUNCH_APP);
 
                 //we set the pending intent to launch the main app on transfer mode
-                Intent intentTransfer = new Intent(context, TransferProgressActivity.class);
+                //Intent intentTransfer = new Intent(context, TransferProgressActivity.class);
+
+                Intent intentTransfer = context.getPackageManager().getLaunchIntentForPackage("com.yumesoftworks.fileshare");
                 //intentTransfer.putExtras(extras);
 
-                //PendingIntent pendingIntentTransfer = PendingIntent.getActivity(context, 0, intentTransfer, 0);
-                PendingIntent pendingIntentTransfer=PendingIntent.getActivity(context,0,intentTransfer,PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent pendingIntentTransfer = PendingIntent.getActivity(context, 0, intentTransfer, 0);
+                //PendingIntent pendingIntentTransfer=PendingIntent.getActivity(context,0,intentTransfer,PendingIntent.FLAG_UPDATE_CURRENT);
 
                 //we set the pending intent for the widget
                 views.setOnClickPendingIntent(R.id.widget_transfer_state, pendingIntentTransfer);
