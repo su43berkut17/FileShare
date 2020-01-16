@@ -115,8 +115,6 @@ public class ServiceFileShare extends Service implements
 
         //create a load database
         loadDatabase();
-
-        //new loadDatabaseAsyncTask().execute();
     }
 
 
@@ -284,11 +282,12 @@ public class ServiceFileShare extends Service implements
     //initialize sockets
     //should only work when database has been loaded and after receiving the intents
     private void initializeSockets(){
-        Log.d(TAG,"initializing sockets");
+        Log.d(TAG,"trying to initialize sockets");
         if (mFileListEntry!=null && receivedBundle!=null){
             //do stuff
             //get action
             mAction=receivedBundle.getInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER);
+            Log.d(TAG,"Ready to intialize sockets");
             Log.d(TAG,"the action is "+mAction);
 
             //we check if the intent is to send or to receive
@@ -330,8 +329,10 @@ public class ServiceFileShare extends Service implements
             }
         }else{
             //destroy service
+            Log.d(TAG,"Might have to destroy service since service ran again.");
             if (receivedBundle==null && mStepsBeforeSelfDestruction>=2){
                 //stop the service
+                Log.d(TAG,"Ready to destroy service");
                 //create he start foreground command
                 Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
                         .setContentTitle(getString(R.string.app_name))
@@ -358,15 +359,6 @@ public class ServiceFileShare extends Service implements
         intentStop.setAction(ACTION_STOP_SERVICE);
         //PendingIntent pendingIntentStopService=PendingIntent.getActivity(this,0,intentStop,0);
         PendingIntent pendingIntentStopService=PendingIntent.getService(this,0,intentStop,PendingIntent.FLAG_UPDATE_CURRENT);
-
-        //set the extra
-        /*Bundle extras=new Bundle();
-        extras.putInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER, TransferProgressActivity.RELAUNCH_APP);
-        intentApp.putExtras(extras);
-
-        //clear backstack
-        intentApp.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);*/
-
 
         //we set the notification
         return new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
@@ -511,14 +503,6 @@ public class ServiceFileShare extends Service implements
         //we update the ui as successful
         TextInfoSendObject endObject=new TextInfoSendObject(com.yumesoftworks.fileshare.TransferProgressActivity.TYPE_END,getResources().getString(R.string.service_success),String.valueOf(mTotalFiles)+","+String.valueOf(mTotalFiles));
         updateGeneralUI(endObject);
-
-        //we hide the notification
-        /*
-        try {
-            manager.cancel(NOTIFICATION_ID);
-        }catch (Exception e){
-            Log.e(TAG,"Finished send transfer couldnt cancel notification "+e.getMessage());
-        }*/
 
         //we update the notification
         manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)

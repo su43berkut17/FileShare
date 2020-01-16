@@ -93,6 +93,7 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
     }
 
     private void startTransfer(){
+        Log.d(TAG,"The total of files "+mTotalFiles+ " the current transfer "+mCurrentFile);
         if (mCurrentFile<mTotalFiles) {
             //we continue with the transfer
             if (typeOfTransfer == TransferProgressActivity.FILES_RECEIVING) {
@@ -149,7 +150,7 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
             mReceiverInterface.addReceivedCounter();
 
             //destroy socket
-            Boolean canWeContinue = false;
+            Boolean canWeContinue;
             do {
                 canWeContinue = mReceiverSocketTransfer.destroy();
             } while (!canWeContinue);

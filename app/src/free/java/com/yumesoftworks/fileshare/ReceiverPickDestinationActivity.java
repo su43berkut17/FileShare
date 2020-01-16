@@ -64,6 +64,9 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
     private Boolean isFirstExecution=true;
     private Boolean NSDInitialized=false;
 
+    //prevent double launch app
+    private boolean mLaunchNewActivity=false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -238,29 +241,32 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     @Override
     public void openNexActivity() {
-        //we close the socket
-        try {
-            mServerSocket.close();
-            Log.d(TAG,"server socket is closed "+mServerSocket.isClosed());
-        }catch(Exception e){
-            Log.d(TAG,"cant close server socket");
+        if (!mLaunchNewActivity) {
+            mLaunchNewActivity=true;
+            //we close the socket
+            try {
+                mServerSocket.close();
+                Log.d(TAG, "server socket is closed " + mServerSocket.isClosed());
+            } catch (Exception e) {
+                Log.d(TAG, "cant close server socket");
+            }
+
+            //we open the next activity with the socket information
+            //we call the activity that will start the service with the info
+            Intent intent = new Intent(this, TransferProgressActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+            //data to send on the intent
+            Bundle bundleSend = new Bundle();
+
+            //variables to be sent
+            bundleSend.putInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER, TransferProgressActivity.FILES_RECEIVING);
+            bundleSend.putInt(TransferProgressActivity.LOCAL_PORT, mServerSocket.getLocalPort());
+
+            intent.putExtras(bundleSend);
+            startActivity(intent);
+            finish();
         }
-
-        //we open the next activity with the socket information
-        //we call the activity that will start the service with the info
-        Intent intent=new Intent(this,TransferProgressActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-        //data to send on the intent
-        Bundle bundleSend=new Bundle();
-
-        //variables to be sent
-        bundleSend.putInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER,TransferProgressActivity.FILES_RECEIVING);
-        bundleSend.putInt(TransferProgressActivity.LOCAL_PORT,mServerSocket.getLocalPort());
-
-        intent.putExtras(bundleSend);
-        startActivity(intent);
-        finish();
     }
 
     @Override

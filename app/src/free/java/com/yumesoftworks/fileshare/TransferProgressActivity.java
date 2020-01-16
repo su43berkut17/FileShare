@@ -140,7 +140,8 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
         //we get the instance of the indeterminate progress bar
         mWaitingScreen =findViewById(R.id.pb_atp_waitingForConnection);
-        mAreWeClosing=false;
+
+        mAreWeClosing=false;//reset the closing flag
 
         //get the extras
         try {
@@ -344,7 +345,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     break;
 
                 case STATUS_TRANSFER_ACTIVE:
-                    if (!mIsServiceBound) {
+                    if (!mIsServiceBound && mHasServiceStarted==1) {
                         bindTheService();
                     }
                     break;
@@ -403,6 +404,10 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     Log.d(TAG, "starting on create the service 1st");
                     startService(serviceIntent);
                 }
+
+                //bind service
+                bindTheService();
+
             } catch (Exception e) {
                 Log.e(TAG, "Couldnt start service " + e.getMessage());
                 //we set the service start as complete
