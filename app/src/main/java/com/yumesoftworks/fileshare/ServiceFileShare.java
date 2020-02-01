@@ -75,6 +75,7 @@ public class ServiceFileShare extends Service implements
     public void onCreate() {
         super.onCreate();
 
+        Log.d(TAG,"Creating service");
         //foreground service 1st
         //check the API
         manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -109,7 +110,6 @@ public class ServiceFileShare extends Service implements
                     .build());
         }
 
-        Log.d(TAG,"Creating service");
         repositoryFile=new FileListRepository(getApplication());
         repositoryUser=new UserInfoRepository(getApplication());
 
@@ -244,7 +244,6 @@ public class ServiceFileShare extends Service implements
         }
 
         return super.onStartCommand(intent, flags, startId);
-        //return START_STICKY;
     }
 
     @Override
@@ -311,7 +310,6 @@ public class ServiceFileShare extends Service implements
                     e.printStackTrace();
                     connectionError();
                 }
-
             }else if (mAction== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_RECEIVING){
                 //we are receiving files
                 //change to send or receive

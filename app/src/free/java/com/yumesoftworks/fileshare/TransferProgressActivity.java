@@ -223,10 +223,10 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
         try {
             typeOfService = mExtras.getInt(EXTRA_TYPE_TRANSFER);
-            Log.d(TAG,"The transfer type is: "+typeOfService+ " -- 2001 for rec 2002 for send 0 for other");
+            Log.d(TAG,"The transfer type is: "+typeOfService+ " -- 2001 rec, 2002 for send, 0 for others");
         }catch (Exception e){
             typeOfService=0;
-            Log.e(TAG,"couldnt get what type of transfer it is");
+            Log.e(TAG,"couldnt get what type of transfer it is so it is 0");
         }
 
         bundleFrag.putInt(EXTRA_TYPE_TRANSFER,typeOfService);
@@ -349,9 +349,11 @@ public class TransferProgressActivity extends AppCompatActivity implements
                         bindTheService();
                     }
                     break;
+
                 case STATUS_TRANSFER_NOTIFICATION_CANCEL:
                     reopenApp();
                     break;
+
                 case STATUS_TRANSFER_INACTIVE:
                     //check if the service is running
                     if (typeOfTransfer==TransferProgressActivity.SERVICE_TYPE_INACTIVE && mHasServiceStarted==0 && mAreWeClosing==false){
@@ -383,7 +385,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         int typeOfService;
         try {
             typeOfService = mExtras.getInt(EXTRA_TYPE_TRANSFER);
-            Log.d(TAG,"The transfer type is: "+typeOfService+ " -- 2001 for rec 2002 for send 0 for other");
+            Log.d(TAG,"The transfer type is: "+typeOfService+ " -- 2001 rec, 2002 for send, 0 for other");
         }catch (Exception e){
             typeOfService=0;
             Log.e(TAG,"couldnt get what type of transfer it is");
