@@ -144,6 +144,16 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
+    protected void onDestroy() {
+        //remove observers
+        if (viewModel!=null && viewModel.getUserInfo().hasObservers()) {
+            viewModel.getUserInfo().removeObservers(this);
+        }
+
+        super.onDestroy();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater=getMenuInflater();
         inflater.inflate(R.menu.options_menu,menu);

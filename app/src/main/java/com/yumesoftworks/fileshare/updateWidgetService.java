@@ -39,7 +39,7 @@ public class updateWidgetService extends JobIntentService {
     //method to update the widget
     private void updateWidget(String recOrigin){
         //we check the origin of the update
-        Log.d(TAG,"We received the update from "+recOrigin);
+       // Log.d(TAG,"We received the update from "+recOrigin);
 
         //data has been sent, we update the widget!
         //we get the widget manager
@@ -64,7 +64,7 @@ public class updateWidgetService extends JobIntentService {
             mCurrentNumberOfFiles=recCurrentNumberOfFiles;
             mPercentage=percentage;
 
-            Log.i(TAG,"updates received on the service");
+            //Log.i(TAG,"updates received on the service");
         }else{
             //it is null so it is probably from normal update so we need to read it from the database
             mCurrentState=TransferProgressWidget.STATE_NORMAL;
@@ -74,12 +74,12 @@ public class updateWidgetService extends JobIntentService {
             mPercentage=0;
 
             //read it from the database
-            Log.d(TAG,"update current state is null so it is scheduled update");
+            //Log.d(TAG,"update current state is null so it is scheduled update");
         }
 
-        Log.d(TAG,"this is startActionUpdateWidget "+
-                mCurrentState+"-"+mNameOfCurrentFile+"-"+
-                mTotalNumberOfFiles+" of "+mCurrentNumberOfFiles);
+        //Log.d(TAG,"this is startActionUpdateWidget "+
+               // mCurrentState+"-"+mNameOfCurrentFile+"-"+
+               // mTotalNumberOfFiles+" of "+mCurrentNumberOfFiles);
 
         //we start the intent
         Intent intent=new Intent(context,updateWidgetService.class);

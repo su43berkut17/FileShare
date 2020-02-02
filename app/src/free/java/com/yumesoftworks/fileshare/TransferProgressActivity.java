@@ -73,6 +73,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
     //name of bundle objects coming from service
     public static final String ACTION_UPDATE_UI_DATA="updateUIData";
+    public static final String IS_ONLY_BIND="isOnlyBind";
     private static final String SERVICE_STARTED_STATUS="serviceStatusInitial";
     private static final String SEND_OR_RECEIVE_BUNDLE="sendOrReceiveBundle";
 
@@ -219,18 +220,8 @@ public class TransferProgressActivity extends AppCompatActivity implements
         //bundle to be sent to the new fragment
         Bundle bundleFrag=new Bundle();
 
-        int typeOfService;
-
-        try {
-            typeOfService = mExtras.getInt(EXTRA_TYPE_TRANSFER);
-            Log.d(TAG,"The transfer type is: "+typeOfService+ " -- 2001 rec, 2002 for send, 0 for others");
-        }catch (Exception e){
-            typeOfService=0;
-            Log.e(TAG,"couldnt get what type of transfer it is so it is 0");
-        }
-
+        int typeOfService= mExtras.getInt(EXTRA_TYPE_TRANSFER,0);
         bundleFrag.putInt(EXTRA_TYPE_TRANSFER,typeOfService);
-
         fragmentFileTransferProgress.setArguments(bundleFrag);
 
         //transaction
@@ -345,7 +336,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     break;
 
                 case STATUS_TRANSFER_ACTIVE:
-                    if (!mIsServiceBound && mHasServiceStarted==1) {
+                    if (!mIsServiceBound) {
                         bindTheService();
                     }
                     break;
@@ -427,6 +418,8 @@ public class TransferProgressActivity extends AppCompatActivity implements
     private void bindTheService(){
         //check if the service can be bound to
         Intent serviceIntent = new Intent(this, ServiceFileShare.class);
+        Bundle bindExtra=new Bundle();
+        bindExtra.putBoolean(IS_ONLY_BIND,true);
 
         //we bind the service
         try {

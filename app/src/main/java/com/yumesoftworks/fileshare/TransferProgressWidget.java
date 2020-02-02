@@ -44,14 +44,14 @@ public class TransferProgressWidget extends AppWidgetProvider {
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.transfer_progress_widget);
 
-        Log.d(TAG,"updateAppWidget starts");
+        //Log.d(TAG,"updateAppWidget starts");
         if (currentState!=null) {
             mCurrentState = currentState;
         }else{
             mCurrentState=STATE_NORMAL;
        }
 
-        Log.d(TAG,"updateAppWidget starts, current state is "+mCurrentState);
+        //Log.d(TAG,"updateAppWidget starts, current state is "+mCurrentState);
 
         if (mCurrentState.equals(STATE_TRANSFER)){
             mNameOfCurrentFile=nameOfCurrentFile;
@@ -94,17 +94,17 @@ public class TransferProgressWidget extends AppWidgetProvider {
                 views.setProgressBar(R.id.pb_widget_progress,100,mPercentage,false);
 
                 //set the extra
-               // Bundle extras=new Bundle();
-               // extras.putInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER,TransferProgressActivity.RELAUNCH_APP);
+                Bundle extras=new Bundle();
+                extras.putInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER,TransferProgressActivity.RELAUNCH_APP);
 
                 //we set the pending intent to launch the main app on transfer mode
-                //Intent intentTransfer = new Intent(context, TransferProgressActivity.class);
+                Intent intentTransfer = new Intent(context, TransferProgressActivity.class);
 
-                Intent intentTransfer = context.getPackageManager().getLaunchIntentForPackage("com.yumesoftworks.fileshare");
-                //intentTransfer.putExtras(extras);
+                //Intent intentTransfer = context.getPackageManager().getLaunchIntentForPackage("com.yumesoftworks.fileshare");
+                intentTransfer.putExtras(extras);
 
-                PendingIntent pendingIntentTransfer = PendingIntent.getActivity(context, 0, intentTransfer, 0);
-                //PendingIntent pendingIntentTransfer=PendingIntent.getActivity(context,0,intentTransfer,PendingIntent.FLAG_UPDATE_CURRENT);
+                //PendingIntent pendingIntentTransfer = PendingIntent.getActivity(context, 0, intentTransfer, 0);
+                PendingIntent pendingIntentTransfer=PendingIntent.getActivity(context,0,intentTransfer,PendingIntent.FLAG_UPDATE_CURRENT);
 
                 //we set the pending intent for the widget
                 views.setOnClickPendingIntent(R.id.widget_transfer_state, pendingIntentTransfer);

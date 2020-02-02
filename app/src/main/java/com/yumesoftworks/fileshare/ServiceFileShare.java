@@ -194,6 +194,9 @@ public class ServiceFileShare extends Service implements
     //start the transfer
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        //get the flags
+        Boolean isThisBind=intent.getBooleanExtra(TransferProgressActivity.IS_ONLY_BIND,false);
+
         //we set the service as started
         isServiceStarted=true;
         Log.d(TAG,"OnStar command");
@@ -219,13 +222,10 @@ public class ServiceFileShare extends Service implements
                 mTotalFiles = 0;
                 mCurrentFile = 0;
 
-                //we get the bundle of extras
-                try {
-                    //we call the initialize sockets
-                    receivedBundle = intent.getExtras();
-                    mStepsBeforeSelfDestruction++;
-                    initializeSockets();
-                } catch (Exception e) {
+                //get extras
+                receivedBundle=intent.getExtras();
+
+                if (receivedBundle==null){
                     Log.e(TAG, "No extra information sent to the service, we stop it.");
                     //create he start foreground command
                     Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
@@ -237,6 +237,14 @@ public class ServiceFileShare extends Service implements
 
                     startForeground(NOTIFICATION_ID, notification);
                     stopSelf();
+                }else{
+                    //check if it is binding
+                    if (isThisBind){
+                        stopSelf();
+                    }else{
+                        mStepsBeforeSelfDestruction++;
+                        initializeSockets();
+                    }
                 }
             } else {
                 Log.d(TAG, "A transfer has already started");
@@ -348,11 +356,17 @@ public class ServiceFileShare extends Service implements
 
     //notification build
     private NotificationCompat.Builder notificationBuilder(String title, String filename, boolean showProgress){
+        //extras
+        //set the extra
+        Bundle extras=new Bundle();
+        extras.putInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER,TransferProgressActivity.RELAUNCH_APP);
+
         //intent to open the activity
-        //Intent intentApp=new Intent(getApplicationContext(),TransferProgressActivity.class);
-        Intent intentApp = getApplicationContext().getPackageManager().getLaunchIntentForPackage("com.yumesoftworks.fileshare");
-        //PendingIntent pendingIntentApp=PendingIntent.getActivity(this,0,intentApp,PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent pendingIntentApp=PendingIntent.getActivity(this,0,intentApp,0);
+        Intent intentApp=new Intent(getApplicationContext(),TransferProgressActivity.class);
+        intentApp.putExtras(extras);
+        //Intent intentApp = getApplicationContext().getPackageManager().getLaunchIntentForPackage("com.yumesoftworks.fileshare");
+        PendingIntent pendingIntentApp=PendingIntent.getActivity(this,0,intentApp,PendingIntent.FLAG_UPDATE_CURRENT);
+        //PendingIntent pendingIntentApp=PendingIntent.getActivity(this,0,intentApp,0);
 
         //intent to stop the transfer
         Intent intentStop=new Intent(this,ServiceFileShare.class);
