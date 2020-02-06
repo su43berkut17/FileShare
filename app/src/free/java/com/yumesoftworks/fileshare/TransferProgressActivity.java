@@ -152,9 +152,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
             Log.e(TAG,"No extras found");
         }
 
-        //initialize fragments
-        initializeFragments();
-
         //get the broadcast receivers for responses from the service
         IntentFilter intentFilter=new IntentFilter(LOCAL_BROADCAST_REC);
         intentFilter.addAction(ACTION_UPDATE_UI);
@@ -163,11 +160,29 @@ public class TransferProgressActivity extends AppCompatActivity implements
         //toolbar
         Toolbar myToolbar = findViewById(R.id.tp_toolbar);
         setSupportActionBar(myToolbar);
+
+        //initialize fragments
+        initializeFragments();
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onResume() {
+        super.onResume();
+
+        //we get the file model to get user data and transfer status
+        fileTransferViewModel=ViewModelProviders.of(this).get(FileTransferViewModel.class);
+        fileTransferViewModel.getFileListInfo().observe(this,fileTransferViewModelObserver);
+
+        //we get the view model for the user transfer info
+        transferProgressActivityViewModel=ViewModelProviders.of(this).get(TransferProgressActivityViewModel.class);
+        transferProgressActivityViewModel.getData().observe(this,transferProgressActivityViewModelObserver);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        removeObservers();
 
         try {
             if (mIsServiceBound) {
@@ -228,14 +243,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
         fragmentManager.beginTransaction()
                 .add(R.id.frag_atp_transfer_progress,fragmentFileTransferProgress)
                 .commit();
-
-        //we get the file model to get user data and transfer status
-        fileTransferViewModel=ViewModelProviders.of(this).get(FileTransferViewModel.class);
-        fileTransferViewModel.getFileListInfo().observe(this,fileTransferViewModelObserver);
-
-        //we get the view model for the user transfer info
-        transferProgressActivityViewModel=ViewModelProviders.of(this).get(TransferProgressActivityViewModel.class);
-        transferProgressActivityViewModel.getData().observe(this,transferProgressActivityViewModelObserver);
     }
 
     //file observer
@@ -373,14 +380,8 @@ public class TransferProgressActivity extends AppCompatActivity implements
     //started if it is not needed
     private void startService(){
         Log.d(TAG,"Called start service");
-        int typeOfService;
-        try {
-            typeOfService = mExtras.getInt(EXTRA_TYPE_TRANSFER);
-            Log.d(TAG,"The transfer type is: "+typeOfService+ " -- 2001 rec, 2002 for send, 0 for other");
-        }catch (Exception e){
-            typeOfService=0;
-            Log.e(TAG,"couldnt get what type of transfer it is");
-        }
+        int typeOfService=mExtras.getInt(EXTRA_TYPE_TRANSFER,0);
+        Log.d(TAG,"The transfer type is: "+typeOfService+ " -- 2001 rec, 2002 for send, 0 for other");
 
         //service intent
         if (mHasServiceStarted==0 && (typeOfService==FILES_SENDING || typeOfService==FILES_RECEIVING)) {
@@ -567,8 +568,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
         mAreWeClosing=true;
 
         //change the status as inactive again
-        //transferProgressActivityViewModel.changeTransferStatus(STATUS_TRANSFER_INACTIVE);
-        //transferProgressActivityViewModel.changeServiceTypeStatus(SERVICE_TYPE_INACTIVE);
         transferProgressActivityViewModel.setAsInactive();
     }
 

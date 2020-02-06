@@ -48,7 +48,6 @@ public class ServiceFileShare extends Service implements
     private int mPort;
 
     //database access
-    //private AppDatabase database;
     private FileListRepository repositoryFile;
     private UserInfoRepository repositoryUser;
     private int mCurrentStatus;
@@ -63,7 +62,6 @@ public class ServiceFileShare extends Service implements
     private Bundle receivedBundle;
     private static Boolean isServiceStarted=false;
     private static Boolean isTransferActive=false;
-    private int mStepsBeforeSelfDestruction=0;
 
     //service binding
     private final IBinder binder=new ServiceFileShareBinder();
@@ -117,10 +115,40 @@ public class ServiceFileShare extends Service implements
         loadDatabase();
     }
 
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.d(TAG,"onBind");
+
+        //create he start foreground command
+        Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.service_notification_text_initialize))
+                .setOnlyAlertOnce(true)
+                .setOngoing(true)
+                .build();
+
+        startForeground(NOTIFICATION_ID, notification);
+
+        return binder;
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.d(TAG,"onUnbind");
+        return super.onUnbind(intent);
+    }
+
+    //bind
+    public class ServiceFileShareBinder extends Binder {
+        ServiceFileShare getService() {
+            Log.d(TAG,"returning this service");
+            // Return this instance of LocalService so clients can call public methods
+            return ServiceFileShare.this;
+        }
+    }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         Log.d(TAG,"Destroying service");
         //we cancel everything
 
@@ -171,24 +199,8 @@ public class ServiceFileShare extends Service implements
         }
 
         Log.d(TAG,"Service destroyed successfully");
-    }
 
-    //Load database
-    private void loadDatabase(){
-        //thread
-        readDataThread=new Thread(new Runnable() {
-            @Override
-            public void run() {
-                mFileListEntry=repositoryFile.getFilesDirect();
-                Log.d(TAG,"Database loaded, file list entry is "+mFileListEntry);
-
-                mStepsBeforeSelfDestruction++;
-
-                initializeSockets();
-            }
-        });
-
-        readDataThread.start();
+        super.onDestroy();
     }
 
     //start the transfer
@@ -199,7 +211,7 @@ public class ServiceFileShare extends Service implements
 
         //we set the service as started
         isServiceStarted=true;
-        Log.d(TAG,"OnStar command");
+        Log.d(TAG,"OnStart command");
 
         //check if it is stopped by notification
         if (intent.getAction()==ACTION_STOP_SERVICE){
@@ -211,39 +223,33 @@ public class ServiceFileShare extends Service implements
         }else {
             //we check if the service has been started before or a transfer is active
             if (!isTransferActive) {
-                Log.d(TAG, "No active transfer, we start one");
-                //change the active on the file
-                switchTransfer(TransferProgressActivity.STATUS_TRANSFER_ACTIVE);
-
-                //change the flag
-                isTransferActive = true;
-
-                //we initialize the files
-                mTotalFiles = 0;
-                mCurrentFile = 0;
-
-                //get extras
-                receivedBundle=intent.getExtras();
-
-                if (receivedBundle==null){
-                    Log.e(TAG, "No extra information sent to the service, we stop it.");
-                    //create he start foreground command
-                    Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
-                            .setContentTitle(getString(R.string.app_name))
-                            .setContentText(getString(R.string.service_notification_text_initialize))
-                            .setOnlyAlertOnce(true)
-                            .setOngoing(true)
-                            .build();
-
-                    startForeground(NOTIFICATION_ID, notification);
+                //check if it is a bind
+                if (isThisBind){
+                    Log.d(TAG,"trying to bind when transfer is not active, stop service");
                     stopSelf();
                 }else{
-                    //check if it is binding
-                    if (isThisBind){
+                    //check if the extras exist
+                    if (intent.getIntExtra(TransferProgressActivity.EXTRA_TYPE_TRANSFER,0)==0){
+                        //the type extra transfer does not exist
+                        Log.e(TAG, "No extra information sent to the service, we stop it.");
+                        //create he start foreground command
+                        Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
+                                .setContentTitle(getString(R.string.app_name))
+                                .setContentText(getString(R.string.service_notification_text_initialize))
+                                .setOnlyAlertOnce(true)
+                                .setOngoing(true)
+                                .build();
+
+                        startForeground(NOTIFICATION_ID, notification);
                         stopSelf();
                     }else{
-                        mStepsBeforeSelfDestruction++;
-                        initializeSockets();
+                        //load the database
+                        Log.d(TAG, "No active transfer, we load the database");
+                        //get the bundle
+                        receivedBundle=intent.getExtras();
+                        //change the active flag
+                        isTransferActive=true;
+                        loadDatabase();
                     }
                 }
             } else {
@@ -254,103 +260,91 @@ public class ServiceFileShare extends Service implements
         return super.onStartCommand(intent, flags, startId);
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        Log.d(TAG,"onBind");
+    //Load database
+    private void loadDatabase(){
+        //thread
+        readDataThread=new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mFileListEntry=repositoryFile.getFilesDirect();
+                Log.d(TAG,"Database loaded, file list entry is "+mFileListEntry);
 
-        //create he start foreground command
-        Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText(getString(R.string.service_notification_text_initialize))
-                .setOnlyAlertOnce(true)
-                .setOngoing(true)
-                .build();
+                initializeService();
+            }
+        });
 
-        startForeground(NOTIFICATION_ID, notification);
-
-        return binder;
+        readDataThread.start();
     }
 
-    @Override
-    public boolean onUnbind(Intent intent) {
-        Log.d(TAG,"onUnbind");
-        return super.onUnbind(intent);
-    }
+    //change the switch and call the sockets
+    private void initializeService(){
+        //change the active on the file
+        switchTransfer(TransferProgressActivity.STATUS_TRANSFER_ACTIVE);
 
-    //bind
-    public class ServiceFileShareBinder extends Binder {
-        ServiceFileShare getService() {
-            Log.d(TAG,"returning this service");
-            // Return this instance of LocalService so clients can call public methods
-            return ServiceFileShare.this;
-        }
+        //we initialize the files
+        mTotalFiles = 0;
+        mCurrentFile = 0;
+
+        initializeSockets();
     }
 
     //initialize sockets
     //should only work when database has been loaded and after receiving the intents
     private void initializeSockets(){
-        Log.d(TAG,"trying to initialize sockets");
-        if (mFileListEntry!=null && receivedBundle!=null){
-            //do stuff
-            //get action
-            mAction=receivedBundle.getInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER);
-            Log.d(TAG,"Ready to intialize sockets");
-            Log.d(TAG,"the action is "+mAction);
+        Log.d(TAG,"initializing sockets");
 
-            //we check if the intent is to send or to receive
-            if (mAction== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_SENDING){
-                //we are sending files
-                //change to send or receive
-                switchServiceType(TransferProgressActivity.SERVICE_TYPE_SENDING);
-                //mFileListEntry=mFileListEntryLive;
-                Log.d(TAG,"the value of the files is "+mFileListEntry.size());
-                mTotalFiles=mFileListEntry.size();
+        //get action
+        mAction=receivedBundle.getInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER);
+        Log.d(TAG,"Ready to initialize sockets");
+        Log.d(TAG,"the action is "+mAction);
 
-                //we start the socket for communication
-                try{
-                    mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,
-                            receivedBundle.getString(com.yumesoftworks.fileshare.TransferProgressActivity.REMOTE_IP),
-                            receivedBundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.REMOTE_PORT),
-                            mFileListEntry,mAction);
+        //we check if the intent is to send or to receive
+        if (mAction== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_SENDING){
+            //we are sending files
+            //change to send or receive
+            switchServiceType(TransferProgressActivity.SERVICE_TYPE_SENDING);
+            //mFileListEntry=mFileListEntryLive;
+            Log.d(TAG,"the value of the files is "+mFileListEntry.size());
+            mTotalFiles=mFileListEntry.size();
 
-                }catch (Exception e){
-                    Log.e(TAG,"There was an error creating the send client socket");
-                    e.printStackTrace();
-                    connectionError();
-                }
-            }else if (mAction== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_RECEIVING){
-                //we are receiving files
-                //change to send or receive
-                switchServiceType(TransferProgressActivity.SERVICE_TYPE_RECEIVING);
-                try{
-                    //create the server socket
-                    mPort=receivedBundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.LOCAL_PORT);
+            //we start the socket for communication
+            try{
+                mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,
+                        receivedBundle.getString(com.yumesoftworks.fileshare.TransferProgressActivity.REMOTE_IP),
+                        receivedBundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.REMOTE_PORT),
+                        mFileListEntry,mAction);
 
-                    mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,mPort,mAction);
-                }catch (Exception e){
-                    Log.e(TAG,"There was an error creating the receive client socket"+e.getMessage());
-                    e.printStackTrace();
-                    connectionError();
-                }
+            }catch (Exception e){
+                Log.e(TAG,"There was an error creating the send client socket");
+                e.printStackTrace();
+                connectionError();
+            }
+        }else if (mAction== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_RECEIVING){
+            //we are receiving files
+            //change to send or receive
+            switchServiceType(TransferProgressActivity.SERVICE_TYPE_RECEIVING);
+            try{
+                //create the server socket
+                mPort=receivedBundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.LOCAL_PORT);
+
+                mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,mPort,mAction);
+            }catch (Exception e){
+                Log.e(TAG,"There was an error creating the receive client socket"+e.getMessage());
+                e.printStackTrace();
+                connectionError();
             }
         }else{
-            //destroy service
-            Log.d(TAG,"Might have to destroy service since service ran again.");
-            if (receivedBundle==null && mStepsBeforeSelfDestruction>=2){
-                //stop the service
-                Log.d(TAG,"Ready to destroy service");
-                //create he start foreground command
-                Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
-                        .setContentTitle(getString(R.string.app_name))
-                        .setContentText(getString(R.string.service_notification_text_initialize))
-                        .setOnlyAlertOnce(true)
-                        .setOngoing(true)
-                        .build();
+            Log.e(TAG,"We should never get to this");
+            //create he start foreground command
+            Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setContentText(getString(R.string.service_notification_text_initialize))
+                    .setOnlyAlertOnce(true)
+                    .setOngoing(true)
+                    .build();
 
-                startForeground(NOTIFICATION_ID, notification);
-
-                stopSelf();
-            }
+            startForeground(NOTIFICATION_ID, notification);
+            stopSelf();
         }
     }
 
