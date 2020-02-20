@@ -38,9 +38,17 @@ public class WelcomeScreenViewModel extends AndroidViewModel {
                 database.userInfoDao().insertTask(userInfoEntry);
             }
         });
+    }
 
-
-        //new saveDatabaseAsyncTask(database).execute(userInfoEntry);
+    public void resetFlags(final UserInfoEntry userInfoEntry){
+        Executor myExecutor = Executors.newSingleThreadExecutor();
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                database.fileListDao().clearFileList();
+                database.userInfoDao().updateTask(userInfoEntry);
+            }
+        });
     }
 
     /*private static class saveDatabaseAsyncTask extends AsyncTask<UserInfoEntry,Void,Void>{

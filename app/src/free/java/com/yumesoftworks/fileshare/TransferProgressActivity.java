@@ -107,7 +107,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
     //type of service
     private int mTypeServiceOrRelaunch;
-    //private int mSendOrReceive;//useless
     private int mHasServiceStarted; //useless?
     private boolean mIsServiceBound=false;
 
@@ -234,9 +233,13 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
         //bundle to be sent to the new fragment
         Bundle bundleFrag=new Bundle();
+        try {
+            int typeOfService = mExtras.getInt(EXTRA_TYPE_TRANSFER, 0);
+            bundleFrag.putInt(EXTRA_TYPE_TRANSFER, typeOfService);
+        }catch (Exception e){
+            bundleFrag.putInt(EXTRA_TYPE_TRANSFER,0);
+        }
 
-        int typeOfService= mExtras.getInt(EXTRA_TYPE_TRANSFER,0);
-        bundleFrag.putInt(EXTRA_TYPE_TRANSFER,typeOfService);
         fragmentFileTransferProgress.setArguments(bundleFrag);
 
         //transaction
@@ -380,7 +383,12 @@ public class TransferProgressActivity extends AppCompatActivity implements
     //started if it is not needed
     private void startService(){
         Log.d(TAG,"Called start service");
-        int typeOfService=mExtras.getInt(EXTRA_TYPE_TRANSFER,0);
+        int typeOfService;
+        try {
+            typeOfService = mExtras.getInt(EXTRA_TYPE_TRANSFER, 0);
+        }catch (Exception e){
+            typeOfService=0;
+        }
         Log.d(TAG,"The transfer type is: "+typeOfService+ " -- 2001 rec, 2002 for send, 0 for other");
 
         //service intent
@@ -508,6 +516,8 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 Log.d(TAG,"the transfer is not active we hide the splash screen that hides everything");
                 //it is not active
                 mWaitingScreen.setVisibility(View.GONE);
+                //unbind
+                doUnbind();
             }else{
                 //update the UI with data from the service
                 mService.updateUIOnly();

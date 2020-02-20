@@ -113,31 +113,20 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
                     //we check if a transfer is in progress
                     mIsTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
                     if (mIsTransferInProgress!=TransferProgressActivity.STATUS_TRANSFER_INACTIVE){
-                        Log.e(TAG,"This is a relaunch from the main menu nactivity");
-                        //we relaunch the transfer activity
-                        Intent intent= new Intent(getApplicationContext(), com.yumesoftworks.fileshare.TransferProgressActivity.class);
+                        //we reset the values
+                        UserInfoEntry resetUserInfoEntry=userInfoEntries.get(0);
+                        resetUserInfoEntry.setIsTransferInProgress(TransferProgressActivity.STATUS_TRANSFER_INACTIVE);
+                        resetUserInfoEntry.setTransferTypeSendOrReceive(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
+                        viewModel.resetFlags(resetUserInfoEntry);
 
-                        //set the extra
-                        Bundle extras=new Bundle();
-                        extras.putInt(com.yumesoftworks.fileshare.TransferProgressActivity.EXTRA_TYPE_TRANSFER, com.yumesoftworks.fileshare.TransferProgressActivity.RELAUNCH_APP);
-                        intent.putExtras(extras);
-
-                        //clear backstack
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                        //basic transition to main menu
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                            Bundle bundle = ActivityOptions.makeSceneTransitionAnimation((Activity)thisActivity).toBundle();
-                            startActivity(intent, bundle);
-                        } else {
-                            startActivity(intent);
+                        //return the widget to its normal state
+                        try {
+                            updateWidgetService.startActionUpdateWidget(thisActivity, TransferProgressWidget.STATE_NORMAL, "", 0, 0,100);
+                        }catch (Exception e){
+                            Log.e(TAG,"Couldn't set widget as normal");
                         }
-
-                        //finish this activity
-                        finish();
-                    }else {
-                        mLoadingScreen.setVisibility(View.GONE);
                     }
+                    mLoadingScreen.setVisibility(View.GONE);
                 }
             }
         });

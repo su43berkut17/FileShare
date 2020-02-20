@@ -207,7 +207,12 @@ public class ServiceFileShare extends Service implements
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //get the flags
-        Boolean isThisBind=intent.getBooleanExtra(TransferProgressActivity.IS_ONLY_BIND,false);
+        Boolean isThisBind;
+        try {
+            isThisBind = intent.getBooleanExtra(TransferProgressActivity.IS_ONLY_BIND, false);
+        }catch (Exception e){
+            isThisBind=false;
+        }
 
         //we set the service as started
         isServiceStarted=true;
@@ -294,7 +299,11 @@ public class ServiceFileShare extends Service implements
         Log.d(TAG,"initializing sockets");
 
         //get action
-        mAction=receivedBundle.getInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER);
+        try {
+            mAction = receivedBundle.getInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER);
+        }catch (Exception e){
+            mAction=0;
+        }
         Log.d(TAG,"Ready to initialize sockets");
         Log.d(TAG,"the action is "+mAction);
 

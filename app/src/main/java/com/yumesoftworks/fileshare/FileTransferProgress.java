@@ -61,8 +61,14 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         Log.d(TAG,"Creating the views for the fragment");
 
         //get the type via arguments
-        Bundle bundle=getArguments();
-        mType=bundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.EXTRA_TYPE_TRANSFER,0);
+        Bundle bundle;
+        try {
+            bundle=getArguments();
+            mType = bundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.EXTRA_TYPE_TRANSFER, 0);
+        }catch (Exception e){
+            bundle=new Bundle();
+            bundle.putInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER,0);
+        }
 
         rvFileList=fileProgressView.findViewById(R.id.rv_file_progress_queue);
         rvFileList.setLayoutManager(new LinearLayoutManager(getContext()));
