@@ -41,7 +41,8 @@ public class ServiceFileShare extends Service implements
     private int mCurrentFile=0;
     private String mCurrentFileName;
     private int mCounterTimesWidget=0;
-    private static final String ACTION_STOP_SERVICE="stopServiceAction";
+    public static final String ACTION_STOP_SERVICE="stopServiceAction";
+    public static final String ACTION_BEGIN_TRANSFER="startTransferAction";
 
     //socket stuff
     private TransferFileCoordinatorHelper mTransferFileCoordinatorHelper;
@@ -101,7 +102,7 @@ public class ServiceFileShare extends Service implements
             }
         } else {
             manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
-                    , getString(R.string.service_notification_text_initialize)
+                    , getString(R.string.app_name)
                     , false)
                     .setOnlyAlertOnce(true)
                     .setOngoing(true)
@@ -110,9 +111,6 @@ public class ServiceFileShare extends Service implements
 
         repositoryFile=new FileListRepository(getApplication());
         repositoryUser=new UserInfoRepository(getApplication());
-
-        //create a load database
-        loadDatabase();
     }
 
     @Override
@@ -122,7 +120,7 @@ public class ServiceFileShare extends Service implements
         //create he start foreground command
         Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
                 .setContentTitle(getString(R.string.app_name))
-                .setContentText(getString(R.string.service_notification_text_initialize))
+                .setContentText(getString(R.string.app_name))
                 .setOnlyAlertOnce(true)
                 .setOngoing(true)
                 .build();
@@ -153,13 +151,13 @@ public class ServiceFileShare extends Service implements
         //we cancel everything
 
         //check if the current status is an error so it wont change it to success
-        if (mCurrentStatus != TransferProgressActivity.STATUS_TRANSFER_OUT_OF_SPACE_ERROR || mCurrentStatus != TransferProgressActivity.STATUS_TRANSFER_SOCKET_ERROR || mCurrentStatus!=TransferProgressActivity.STATUS_TRANSFER_NOTIFICATION_CANCEL) {
+        //if (mCurrentStatus != TransferProgressActivity.STATUS_TRANSFER_OUT_OF_SPACE_ERROR || mCurrentStatus != TransferProgressActivity.STATUS_TRANSFER_SOCKET_ERROR || mCurrentStatus!=TransferProgressActivity.STATUS_TRANSFER_NOTIFICATION_CANCEL) {
             //deactivate the switch transfer
             if (isServiceStarted && !isTransferActive) {
                 repositoryUser.switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
                 repositoryUser.switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
             }
-        }
+        //}
 
         //make sure to destroy the transfer and threads by any chance if it is still active
         Boolean isItDestroyed;
@@ -206,20 +204,50 @@ public class ServiceFileShare extends Service implements
     //start the transfer
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //get the flags
-        Boolean isThisBind;
-        try {
-            isThisBind = intent.getBooleanExtra(TransferProgressActivity.IS_ONLY_BIND, false);
-        }catch (Exception e){
-            isThisBind=false;
-        }
-
         //we set the service as started
         isServiceStarted=true;
         Log.d(TAG,"OnStart command");
 
-        //check if it is stopped by notification
+        //get the intent
+        try {
+            receivedBundle = intent.getExtras();
+        }catch (Exception e){
+            receivedBundle=new Bundle();
+        }
+
+        //check if it is stopping the transfer
         if (intent.getAction()==ACTION_STOP_SERVICE){
+            //we deactivate the transfer status
+            Log.d(TAG,"trying to stop service by notification");
+            switchTransfer(TransferProgressActivity.STATUS_TRANSFER_NOTIFICATION_CANCEL);
+            switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
+
+            //stop the transfer
+            mTransferFileCoordinatorHelper.userCancelled();
+        }else if (intent.getAction()==ACTION_BEGIN_TRANSFER){
+            //load the database
+            Log.d(TAG, "No active transfer, we load the database");
+            //get the bundle
+            receivedBundle=intent.getExtras();
+            //change the active flag
+            isTransferActive=true;
+            loadDatabase();
+        }else{
+            //nothing happens, services keeps running
+            Log.d(TAG, "Service running normally");
+        }
+
+        //get the flags
+        /*Boolean isThisBind;
+        try {
+            isThisBind = intent.getBooleanExtra(TransferProgressActivity.IS_ONLY_BIND, false);
+        }catch (Exception e){
+            isThisBind=false;
+        }*/
+
+
+        //check if it is stopped by notification
+        /*if (intent.getAction()==ACTION_STOP_SERVICE){
             //we deactivate the transfer status
             Log.d(TAG,"trying to stop service by notification");
             switchTransfer(TransferProgressActivity.STATUS_TRANSFER_NOTIFICATION_CANCEL);
@@ -231,12 +259,12 @@ public class ServiceFileShare extends Service implements
                 //check if it is a bind
                 if (isThisBind){
                     Log.d(TAG,"trying to bind when transfer is not active, stop service");
-                    stopSelf();
+                    //stopSelf();
                 }else{
                     //check if the extras exist
                     if (intent.getIntExtra(TransferProgressActivity.EXTRA_TYPE_TRANSFER,0)==0){
                         //the type extra transfer does not exist
-                        Log.e(TAG, "No extra information sent to the service, we stop it.");
+                        Log.e(TAG, "No extra information sent to the service");
                         //create he start foreground command
                         Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
                                 .setContentTitle(getString(R.string.app_name))
@@ -247,7 +275,7 @@ public class ServiceFileShare extends Service implements
 
                         startForeground(NOTIFICATION_ID, notification);
                         stopSelf();
-                    }else{
+                    //}else{
                         //load the database
                         Log.d(TAG, "No active transfer, we load the database");
                         //get the bundle
@@ -260,7 +288,7 @@ public class ServiceFileShare extends Service implements
             } else {
                 Log.d(TAG, "A transfer has already started");
             }
-        }
+        }*/
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -345,15 +373,15 @@ public class ServiceFileShare extends Service implements
         }else{
             Log.e(TAG,"We should never get to this");
             //create he start foreground command
-            Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
+            /*Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
                     .setContentTitle(getString(R.string.app_name))
                     .setContentText(getString(R.string.service_notification_text_initialize))
                     .setOnlyAlertOnce(true)
                     .setOngoing(true)
                     .build();
 
-            startForeground(NOTIFICATION_ID, notification);
-            stopSelf();
+            startForeground(NOTIFICATION_ID, notification);*/
+            //stopSelf();
         }
     }
 
@@ -419,7 +447,7 @@ public class ServiceFileShare extends Service implements
         switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
         isTransferActive=false;
 
-        stopSelf();
+        //stopSelf();
     }
 
     //out of space
@@ -437,7 +465,7 @@ public class ServiceFileShare extends Service implements
         switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
         isTransferActive=false;
 
-        stopSelf();
+        //stopSelf();
     }
 
     //receive client interfaces
@@ -472,7 +500,7 @@ public class ServiceFileShare extends Service implements
         }catch (Exception e){
             Log.e(TAG,"Couldnt update widget back to normal "+e.getMessage());
         }
-        stopSelf();
+        //stopSelf();
     }
 
     @Override
@@ -542,7 +570,7 @@ public class ServiceFileShare extends Service implements
             Log.e(TAG,"Couldnt update widget back to normal "+e.getMessage());
         }
 
-        stopSelf();
+        //stopSelf();
     }
 
     @Override
@@ -670,10 +698,6 @@ public class ServiceFileShare extends Service implements
 
     //activity asked is transfer is active
     public boolean methodIsTransferActive(){
-        if (!isTransferActive){
-            Log.e(TAG,"Transfer is not active, we will stop the service");
-            stopSelf();
-        }
         return isTransferActive;
     }
 

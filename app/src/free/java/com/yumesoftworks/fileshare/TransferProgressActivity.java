@@ -143,6 +143,23 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
         mAreWeClosing=false;//reset the closing flag
 
+        //initialize the service
+        Intent serviceIntent=new Intent(thisActivity,ServiceFileShare.class);
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Log.d(TAG, "starting on create the service 1st");
+                startForegroundService(serviceIntent);
+            } else {
+                Log.d(TAG, "starting on create the service 1st");
+                startService(serviceIntent);
+            }
+            mHasServiceStarted=1;
+        } catch (Exception e) {
+            Log.e(TAG, "Couldnt start service " + e.getMessage());
+            //we set the service start as complete
+            mHasServiceStarted = 0;
+        }
+
         //get the extras
         try {
             Intent intent = getIntent();
@@ -182,7 +199,13 @@ public class TransferProgressActivity extends AppCompatActivity implements
         super.onPause();
 
         removeObservers();
+    }
 
+    @Override
+    protected void onDestroy() {
+        Log.d(TAG,"-------On destroy activity--------");
+
+        //unbind
         try {
             if (mIsServiceBound) {
                 Log.d(TAG, "Unbinding the service onStop");
@@ -192,11 +215,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
         }catch (Exception e){
             Log.e(TAG,"Couldnt unbind the service "+e.getMessage());
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        Log.d(TAG,"-------On destroy activity--------");
 
         //kill the fragment
         try {
@@ -307,10 +325,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     //set values to completed
                     fragmentFileTransferProgress.setComplete();
 
-                    //we unbind the service
-                    mHasServiceStarted=0;
-                    doUnbind();
-
                     break;
 
                 case STATUS_TRANSFER_OUT_OF_SPACE_ERROR:
@@ -322,10 +336,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
                     //hide the waiting screen
                     mWaitingScreen.setVisibility(View.GONE);
-
-                    //we unbind the service
-                    mHasServiceStarted=0;
-                    doUnbind();
 
                     break;
 
@@ -339,16 +349,13 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     //hide the waiting screen
                     mWaitingScreen.setVisibility(View.GONE);
 
-                    //we unbind the service
-                    mHasServiceStarted=0;
-                    doUnbind();
-
                     break;
 
                 case STATUS_TRANSFER_ACTIVE:
-                    if (!mIsServiceBound) {
-                        bindTheService();
-                    }
+                    //if (!mIsServiceBound) {
+                        //bindTheService();
+                    //}
+
                     break;
 
                 case STATUS_TRANSFER_NOTIFICATION_CANCEL:
@@ -357,10 +364,15 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
                 case STATUS_TRANSFER_INACTIVE:
                     //check if the service is running
-                    if (typeOfTransfer==TransferProgressActivity.SERVICE_TYPE_INACTIVE && mHasServiceStarted==0 && mAreWeClosing==false){
+                    if (typeOfTransfer==TransferProgressActivity.SERVICE_TYPE_INACTIVE && mAreWeClosing==false){
                         Log.d(TAG,"We start the service from observer");
-                        startService();
+                        startServiceTransfer();
                     }else if(mAreWeClosing==true){
+                        Log.d(TAG,"We close the activity from observer and we reset everything");
+                        //close the service
+                        Intent serviceIntent=new Intent(thisActivity,ServiceFileShare.class);
+                        stopService(serviceIntent);
+
                         //close for good
                         removeObservers();
 
@@ -374,14 +386,14 @@ public class TransferProgressActivity extends AppCompatActivity implements
                         startActivity(intent);
                         finish();
                     }
-
+                    break;
             }
         }
     };
 
     //Start service only when the status is inactive, that way we prevent the service from being
     //started if it is not needed
-    private void startService(){
+    private void startServiceTransfer(){
         Log.d(TAG,"Called start service");
         int typeOfService;
         try {
@@ -392,9 +404,10 @@ public class TransferProgressActivity extends AppCompatActivity implements
         Log.d(TAG,"The transfer type is: "+typeOfService+ " -- 2001 rec, 2002 for send, 0 for other");
 
         //service intent
-        if (mHasServiceStarted==0 && (typeOfService==FILES_SENDING || typeOfService==FILES_RECEIVING)) {
+        if (typeOfService==FILES_SENDING || typeOfService==FILES_RECEIVING) {
             Log.d(TAG,"Extras are good and service hasnt been started yet, we can start de service");
             Intent serviceIntent = new Intent(this, ServiceFileShare.class);
+            serviceIntent.setAction(ServiceFileShare.ACTION_BEGIN_TRANSFER);
             serviceIntent.putExtras(mExtras);
             mHasServiceStarted = 1;
 
