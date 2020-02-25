@@ -419,12 +419,13 @@ public class ServiceFileShare extends Service implements
     }
 
     //dabatase stuff
-    private void switchTransfer(int activateTransfer){
-        mCurrentStatus=activateTransfer;
-        repositoryUser.switchTransfer(activateTransfer);
+    private void switchTransfer(int rActivateTransfer){
+        Log.d(TAG,"Changing transfer to: "+rActivateTransfer);
+        mCurrentStatus=rActivateTransfer;
+        repositoryUser.switchTransfer(rActivateTransfer);
     }
-    private void switchServiceType(int serviceType){
-        repositoryUser.switchServiceType(serviceType);
+    private void switchServiceType(int rServiceType){
+        repositoryUser.switchServiceType(rServiceType);
     }
 
     //successful sent
