@@ -1,10 +1,14 @@
 package com.yumesoftworks.fileshare.recyclerAdapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -89,12 +93,21 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
                         .into(queueListViewHolder.iv_icon);
             } else if (fileListEntry.getMimeType().startsWith("video")){
                 int tempUri = mContext.getResources().getIdentifier("icon_video_128","drawable",mContext.getPackageName());
-                Picasso.get()
-                        .load(tempUri)
-                        .resize(200, 200)
-                        .centerCrop()
-                        .placeholder(placeholderUri)
-                        .into(queueListViewHolder.iv_icon);
+                try {
+                    Bitmap bigBitmap = ThumbnailUtils.createVideoThumbnail(fileListEntry.getPath(), MediaStore.Video.Thumbnails.MICRO_KIND);
+                    int width = bigBitmap.getWidth();
+                    int height = bigBitmap.getHeight();
+                    int crop = (width - height) / 2;
+                    Bitmap cropImg = Bitmap.createBitmap(bigBitmap, crop, 0, height, height);
+                    queueListViewHolder.iv_icon.setImageBitmap(cropImg);
+                }catch (Exception e) {
+                    Picasso.get()
+                            .load(tempUri)
+                            .resize(200, 200)
+                            .centerCrop()
+                            .placeholder(tempUri)
+                            .into(queueListViewHolder.iv_icon);
+                }
             }else if (fileListEntry.getMimeType().startsWith("audio")){
                 int tempUri = mContext.getResources().getIdentifier("icon_music_128","drawable",mContext.getPackageName());
                 Picasso.get()
