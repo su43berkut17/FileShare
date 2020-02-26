@@ -51,7 +51,7 @@ public class ServiceFileShare extends Service implements
     //database access
     private FileListRepository repositoryFile;
     private UserInfoRepository repositoryUser;
-    private int mCurrentStatus;
+    //private int mCurrentStatus;
 
     //threading
     private Thread readDataThread;
@@ -220,7 +220,7 @@ public class ServiceFileShare extends Service implements
             //we deactivate the transfer status
             Log.d(TAG,"trying to stop service by notification");
             switchTransfer(TransferProgressActivity.STATUS_TRANSFER_NOTIFICATION_CANCEL);
-            switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
+            //switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
 
             //stop the transfer
             mTransferFileCoordinatorHelper.userCancelled();
@@ -421,7 +421,7 @@ public class ServiceFileShare extends Service implements
     //dabatase stuff
     private void switchTransfer(int rActivateTransfer){
         Log.d(TAG,"Changing transfer to: "+rActivateTransfer);
-        mCurrentStatus=rActivateTransfer;
+        //mCurrentStatus=rActivateTransfer;
         repositoryUser.switchTransfer(rActivateTransfer);
     }
     private void switchServiceType(int rServiceType){
@@ -445,7 +445,7 @@ public class ServiceFileShare extends Service implements
 
         //we deactivate the transfer status
         switchTransfer(TransferProgressActivity.STATUS_TRANSFER_SOCKET_ERROR);
-        switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
+        //switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
         isTransferActive=false;
 
         //stopSelf();
@@ -463,7 +463,7 @@ public class ServiceFileShare extends Service implements
 
         //we deactivate the transfer status
         switchTransfer(TransferProgressActivity.STATUS_TRANSFER_OUT_OF_SPACE_ERROR);
-        switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
+        //switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
         isTransferActive=false;
 
         //stopSelf();
@@ -492,7 +492,7 @@ public class ServiceFileShare extends Service implements
 
         //we deactivate the transfer status
         switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
-        switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
+        //switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
         isTransferActive=false;
 
         //set the widget on its initial state
@@ -561,7 +561,7 @@ public class ServiceFileShare extends Service implements
 
         //we set the database as not transferring so if they restart the app goes to the main menu
         switchTransfer(TransferProgressActivity.STATUS_TRANSFER_FINISHED);
-        switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
+        //switchServiceType(TransferProgressActivity.SERVICE_TYPE_INACTIVE);
         isTransferActive=false;
 
         //set the widget on its initial state
@@ -570,8 +570,6 @@ public class ServiceFileShare extends Service implements
         }catch (Exception e){
             Log.e(TAG,"Couldnt update widget back to normal "+e.getMessage());
         }
-
-        //stopSelf();
     }
 
     @Override

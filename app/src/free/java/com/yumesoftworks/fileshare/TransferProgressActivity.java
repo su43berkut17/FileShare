@@ -74,8 +74,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
     //name of bundle objects coming from service
     public static final String ACTION_UPDATE_UI_DATA="updateUIData";
     public static final String IS_ONLY_BIND="isOnlyBind";
-    private static final String SERVICE_STARTED_STATUS="serviceStatusInitial";
-    private static final String SEND_OR_RECEIVE_BUNDLE="sendOrReceiveBundle";
 
     private LinearLayout mWaitingScreen;
 
@@ -86,7 +84,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
     public static final int FILES_SENDING=2001;
     public static final int FILES_RECEIVING=2002;
     public static final int RELAUNCH_APP=2003;
-    public static final String ACTION_SERVICE ="ReceivingFiles";
 
     //fragment parts
     private FileTransferProgress fragmentFileTransferProgress;
@@ -107,7 +104,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
     //type of service
     private int mTypeServiceOrRelaunch;
-    private int mHasServiceStarted; //useless?
     private boolean mIsServiceBound=false;
 
     //from the intent that created the activity to indicate the service what kind of transfer
@@ -153,11 +149,8 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 Log.d(TAG, "starting on create the service 1st");
                 startService(serviceIntent);
             }
-            mHasServiceStarted=1;
         } catch (Exception e) {
             Log.e(TAG, "Couldnt start service " + e.getMessage());
-            //we set the service start as complete
-            mHasServiceStarted = 0;
         }
 
         //get the extras
@@ -184,37 +177,22 @@ public class TransferProgressActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-
-        //we get the file model to get user data and transfer status
-        fileTransferViewModel=ViewModelProviders.of(this).get(FileTransferViewModel.class);
-        fileTransferViewModel.getFileListInfo().observe(this,fileTransferViewModelObserver);
-
-        //we get the view model for the user transfer info
-        transferProgressActivityViewModel=ViewModelProviders.of(this).get(TransferProgressActivityViewModel.class);
-        transferProgressActivityViewModel.getData().observe(this,transferProgressActivityViewModelObserver);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-
-        removeObservers();
     }
 
     @Override
     protected void onDestroy() {
         Log.d(TAG,"-------On destroy activity--------");
 
-        //unbind
-        try {
-            if (mIsServiceBound) {
-                Log.d(TAG, "Unbinding the service onStop");
-                unbindService(serConnection);
-                mIsServiceBound=false;
-            }
-        }catch (Exception e){
-            Log.e(TAG,"Couldnt unbind the service "+e.getMessage());
-        }
+        //removing observers
+        removeObservers();
+
+        //unbind service
+        doUnbind();
 
         //kill the fragment
         try {
@@ -223,9 +201,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
             Log.d(TAG,"couldnt remove the fragments on destroy");
         }
 
-        //removing observers
-        removeObservers();
-
         //dismiss dialogs if they exist
         try {
             mGeneralDialog.dismiss();
@@ -233,6 +208,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
             Log.d(TAG,"dialog cant be dismissed");
         }
 
+        //remove broadcast manager
         try {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceived);
         }catch (Exception e){
@@ -264,6 +240,10 @@ public class TransferProgressActivity extends AppCompatActivity implements
         fragmentManager.beginTransaction()
                 .add(R.id.frag_atp_transfer_progress,fragmentFileTransferProgress)
                 .commit();
+
+        //we get the view model for the user transfer info
+        transferProgressActivityViewModel=ViewModelProviders.of(this).get(TransferProgressActivityViewModel.class);
+        transferProgressActivityViewModel.getData().observe(this,transferProgressActivityViewModelObserver);
     }
 
     //file observer
@@ -325,6 +305,10 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     //set values to completed
                     fragmentFileTransferProgress.setComplete();
 
+                    if (!mIsServiceBound) {
+                        bindTheService();
+                    }
+
                     break;
 
                 case STATUS_TRANSFER_OUT_OF_SPACE_ERROR:
@@ -336,6 +320,10 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
                     //hide the waiting screen
                     mWaitingScreen.setVisibility(View.GONE);
+
+                    if (!mIsServiceBound) {
+                        bindTheService();
+                    }
 
                     break;
 
@@ -349,12 +337,16 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     //hide the waiting screen
                     mWaitingScreen.setVisibility(View.GONE);
 
+                    if (!mIsServiceBound) {
+                        bindTheService();
+                    }
+
                     break;
 
                 case STATUS_TRANSFER_ACTIVE:
-                    //if (!mIsServiceBound) {
-                        //bindTheService();
-                    //}
+                    if (!mIsServiceBound) {
+                        bindTheService();
+                    }
 
                     break;
 
@@ -369,6 +361,9 @@ public class TransferProgressActivity extends AppCompatActivity implements
                         startServiceTransfer();
                     }else if(mAreWeClosing==true){
                         Log.d(TAG,"We close the activity from observer and we reset everything");
+                        //unbind
+                        doUnbind();
+
                         //close the service
                         Intent serviceIntent=new Intent(thisActivity,ServiceFileShare.class);
                         stopService(serviceIntent);
@@ -409,7 +404,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
             Intent serviceIntent = new Intent(this, ServiceFileShare.class);
             serviceIntent.setAction(ServiceFileShare.ACTION_BEGIN_TRANSFER);
             serviceIntent.putExtras(mExtras);
-            mHasServiceStarted = 1;
 
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -425,8 +419,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
             } catch (Exception e) {
                 Log.e(TAG, "Couldnt start service " + e.getMessage());
-                //we set the service start as complete
-                mHasServiceStarted = 0;
             }
         }else{
             //this is a relaunch when the service is shown as active but there are no bundles
@@ -524,29 +516,22 @@ public class TransferProgressActivity extends AppCompatActivity implements
             ServiceFileShare.ServiceFileShareBinder binder = (ServiceFileShare.ServiceFileShareBinder) service;
             mService = binder.getService();
 
+            //get the service type
+            mTypeServiceOrRelaunch=mService.typeOfService();
+            fragmentFileTransferProgress.transferType(mTypeServiceOrRelaunch);
+            activateFileListObserver();
+
             //check if service is doing a transfer
             if (!mService.methodIsTransferActive()){
                 Log.d(TAG,"the transfer is not active we hide the splash screen that hides everything");
                 //it is not active
                 mWaitingScreen.setVisibility(View.GONE);
-                //unbind
-                doUnbind();
             }else{
                 //update the UI with data from the service
                 mService.updateUIOnly();
-
-                //check what is the type of service to communicate the fragment
-                mTypeServiceOrRelaunch=mService.typeOfService();
-                fragmentFileTransferProgress.transferType(mTypeServiceOrRelaunch);
-                //update the viewmodel
-                try {
-                    sortFilesBySendOrReceive(fileTransferViewModel.getFileListInfo().getValue());
-                }catch (Exception e){
-                    Log.e(TAG,"cant separate send from receive yet");
-                }
-                mIsServiceBound = true;
             }
 
+            mIsServiceBound = true;
             Log.d(TAG,"Service has been bound");
         }
 
@@ -556,6 +541,15 @@ public class TransferProgressActivity extends AppCompatActivity implements
             mIsServiceBound=false;
         }
     };
+
+    //before setting up the file list observer we need to know what kind of transfer it is
+    // (sending or receiving) we can get that info from the service so we call this after we
+    //bind the service
+    void activateFileListObserver(){
+        //we get the file model to get user data and transfer status
+        fileTransferViewModel=ViewModelProviders.of(this).get(FileTransferViewModel.class);
+        fileTransferViewModel.getFileListInfo().observe(this,fileTransferViewModelObserver);
+    }
 
     @Override
     public void buttonOkCancel(String received){

@@ -44,8 +44,8 @@ public class TransferProgressActivityTest {
         ActivityScenario<TransferProgressActivity> activityScenario=activityScenarioRule.getScenario();
 
         Log.d("-----------------------------------------","CHECKING IF VIEW IS VISIBLE");
-        onView(withId(R.id.pb_atp_waitingForConnection)).check(matches(isDisplayed()));
-        //onView(withId(R.id.pb_atp_waitingForConnection)).check(matches(not(isDisplayed())));
+        //onView(withId(R.id.pb_atp_waitingForConnection)).check(matches(isDisplayed()));
+        onView(withId(R.id.pb_atp_waitingForConnection)).check(matches(not(isDisplayed())));
         //onView(withId(R.id.pb_atp_waitingForConnection)).check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));
 
         Log.d("-----------------------------------------","FINISHES CHECKING IF VIEW IS VISIBLE 1ST STEP");
