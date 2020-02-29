@@ -1,8 +1,5 @@
 <resources>
-
-    <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -15,9 +12,9 @@
         <item name="actionMenuTextColor">@android:color/white</item>
     </style>
 
+    <!--widget -->
     <style name="AppThemeProgressBar" parent="Base.Widget.AppCompat.ProgressBar.Horizontal">
         <item name="android:progressTint">@color/colorCardWhite</item>
         <item name="android:progressBackgroundTint">@color/colorPrimaryDark</item>
     </style>
-
 </resources>

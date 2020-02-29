@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/medium_padding"
-    android:foreground="?android:attr/selectableItemBackground">
+    android:foreground="?android:attr/selectableItemBackground"
+    app:cardBackgroundColor="@color/colorCardWhite">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -36,10 +37,9 @@
             android:layout_marginStart="@dimen/default_padding"
             android:layout_marginLeft="@dimen/default_padding"
             android:layout_marginTop="@dimen/default_padding"
-            android:layout_marginEnd="@dimen/default_padding"
-            android:layout_marginRight="@dimen/default_padding"
             android:layout_marginBottom="@dimen/default_padding"
             android:text="@string/pu_username_description"
+            android:textColor="@color/mainTextDark"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/iv_item_user_avatar"
             app:layout_constraintTop_toTopOf="parent" />

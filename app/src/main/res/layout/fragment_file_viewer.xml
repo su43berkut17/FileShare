@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/mainBackground"
     android:orientation="vertical">
 
     <Spinner
         android:id="@+id/spi_ffv_storage_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:background="@color/colorCardWhite" />
 
     <TextView
         android:id="@+id/tv_ffv_current_path"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/default_padding"
-        android:text="@string/fb_path"
         android:contentDescription="@string/fb_path_description"
+        android:text="@string/fb_path"
+        android:textColor="@color/titleText"
         android:textSize="@dimen/medium_text"
         android:textStyle="bold" />
 
@@ -27,18 +29,20 @@
         android:layout_weight="1">
 
         <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_file_viewer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+            android:id="@+id/rv_file_viewer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
     </ScrollView>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <Button
             android:id="@+id/bt_ffv_review_queue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/fb_button_review_queue"/>
+            android:text="@string/fb_button_review_queue" />
     </LinearLayout>
 </LinearLayout>

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="mainBackground">#FAFAFA</color>
+    <color name="mainBackground">#000000</color>
     <color name="colorPrimary">#367AFF</color>
     <color name="colorPrimaryDark">#295CBF</color>
     <color name="colorAccent">#367AFF</color>
     <color name="colorGreen">#00963b</color>
     <color name="colorDeleteRed">#fa315b</color>
-    <color name="colorCardWhite">#FFFFFF</color>
+    <color name="colorCardWhite">#0C0C0C</color>
     <color name="unselectedAvatar">#EBEBEB</color>
     <color name="colorWidgetText">#FFFFFF</color>
     <color name="colorWidgetBackground">#367AFF</color>
-    <color name="mainTextDark">#000000</color>
-    <color name="mainTextLight">#455A64</color>
-    <color name="titleText">#3E4D53</color>
+    <color name="mainTextDark">#FFFFFF</color>
+    <color name="mainTextLight">#919A9F</color>
+    <color name="titleText">#6D8F9F</color>
 </resources>
