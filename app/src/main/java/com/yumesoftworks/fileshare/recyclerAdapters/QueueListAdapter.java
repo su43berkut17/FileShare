@@ -16,7 +16,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.yumesoftworks.fileshare.R;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 
@@ -58,6 +59,7 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
 
         //placeholder uri
         int placeholderUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
+        RequestOptions smallSize=new RequestOptions().override(200,200);
 
         File tempFile = new File(fileListEntry.getPath());
 
@@ -85,43 +87,35 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
             if (fileListEntry.getMimeType().startsWith("image")) {
                 Uri uri=Uri.fromFile(new File(fileListEntry.getPath()));
                 int tempUri = mContext.getResources().getIdentifier("icon_image_128","drawable",mContext.getPackageName());
-                Picasso.get()
+                Glide.with(mContext)
                         .load(uri)
                         .placeholder(tempUri)
-                        .resize(200, 200)
                         .centerCrop()
+                        .apply(smallSize)
                         .into(queueListViewHolder.iv_icon);
             } else if (fileListEntry.getMimeType().startsWith("video")){
+                Uri uri=Uri.fromFile(new File(fileListEntry.getPath()));
                 int tempUri = mContext.getResources().getIdentifier("icon_video_128","drawable",mContext.getPackageName());
-                try {
-                    Bitmap bigBitmap = ThumbnailUtils.createVideoThumbnail(fileListEntry.getPath(), MediaStore.Video.Thumbnails.MICRO_KIND);
-                    int width = bigBitmap.getWidth();
-                    int height = bigBitmap.getHeight();
-                    int crop = (width - height) / 2;
-                    Bitmap cropImg = Bitmap.createBitmap(bigBitmap, crop, 0, height, height);
-                    queueListViewHolder.iv_icon.setImageBitmap(cropImg);
-                }catch (Exception e) {
-                    Picasso.get()
-                            .load(tempUri)
-                            .resize(200, 200)
-                            .centerCrop()
-                            .placeholder(tempUri)
-                            .into(queueListViewHolder.iv_icon);
-                }
+                Glide.with(mContext)
+                        .load(uri)
+                        .placeholder(tempUri)
+                        .centerCrop()
+                        .apply(smallSize)
+                        .into(queueListViewHolder.iv_icon);
             }else if (fileListEntry.getMimeType().startsWith("audio")){
                 int tempUri = mContext.getResources().getIdentifier("icon_music_128","drawable",mContext.getPackageName());
-                Picasso.get()
+                Glide.with(mContext)
                         .load(tempUri)
-                        .resize(200, 200)
                         .centerCrop()
+                        .apply(smallSize)
                         .placeholder(placeholderUri)
                         .into(queueListViewHolder.iv_icon);
             }else {
                 int tempUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
-                Picasso.get()
+                Glide.with(mContext)
                         .load(tempUri)
-                        .resize(200, 200)
                         .centerCrop()
+                        .apply(smallSize)
                         .placeholder(placeholderUri)
                         .into(queueListViewHolder.iv_icon);
             }

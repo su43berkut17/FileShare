@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
 import com.yumesoftworks.fileshare.R;
 import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
 
@@ -53,10 +53,14 @@ public class AvatarAdapter extends RecyclerView.Adapter<AvatarAdapter.AvatarView
         //Set values in view
         if (type==AvatarStaticEntry.TYPE_LOCAL){
             int imageUri = mContext.getResources().getIdentifier(path,"drawable",mContext.getPackageName());
-            Picasso.get().load(imageUri).into(avatarViewHolder.iv_avatar);
+            Glide.with(mContext)
+                    .load(imageUri)
+                    .into(avatarViewHolder.iv_avatar);
             Log.d(TAG,"path "+path);
         }else{
-            Picasso.get().load(path).into(avatarViewHolder.iv_avatar);
+            Glide.with(mContext)
+                    .load(path)
+                    .into(avatarViewHolder.iv_avatar);
             Log.d(TAG,"path "+path);
         }
 

@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
 import com.yumesoftworks.fileshare.R;
 import com.yumesoftworks.fileshare.data.UserSendEntry;
 
@@ -60,10 +60,14 @@ public class SendFileUserListAdapter extends RecyclerView.Adapter<SendFileUserLi
         //Set values in view
         if (avatar<=8){
             int imageUri = mContext.getResources().getIdentifier(path,"drawable",mContext.getPackageName());
-            Picasso.get().load(imageUri).into(userListViewHolder.iv_avatar);
+            Glide.with(mContext)
+                    .load(imageUri)
+                    .into(userListViewHolder.iv_avatar);
             Log.d(TAG,"path "+path);
         }else{
-            Picasso.get().load(path).into(userListViewHolder.iv_avatar);
+            Glide.with(mContext)
+                    .load(path)
+                    .into(userListViewHolder.iv_avatar);
             Log.d(TAG,"path "+path);
         }
     }

@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+
+import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,11 +21,11 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.squareup.picasso.Picasso;
 import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.AvatarDefaultImages;
 import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
@@ -64,6 +66,8 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
     private Boolean isFirstExecution=true;
     private Boolean NSDInitialized=false;
 
+    private Context mContext;
+
     //prevent double launch app
     private boolean mLaunchNewActivity=false;
 
@@ -87,6 +91,8 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         mUserName=(TextView)findViewById(R.id.tv_receive_username);
         mUserIcon=(ImageView)findViewById(R.id.iv_receive_icon);
         mConnectionAnimation=(ImageView)findViewById(R.id.iv_receive_animation);
+
+        mContext=this;
 
         Drawable drawable = mConnectionAnimation.getDrawable();
         if (drawable instanceof Animatable) {
@@ -161,7 +167,8 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
                 List<AvatarStaticEntry> receivedAvatars = AvatarDefaultImages.getDefaultImages();
                 String path=receivedAvatars.get(mUserInfoEntry.getPickedAvatar()).getPath();
                 int imageUri = getApplicationContext().getResources().getIdentifier(path,"drawable",getApplicationContext().getPackageName());
-                Picasso.get().load(imageUri).into(mUserIcon);
+
+                Glide.with(mContext).load(imageUri).into(mUserIcon);
 
                 if (!NSDInitialized) {
                     initializeNsd();

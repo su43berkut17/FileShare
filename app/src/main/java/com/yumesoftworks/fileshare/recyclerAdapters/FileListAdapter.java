@@ -1,14 +1,11 @@
 package com.yumesoftworks.fileshare.recyclerAdapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.Guideline;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +14,8 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.yumesoftworks.fileshare.R;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 
@@ -68,16 +66,18 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
 
         //placeholder uri
         int placeholderUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
+        RequestOptions smallSize=new RequestOptions().override(200,200);
 
         //we check if it is a directory
         if (fileListEntry.getDirectory()!=null && fileListEntry.getDirectory()==true){
             //it is a directory
             fileListViewHolder.cv_selected.setVisibility(View.INVISIBLE);
             int imageUri = mContext.getResources().getIdentifier("icon_folder_128","drawable",mContext.getPackageName());
-            Picasso.get()
+
+            Glide.with(mContext)
                     .load(imageUri)
-                    .resize(200, 200)
                     .centerCrop()
+                    .apply(smallSize)
                     .into(fileListViewHolder.iv_icon);
 
             fileListViewHolder.tv_date.setVisibility(View.GONE);
@@ -117,53 +117,47 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
                 if (fileListEntry.getMimeType().startsWith("image")) {
                     Uri uri=Uri.fromFile(new File(fileListEntry.getPath()));
                     int tempUri = mContext.getResources().getIdentifier("icon_image_128","drawable",mContext.getPackageName());
-                    Picasso.get()
+
+                    Glide.with(mContext)
                             .load(uri)
-                            .resize(200, 200)
-                            .centerCrop()
                             .placeholder(tempUri)
+                            .centerCrop()
+                            .apply(smallSize)
                             .into(fileListViewHolder.iv_icon);
                 } else if (fileListEntry.getMimeType().startsWith("video")){
+                    Uri uri=Uri.fromFile(new File(fileListEntry.getPath()));
                     int tempUri = mContext.getResources().getIdentifier("icon_video_128","drawable",mContext.getPackageName());
-                    try {
-                        Bitmap bigBitmap = ThumbnailUtils.createVideoThumbnail(fileListEntry.getPath(), MediaStore.Video.Thumbnails.MICRO_KIND);
-                        int width = bigBitmap.getWidth();
-                        int height = bigBitmap.getHeight();
-                        int crop = (width - height) / 2;
-                        Bitmap cropImg = Bitmap.createBitmap(bigBitmap, crop, 0, height, height);
-                        fileListViewHolder.iv_icon.setImageBitmap(cropImg);
-                    }catch (Exception e) {
-                        Picasso.get()
-                                .load(tempUri)
-                                .resize(200, 200)
-                                .centerCrop()
-                                .placeholder(tempUri)
-                                .into(fileListViewHolder.iv_icon);
-                    }
+
+                    Glide.with(mContext)
+                            .load(uri)
+                            .placeholder(tempUri)
+                            .centerCrop()
+                            .apply(smallSize)
+                            .into(fileListViewHolder.iv_icon);
                 }else if (fileListEntry.getMimeType().startsWith("audio")){
                     int tempUri = mContext.getResources().getIdentifier("icon_music_128","drawable",mContext.getPackageName());
-                    Picasso.get()
+                    Glide.with(mContext)
                             .load(tempUri)
-                            .resize(200, 200)
                             .centerCrop()
+                            .apply(smallSize)
                             .placeholder(placeholderUri)
                             .into(fileListViewHolder.iv_icon);
                 }else{
                     int tempUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
-                    Picasso.get()
+                    Glide.with(mContext)
                             .load(tempUri)
-                            .resize(200, 200)
                             .centerCrop()
+                            .apply(smallSize)
                             .placeholder(placeholderUri)
                             .into(fileListViewHolder.iv_icon);
                 }
             }else{
                 //it is a file with no mime type
                 int tempUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
-                Picasso.get()
+                Glide.with(mContext)
                         .load(tempUri)
-                        .resize(200, 200)
                         .centerCrop()
+                        .apply(smallSize)
                         .placeholder(placeholderUri)
                         .into(fileListViewHolder.iv_icon);
             }
