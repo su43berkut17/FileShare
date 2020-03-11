@@ -8,9 +8,11 @@
 
     <Spinner
         android:id="@+id/spi_ffv_storage_list"
+        style="@style/Widget.AppCompat.Spinner.DropDown"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorCardWhite" />
+        android:background="@color/colorCardWhite"
+        android:spinnerMode="dropdown" />
 
     <TextView
         android:id="@+id/tv_ffv_current_path"

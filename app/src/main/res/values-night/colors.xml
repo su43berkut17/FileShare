@@ -5,8 +5,8 @@
     <color name="colorPrimaryDark">#295CBF</color>
     <color name="colorAccent">#367AFF</color>
     <color name="colorGreen">#00963b</color>
-    <color name="colorDeleteRed">#fa315b</color>
-    <color name="colorCardWhite">#0C0C0C</color>
+    <color name="colorDeleteRed">#A11C38</color>
+    <color name="colorCardWhite">#212121</color>
     <color name="unselectedAvatar">#EBEBEB</color>
     <color name="colorWidgetText">#FFFFFF</color>
     <color name="colorWidgetBackground">#367AFF</color>
