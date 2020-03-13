@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.StorageListEntry;
 import com.yumesoftworks.fileshare.recyclerAdapters.FileListAdapter;
+import com.yumesoftworks.fileshare.recyclerAdapters.StorageDropdownMenuAdapter;
 import com.yumesoftworks.fileshare.utils.StorageCheck;
 
 import java.io.File;
@@ -48,10 +50,10 @@ public class FileViewer extends Fragment implements
     private Button btnQueue;
     private Boolean mIsButtonShown;
     private TextView textPath;
-    private Spinner storagePicker;
+    private AutoCompleteTextView storagePicker;
 
     //spinner
-    private ArrayAdapter<StorageListEntry> storageAdapter;
+    private StorageDropdownMenuAdapter storageAdapter;
     private String mSelectedStorage="";
     private SpinnerInteractionListener mSpinnerInteractionListener;
 
@@ -161,64 +163,53 @@ public class FileViewer extends Fragment implements
             storageList.add(entry);
         }
 
-        storageAdapter=new ArrayAdapter<>(getContext(),
-                R.layout.item_spn_content,
+        storageAdapter=new StorageDropdownMenuAdapter(getContext(),
+                R.layout.item_spn_content_dropdown,
                 storageList);
-        storageAdapter.setDropDownViewResource(R.layout.item_spn_content_dropdown);
 
         storagePicker.setAdapter(storageAdapter);
+        storageAdapter.notifyDataSetChanged();
+
         mSpinnerInteractionListener=new SpinnerInteractionListener();
 
-        storagePicker.setOnItemSelectedListener(mSpinnerInteractionListener);
-        storagePicker.setOnTouchListener(mSpinnerInteractionListener);
+        storagePicker.setOnItemClickListener(mSpinnerInteractionListener);
     }
 
     //custom listener for the spinner
-    private class SpinnerInteractionListener implements AdapterView.OnItemSelectedListener, View.OnTouchListener{
-        Boolean isSpinnerTouched=false;
-
+    private class SpinnerInteractionListener implements AdapterView.OnItemClickListener, View.OnTouchListener{
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            Log.d(TAG,"interaction with spinner");
-            isSpinnerTouched=true;
             return false;
         }
 
         @Override
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            if (isSpinnerTouched) {
-                Log.d(TAG, "We have clicked the item " + storageAdapter.getItem(position).getName() + " " +
-                        storageAdapter.getItem(position).getPath());
-                mListener.fileFragmentSpinner(storageAdapter.getItem(position));
-                isSpinnerTouched = false;
-            }
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> parent) {
-
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Log.d(TAG, "We have clicked the item "
+                    + storageAdapter.getItem(position).getName()
+                    + " "
+                    + storageAdapter.getItem(position).getPath());
+            mListener.fileFragmentSpinner(storageAdapter.getItem(position));
         }
     }
 
     //spinner update selection
     public void updateSpinner(String selectedItem){
         Log.d(TAG,"Update spinner called");
-        int selectedIndex=0;
+        String selectedName="";
 
         if (selectedItem!=null && selectedItem.isEmpty()==false){
             for (int i=0;i<storageAdapter.getCount();i++){
                 StorageListEntry entry=storageAdapter.getItem(i);
                 Log.d(TAG,"Spinner comparing: Selected item: "+selectedItem+" with entry: "+entry.getName()+"-"+entry.getPath());
                 if (selectedItem.contains(entry.getPath())){
-                //if (entry.getPath().contains(selectedItem)){
                     Log.d(TAG,"IT CONTAINS THE PATH");
-                    selectedIndex=i;
+                    selectedName=entry.getName();
                 }
             }
         }
 
-        Log.d(TAG,"Setting the selection to index number: "+selectedIndex);
-        storagePicker.setSelection(selectedIndex);
+        Log.d(TAG,"Setting the selection to : "+selectedName);
+        storagePicker.setText(selectedName,false);
     }
 
     //update file viewer

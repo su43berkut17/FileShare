@@ -99,7 +99,6 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             Log.d(TAG,"Restoring the path: "+mPath);
         }else{
             mCurrentFragment=FILE_FRAGMENT;
-            //mPath=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "").getAbsolutePath();
             mPath=new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "").getAbsolutePath();
             mFileHistory.add(mPath);
         }

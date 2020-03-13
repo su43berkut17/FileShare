@@ -15,7 +15,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.yumesoftworks.fileshare"
-        minSdkVersion 16
+        minSdkVersion 17
         targetSdkVersion 28
         multiDexEnabled true
         versionCode 1
