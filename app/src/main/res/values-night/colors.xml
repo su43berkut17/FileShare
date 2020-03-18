@@ -13,4 +13,5 @@
     <color name="mainTextDark">#FFFFFF</color>
     <color name="mainTextLight">#919A9F</color>
     <color name="titleText">#6D8F9F</color>
+    <color name="actionBar">#212121</color>
 </resources>

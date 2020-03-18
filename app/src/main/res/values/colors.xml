@@ -5,7 +5,7 @@
     <color name="colorPrimaryDark">#295CBF</color>
     <color name="colorAccent">#367AFF</color>
     <color name="colorGreen">#00963b</color>
-    <color name="colorDeleteRed">#fa315b</color>
+    <color name="colorDeleteRed">#FA315B</color>
     <color name="colorCardWhite">#FFFFFF</color>
     <color name="unselectedAvatar">#EBEBEB</color>
     <color name="colorWidgetText">#FFFFFF</color>
@@ -13,4 +13,5 @@
     <color name="mainTextDark">#000000</color>
     <color name="mainTextLight">#455A64</color>
     <color name="titleText">#3E4D53</color>
+    <color name="actionBar">#367AFF</color>
 </resources>
