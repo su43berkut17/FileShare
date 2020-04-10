@@ -9,6 +9,7 @@
     <color name="colorCardWhite">#FFFFFF</color>
     <color name="unselectedAvatar">#EBEBEB</color>
     <color name="colorWidgetText">#FFFFFF</color>
+    <color name="appBarText">#FFFFFF</color>
     <color name="colorWidgetBackground">#367AFF</color>
     <color name="mainTextDark">#000000</color>
     <color name="mainTextLight">#455A64</color>

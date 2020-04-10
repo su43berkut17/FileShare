@@ -1,5 +1,6 @@
 package com.yumesoftworks.fileshare;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.BroadcastReceiver;
@@ -22,10 +23,12 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.FileListRepository;
@@ -115,6 +118,13 @@ public class TransferProgressActivity extends AppCompatActivity implements
     //service binding
     private ServiceFileShare mService;
 
+    //toolbar
+    private AppBarLayout myToolbar;
+    private ConstraintLayout header;
+    private TextView tempTitle;
+    private TextView tempPercentage;
+    private TextView tempPercentage2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -167,8 +177,43 @@ public class TransferProgressActivity extends AppCompatActivity implements
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceived, intentFilter);
 
         //toolbar
-        Toolbar myToolbar = findViewById(R.id.tp_toolbar);
-        setSupportActionBar(myToolbar);
+        myToolbar = findViewById(R.id.tp_app_bar_layout);
+        header=findViewById(R.id.tp_header);
+        tempTitle=findViewById(R.id.tv_atp_title);
+        tempPercentage=findViewById(R.id.tv_atp_percentage);
+        tempPercentage2=findViewById(R.id.tv_atp_percentage_2);
+
+        myToolbar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener(){
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                //Log.e(TAG,"Vertical offset: "+verticalOffset+appBarLayout.getTotalScrollRange()+" total "+appBarLayout.getTotalScrollRange());
+                float value=verticalOffset+appBarLayout.getTotalScrollRange();
+                value=value*100/appBarLayout.getTotalScrollRange();
+                //Log.e(TAG,"percentage "+value);
+
+                value=value/100;
+                //Log.e(TAG,"divided by 100 "+value);
+
+                value=1-value;
+
+                //int value=1-((verticalOffset+appBarLayout.getTotalScrollRange())*100/appBarLayout.getTotalScrollRange()/100);
+                //Log.e(TAG,"alpha "+value);
+                //header.setTranslationY(-verticalOffset);
+                header.setAlpha(value);
+
+                //shared translation
+                float percentage=-(verticalOffset*100/appBarLayout.getTotalScrollRange());
+                Log.e(TAG,"percentage "+percentage);
+                float distX=tempPercentage.getX()-tempPercentage2.getX();
+                float distY=tempPercentage.getY()-tempPercentage2.getY();
+                tempTitle.setTranslationY(-verticalOffset);
+                tempPercentage.setTranslationX(-distX*percentage/100);
+                tempPercentage.setTranslationY(-distY*percentage/100);
+                tempPercentage.setAlpha(1-value);
+
+            }
+        });
+        //setSupportActionBar(myToolbar);
 
         //initialize fragments
         initializeFragments();

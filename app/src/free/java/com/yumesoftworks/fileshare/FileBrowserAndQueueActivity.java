@@ -435,7 +435,20 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     @Override
     public void onButtonSendClicked() {
         //we go to the send activity
-        Intent intent=new Intent(this, com.yumesoftworks.fileshare.SenderPickDestinationActivity.class);
+        /*Intent intent=new Intent(this, com.yumesoftworks.fileshare.SenderPickDestinationActivity.class);
+        startActivity(intent);*/
+
+        //we call the activity that will start the service with the info
+        Intent intent = new Intent(this, TransferProgressActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        //data to send on the intent
+        Bundle bundleSend = new Bundle();
+
+        //local ip and port
+        bundleSend.putInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER, TransferProgressActivity.FILES_SENDING);
+        intent.putExtras(bundleSend);
+
         startActivity(intent);
     }
 
