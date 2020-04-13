@@ -17,12 +17,12 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import androidx.appcompat.widget.Toolbar;
 
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
@@ -32,6 +32,7 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.FileListRepository;
+import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 
 import java.util.ArrayList;
@@ -122,8 +123,13 @@ public class TransferProgressActivity extends AppCompatActivity implements
     private AppBarLayout myToolbar;
     private ConstraintLayout header;
     private TextView tempTitle;
-    private TextView tempPercentage;
-    private TextView tempPercentage2;
+    private TextView mTvPercentageCollapsed;
+    private int mContinuousPercentage;
+
+    private TextView mTvFileName;
+    private TextView mTvOutOf;
+    private TextView mtvPercentage;
+    private ProgressBar mTvProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,9 +185,14 @@ public class TransferProgressActivity extends AppCompatActivity implements
         //toolbar
         myToolbar = findViewById(R.id.tp_app_bar_layout);
         header=findViewById(R.id.tp_header);
-        tempTitle=findViewById(R.id.tv_atp_title);
-        tempPercentage=findViewById(R.id.tv_atp_percentage);
-        tempPercentage2=findViewById(R.id.tv_atp_percentage_2);
+        mTvFileName=findViewById(R.id.tv_atp_title);
+        tempTitle=findViewById(R.id.tv_atp_title_collapsed);
+
+        mtvPercentage=findViewById(R.id.tv_atp_percentage);
+        mTvPercentageCollapsed =findViewById(R.id.tv_atp_percentage_collapsed);
+
+        mTvOutOf=findViewById(R.id.tv_atp_files_out_of);
+        mTvProgress=findViewById(R.id.pro_bar_atp);
 
         myToolbar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener(){
             @Override
@@ -204,12 +215,12 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 //shared translation
                 float percentage=-(verticalOffset*100/appBarLayout.getTotalScrollRange());
                 Log.e(TAG,"percentage "+percentage);
-                float distX=tempPercentage.getX()-tempPercentage2.getX();
-                float distY=tempPercentage.getY()-tempPercentage2.getY();
+                float distX=mtvPercentage.getX()- mTvPercentageCollapsed.getX();
+                float distY=mtvPercentage.getY()- mTvPercentageCollapsed.getY();
                 tempTitle.setTranslationY(-verticalOffset);
-                tempPercentage.setTranslationX(-distX*percentage/100);
-                tempPercentage.setTranslationY(-distY*percentage/100);
-                tempPercentage.setAlpha(1-value);
+                mtvPercentage.setTranslationX(-distX*percentage/100);
+                mtvPercentage.setTranslationY(-distY*percentage/100);
+                mtvPercentage.setAlpha(1-value);
 
             }
         });
@@ -547,9 +558,44 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 mWaitingScreen.setVisibility(View.GONE);
                 //update ui
                 Bundle bundle=intent.getExtras();
+                TextInfoSendObject textInfoSendObject=(TextInfoSendObject) bundle.getSerializable(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI_DATA);
+
+                try {
+                    //name of file, current number and total number
+                    String fileName = textInfoSendObject.getMessageContent();
+                    String stringNumbers = textInfoSendObject.getAdditionalInfo();
+                    String[] currentNumbers = stringNumbers.split(",");
+                    String finalTextNumbers = currentNumbers[0] + " of " + currentNumbers[1];
+
+                    int percentage=0;
+                    if (currentNumbers.length>2) {
+                        percentage = Integer.parseInt(currentNumbers[2]);
+                    }
+
+                    if (mContinuousPercentage !=percentage && percentage<=100 && percentage>=1){
+                        mContinuousPercentage = percentage;
+                    }
+
+                    //we update the data
+                    mTvFileName.setText(fileName);
+                    mTvOutOf.setText(finalTextNumbers);
+                    mtvPercentage.setText(String.valueOf(mContinuousPercentage) + "%");
+                    mTvPercentageCollapsed.setText(String.valueOf(mContinuousPercentage) + "%");
+                    mTvProgress.setProgress(mContinuousPercentage);
+                }catch (Exception e){
+                    Log.e(TAG,"There was an exception while updating UI "+e.getMessage());
+                    mTvFileName.setText("--");
+                    mTvOutOf.setText("--");
+                    mtvPercentage.setText("0%");
+                    mTvPercentageCollapsed.setText("0%");
+                    mTvProgress.setProgress(0);
+                }
+
+                //update toolbar
+                mTvPercentageCollapsed.setText(textInfoSendObject.getAdditionalInfo());
 
                 //send the data to the fragment
-                fragmentFileTransferProgress.updateData(bundle);
+                //fragmentFileTransferProgress.updateData(bundle);
             }
         }
     };
