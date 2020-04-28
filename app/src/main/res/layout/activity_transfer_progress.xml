@@ -1,42 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
         <FrameLayout
             android:id="@+id/pb_atp_container_frame_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <LinearLayout
-                android:id="@+id/pb_atp_fragment_and_ad_container"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                tools:context=".TransferProgressActivity">
-
-                <FrameLayout
-                    android:id="@+id/frag_atp_transfer_progress"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight=".5" />
-
-                <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
-                    android:id="@+id/ad_view_transfer_progress"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    ads:adSize="BANNER"
-                    ads:adUnitId="ca-app-pub-3940256099942544/6300978111" />
-            </LinearLayout>
+            android:layout_height="match_parent"
+            android:layout_marginTop="?attr/actionBarSize">
 
             <LinearLayout
                 android:id="@+id/pb_atp_waitingForConnection"
@@ -54,8 +31,43 @@
                     android:indeterminate="true"
                     android:indeterminateTint="@color/colorPrimary" />
             </LinearLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/pb_atp_fragment_and_ad_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <FrameLayout
+                    android:id="@+id/frag_atp_transfer_progress"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginBottom="8dp"
+                    android:layout_weight=".5"
+                    app:layout_constraintBottom_toTopOf="@+id/ad_view_transfer_progress"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.gms.ads.AdView
+                    android:id="@+id/ad_view_transfer_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_weight=".1"
+                    app:adSize="BANNER"
+                    app:adUnitId="ca-app-pub-3940256099942544/6300978111"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/frag_atp_transfer_progress" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
         </FrameLayout>
-    </androidx.core.widget.NestedScrollView>
+
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/tp_app_bar_layout"
@@ -69,25 +81,23 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
             style="@style/ToolbarWhite"
-            app:contentScrim="@color/actionBar"
+
             app:expandedTitleMargin="@dimen/default_padding"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/actionBar">
+                android:background="@color/actionBar"
+                android:padding="16dp">
 
                 <TextView
                     android:id="@+id/tv_atp_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/default_padding"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
                     android:contentDescription="@string/app_name"
                     android:text="@string/app_name"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -95,8 +105,7 @@
                     android:id="@+id/tv_atp_filename"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/default_padding"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
                     android:contentDescription="@string/atp_tv_filename"
                     android:text="@string/atp_tv_filename"
                     android:textSize="@dimen/medium_text"
@@ -107,7 +116,6 @@
                     android:id="@+id/tv_atp_files_out_of"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/default_padding"
                     android:contentDescription="@string/atp_tv_out_of"
                     android:text="@string/atp_tv_out_of"
                     android:textSize="@dimen/medium_text"
@@ -118,9 +126,9 @@
                     android:id="@+id/tv_atp_percentage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/default_padding"
-                    android:text="@string/atp_tv_percentage"
+                    android:layout_marginTop="8dp"
                     android:contentDescription="@string/atp_tv_percentage"
+                    android:text="@string/atp_tv_percentage"
                     android:textSize="@dimen/medium_text"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -132,24 +140,18 @@
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/default_padding"
-                    android:layout_marginStart="2dp"
-                    android:layout_marginLeft="2dp"
+                    android:layout_marginTop="8dp"
+                    android:scaleY="4"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tv_atp_percentage"
-                    android:scaleY="4"/>
+                    app:layout_constraintTop_toBottomOf="@+id/tv_atp_percentage" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/tp_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:contentInsetStart="0dp"
-                android:contentInsetLeft="0dp"
-                app:contentInsetLeft="0dp"
-                app:contentInsetStart="0dp"
                 android:elevation="4dp"
                 app:layout_collapseMode="pin"
                 android:theme="@style/ToolbarWhite"
@@ -164,11 +166,9 @@
                         android:id="@+id/tv_atp_title_collapsed"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginTop="16dp"
                         android:text="FileShare"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -176,13 +176,14 @@
                         android:id="@+id/tv_atp_percentage_collapsed"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/default_padding"
-                        android:text="@string/atp_tv_percentage"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="16dp"
                         android:contentDescription="@string/atp_tv_percentage"
+                        android:text="@string/atp_tv_percentage"
                         android:textSize="@dimen/medium_text"
                         android:textStyle="bold"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"/>
+                        app:layout_constraintTop_toTopOf="parent" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 

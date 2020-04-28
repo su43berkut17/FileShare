@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -120,16 +121,22 @@ public class TransferProgressActivity extends AppCompatActivity implements
     private ServiceFileShare mService;
 
     //toolbar
+    private FrameLayout frameRecycler;
     private AppBarLayout myToolbar;
     private ConstraintLayout header;
-    private TextView tempTitle;
+    private TextView mTvTitleCollapsed;
     private TextView mTvPercentageCollapsed;
-    private int mContinuousPercentage;
 
+    private TextView mTvTitle;
     private TextView mTvFileName;
     private TextView mTvOutOf;
     private TextView mtvPercentage;
     private ProgressBar mTvProgress;
+
+    private int mContinuousPercentage;
+
+    private float mDistX;
+    private float mDistY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -185,14 +192,17 @@ public class TransferProgressActivity extends AppCompatActivity implements
         //toolbar
         myToolbar = findViewById(R.id.tp_app_bar_layout);
         header=findViewById(R.id.tp_header);
-        mTvFileName=findViewById(R.id.tv_atp_title);
-        tempTitle=findViewById(R.id.tv_atp_title_collapsed);
+        mTvFileName=findViewById(R.id.tv_atp_filename);
+        mTvTitle=findViewById(R.id.tv_atp_title);
+        mTvTitleCollapsed=findViewById(R.id.tv_atp_title_collapsed);
 
         mtvPercentage=findViewById(R.id.tv_atp_percentage);
         mTvPercentageCollapsed =findViewById(R.id.tv_atp_percentage_collapsed);
 
         mTvOutOf=findViewById(R.id.tv_atp_files_out_of);
         mTvProgress=findViewById(R.id.pro_bar_atp);
+
+        frameRecycler=findViewById(R.id.pb_atp_container_frame_layout);
 
         myToolbar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener(){
             @Override
@@ -205,29 +215,50 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 value=value/100;
                 //Log.e(TAG,"divided by 100 "+value);
 
+                if (mDistX==0) {
+                    initializeToolbarPositions();
+                }
                 value=1-value;
 
-                //int value=1-((verticalOffset+appBarLayout.getTotalScrollRange())*100/appBarLayout.getTotalScrollRange()/100);
-                //Log.e(TAG,"alpha "+value);
-                //header.setTranslationY(-verticalOffset);
                 header.setAlpha(value);
 
-                //shared translation
+                //shared translation for percentage
                 float percentage=-(verticalOffset*100/appBarLayout.getTotalScrollRange());
-                Log.e(TAG,"percentage "+percentage);
-                float distX=mtvPercentage.getX()- mTvPercentageCollapsed.getX();
-                float distY=mtvPercentage.getY()- mTvPercentageCollapsed.getY();
-                tempTitle.setTranslationY(-verticalOffset);
-                mtvPercentage.setTranslationX(-distX*percentage/100);
-                mtvPercentage.setTranslationY(-distY*percentage/100);
+
+                mTvTitle.setTranslationY(-verticalOffset);
+                mtvPercentage.setTranslationX(-mDistX*percentage/100);
+                mtvPercentage.setTranslationY(-mDistY*percentage/100-verticalOffset);
                 mtvPercentage.setAlpha(1-value);
 
+
+                mTvPercentageCollapsed.setTranslationX(mDistX-mDistX*percentage/100);
+                mTvPercentageCollapsed.setTranslationY(mDistY-mDistY*percentage/100);
+
+                //fading
+                mTvFileName.setAlpha(1-value);
+                mTvOutOf.setAlpha(1-value);
+                mTvProgress.setAlpha(1-value);
+                mTvTitle.setAlpha(1-value);
+
+                //frameRecycler.setTranslationY(appBarLayout.getTotalScrollRange()+verticalOffset);
+                frameRecycler.setPadding(0,appBarLayout.getTotalScrollRange()+verticalOffset,0,0);
             }
         });
-        //setSupportActionBar(myToolbar);
 
         //initialize fragments
         initializeFragments();
+    }
+
+    //initialize positions of toolbar
+    private void initializeToolbarPositions(){
+        //initialize the positions
+        int[] locationPercentage=new int[2];
+        int[] locationPercentageCollapsed=new int[2];
+        mtvPercentage.getLocationOnScreen(locationPercentage);
+        mTvPercentageCollapsed.getLocationOnScreen(locationPercentageCollapsed);
+
+        mDistX=locationPercentage[0]-locationPercentageCollapsed[0];
+        mDistY=locationPercentage[1]-locationPercentageCollapsed[1];
     }
 
     @Override
