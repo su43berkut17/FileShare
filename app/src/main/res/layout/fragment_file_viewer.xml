@@ -55,6 +55,9 @@
             android:id="@+id/bt_ffv_review_queue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/MyButtons"
+            android:layout_marginEnd="@dimen/default_padding"
+            android:layout_marginStart="@dimen/default_padding"
             android:text="@string/fb_button_review_queue" />
     </LinearLayout>
 </LinearLayout>

@@ -30,6 +30,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.FileListRepository;
@@ -548,7 +549,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         //we show dialog that transfer is done
         if (mGeneralDialog!=null) {
             if (!mGeneralDialog.isShowing()) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(thisActivity,R.style.MyDialog);
                 builder.setMessage(dialogText)
                         .setCancelable(true)
                         .setNeutralButton(R.string.gen_button_ok,
@@ -559,7 +560,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 mGeneralDialog = builder.create();
             }
         }else{
-            AlertDialog.Builder builder = new AlertDialog.Builder(thisActivity);
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(thisActivity,R.style.MyDialog);
             builder.setMessage(dialogText)
                     .setCancelable(true)
                     .setNeutralButton(R.string.gen_button_ok,
@@ -677,7 +678,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
     public void buttonOkCancel(String received){
         if (received.equals("Cancel")) {
             //create the dialog that will ask if yes or no
-            AlertDialog.Builder cancelDialog = new AlertDialog.Builder(thisActivity);
+            MaterialAlertDialogBuilder cancelDialog = new MaterialAlertDialogBuilder(thisActivity,R.style.MyDialog);
             cancelDialog.setMessage("Are you sure you want to cancel?")
                     .setNegativeButton("NO", null)
                     .setPositiveButton("YES",

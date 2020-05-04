@@ -16,7 +16,7 @@
             android:layout_height="?attr/actionBarSize"
             android:elevation="4dp"
             android:theme="@style/ToolbarWhite"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight" />
+            app:popupTheme="@style/ToolbarOptionsMenu"/>
     </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout

@@ -58,6 +58,9 @@
             android:id="@+id/bt_fqv_send_files"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/MyButtons"
+            android:layout_marginEnd="@dimen/default_padding"
+            android:layout_marginStart="@dimen/default_padding"
             android:text="@string/fb_button_send_files"/>
     </LinearLayout>
 </LinearLayout>
