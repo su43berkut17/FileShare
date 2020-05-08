@@ -13,20 +13,17 @@
             android:id="@+id/aws_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:elevation="4dp"
             android:theme="@style/ToolbarWhite"
             app:popupTheme="@style/ToolbarOptionsMenu"/>
     </com.google.android.material.appbar.AppBarLayout>
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/colorPrimary">
+            android:layout_height="match_parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/colorPrimary"
                 tools:context=".WelcomeScreenActivity">
 
                 <ImageView
@@ -38,7 +35,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/logo_white" />
+                    app:srcCompat="@drawable/logo_128" />
 
                 <LinearLayout
                     android:id="@+id/aws_layout_container"
@@ -93,7 +90,8 @@
                         android:inputType="text"
                         android:maxLines="1"
                         android:singleLine="true"
-                        android:text="@string/aws_input_username"/>
+                        android:text="@string/aws_input_username"
+                        android:autofillHints="username" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -104,7 +102,7 @@
                     android:layout_marginTop="@dimen/default_padding"
                     android:layout_marginEnd="@dimen/default_padding"
                     android:layout_marginRight="@dimen/default_padding"
-                    android:gravity="center_horizontal"
+                    android:gravity="end"
                     android:orientation="horizontal"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -114,9 +112,9 @@
                         android:id="@+id/button_go"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        style="@style/MyButtons"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginEnd="@dimen/default_padding"
-                        android:layout_marginRight="@dimen/default_padding"
                         android:contentDescription="@string/aws_button_go"
                         android:text="@string/aws_button_go" />
 
@@ -124,9 +122,9 @@
                         android:id="@+id/button_cancel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        style="@style/MyButtons"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginStart="@dimen/default_padding"
-                        android:layout_marginLeft="@dimen/default_padding"
                         android:contentDescription="@string/gen_button_cancel"
                         android:text="@string/gen_button_cancel" />
                 </LinearLayout>

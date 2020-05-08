@@ -224,7 +224,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 header.setAlpha(value);
 
                 //shared translation for percentage
-                float percentage=-(verticalOffset*100/appBarLayout.getTotalScrollRange());
+                float percentage=-((float)verticalOffset*100/(float)appBarLayout.getTotalScrollRange());
 
                 mTvTitle.setTranslationY(-verticalOffset);
                 mtvPercentage.setTranslationX(-mDistX*percentage/100);
@@ -391,7 +391,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     //hide the waiting screen
                     mWaitingScreen.setVisibility(View.GONE);
                     //set values to completed
-                    fragmentFileTransferProgress.setComplete();
+                    setCompletedUI();
 
                     if (!mIsServiceBound) {
                         bindTheService();
@@ -444,10 +444,10 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
                 case STATUS_TRANSFER_INACTIVE:
                     //check if the service is running
-                    if (typeOfTransfer==TransferProgressActivity.SERVICE_TYPE_INACTIVE && mAreWeClosing==false){
+                    if (typeOfTransfer==TransferProgressActivity.SERVICE_TYPE_INACTIVE && !mAreWeClosing){
                         Log.d(TAG,"We start the service from observer");
                         startServiceTransfer();
-                    }else if(mAreWeClosing==true){
+                    }else if(mAreWeClosing){
                         Log.d(TAG,"We close the activity from observer and we reset everything");
                         //unbind
                         doUnbind();
@@ -586,7 +586,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
             //Log.d(TAG,"Received message from service "+action);
 
             //we check what to do depending on what the service needs to do
-            if (action==ACTION_UPDATE_UI){
+            if (action.equals(ACTION_UPDATE_UI)){
                 mWaitingScreen.setVisibility(View.GONE);
                 //update ui
                 Bundle bundle=intent.getExtras();
@@ -622,15 +622,18 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     mTvPercentageCollapsed.setText("0%");
                     mTvProgress.setProgress(0);
                 }
-
-                //update toolbar
-                mTvPercentageCollapsed.setText(textInfoSendObject.getAdditionalInfo());
-
-                //send the data to the fragment
-                //fragmentFileTransferProgress.updateData(bundle);
             }
         }
     };
+
+    //update ui completed
+    public void setCompletedUI(){
+        Log.d(TAG,"Called on complete method to update to success");
+        mTvFileName.setText(R.string.service_success);
+        mTvOutOf.setText("");
+        mtvPercentage.setText("100%");
+        mTvProgress.setProgress(100);
+    }
 
     //service connection
     private ServiceConnection serConnection=new ServiceConnection() {

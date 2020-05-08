@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,9 +21,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import com.yumesoftworks.fileshare.data.AvatarAndVersion;
@@ -210,7 +209,8 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         String username=tvUsername.getText().toString();
         if ((username.isEmpty()||(mSelectedAvatar==-1))){
             //we show the dialog
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            MaterialAlertDialogBuilder alertDialogBuilder = new MaterialAlertDialogBuilder(this,R.style.MyDialog);
+
             alertDialogBuilder.setCancelable(false);
             if (mSelectedAvatar==-1) {
                 alertDialogBuilder.setMessage(R.string.aws_dialog_avatar);

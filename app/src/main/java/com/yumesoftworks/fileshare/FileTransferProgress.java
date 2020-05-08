@@ -34,15 +34,10 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
     private QueueListAdapter rvAdapter;
 
     //ui
-    private TextView mTvFileName;
-    private TextView mTvOutOf;
-    private TextView mtvPercentage;
-    private ProgressBar mTvProgress;
     private TextView mTitleQueue;
     private Button mButton;
 
     private int mType;
-    private int mContinuousPercentage;
 
     public FileTransferProgress(){
     }
@@ -73,8 +68,6 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         rvFileList=fileProgressView.findViewById(R.id.rv_file_progress_queue);
         rvFileList.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        mTitleQueue=fileProgressView.findViewById(R.id.tv_atp_files_queue);
-
         rvAdapter=new QueueListAdapter(getContext(),this);
 
         //we set the adapter
@@ -82,10 +75,7 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         rvAdapter.notifyDataSetChanged();
 
         //we get the ui objects
-        mTvFileName=fileProgressView.findViewById(R.id.tv_atp_filename);
-        mTvOutOf=fileProgressView.findViewById(R.id.tv_atp_files_out_of);
-        mtvPercentage=fileProgressView.findViewById(R.id.tv_atp_percentage);
-        mTvProgress=fileProgressView.findViewById(R.id.pro_bar_atp);
+        mTitleQueue=fileProgressView.findViewById(R.id.tv_atp_files_queue);
         mButton=fileProgressView.findViewById(R.id.btn_atp_cancelOk);
 
         //get the text depending on the type
@@ -134,50 +124,6 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         rvAdapter.notifyDataSetChanged();
     }
 
-    //update the ui
-    public void updateData(Bundle bundle){
-        //process data
-        TextInfoSendObject textInfoSendObject=(TextInfoSendObject) bundle.getSerializable(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI_DATA);
-
-        try {
-            //name of file, current number and total number
-            String fileName = textInfoSendObject.getMessageContent();
-            String stringNumbers = textInfoSendObject.getAdditionalInfo();
-            String[] currentNumbers = stringNumbers.split(",");
-            String finalTextNumbers = currentNumbers[0] + " of " + currentNumbers[1];
-
-            int percentage=0;
-            if (currentNumbers.length>2) {
-                percentage = Integer.parseInt(currentNumbers[2]);
-            }
-
-            if (mContinuousPercentage !=percentage && percentage<=100 && percentage>=1){
-                mContinuousPercentage = percentage;
-            }
-
-            //we update the data
-            mTvFileName.setText(fileName);
-            mTvOutOf.setText(finalTextNumbers);
-            mtvPercentage.setText(String.valueOf(mContinuousPercentage) + "%");
-            mTvProgress.setProgress(mContinuousPercentage);
-        }catch (Exception e){
-            Log.e(TAG,"There was an exception while updating UI "+e.getMessage());
-            mTvFileName.setText("--");
-            mTvOutOf.setText("--");
-            mtvPercentage.setText("0%");
-            mTvProgress.setProgress(0);
-        }
-    }
-
-    //update ui completed
-    public void setComplete(){
-        Log.d(TAG,"Called on complete method to update to success");
-        mTvFileName.setText(R.string.service_success);
-        mTvOutOf.setText("");
-        mtvPercentage.setText("100%");
-        mTvProgress.setProgress(100);
-    }
-
     public void changeButton(){
         mButton.setText(R.string.gen_button_ok);
     }
@@ -188,7 +134,7 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
         Intent myIntent = new Intent(Intent.ACTION_VIEW);
         myIntent.setDataAndType(Uri.parse(rvAdapter.getFileItem(itemId).getPath()),rvAdapter.getFileItem(itemId).getMimeType());
         try {
-            this.startActivity(myIntent.createChooser(myIntent,"Pick a viewer"));
+            this.startActivity(Intent.createChooser(myIntent,"Pick a viewer"));
         }catch (Exception e){
             Toast.makeText(getActivity().getBaseContext(), R.string.fb_incompatible_file, Toast.LENGTH_SHORT).show();
         }

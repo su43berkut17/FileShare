@@ -4,7 +4,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiManager;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,6 +16,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.SocketListEntry;
 import com.yumesoftworks.fileshare.data.UserSendEntry;
@@ -232,7 +232,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     @Override
     public void showErrorDialog() {
         Log.d(TAG, "Couldn't connect to the socket, we show dialog with error ");
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this,R.style.MyDialog);
         builder.setMessage(R.string.pu_error_connect_dialog)
                 .setCancelable(true)
                 .setNeutralButton(R.string.gen_button_ok,

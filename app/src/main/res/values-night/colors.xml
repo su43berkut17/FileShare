@@ -3,11 +3,11 @@
     <color name="mainBackground">#000000</color>
     <color name="colorPrimary">#234EA3</color>
     <color name="colorPrimaryDark">#060C19</color>
-    <color name="colorAccent">#367AFF</color>
+    <color name="colorAccent">#234EA3</color>
     <color name="colorGreen">#005A24</color>
     <color name="colorDeleteRed">#A11C38</color>
     <color name="colorCardWhite">#121212</color>
-    <color name="unselectedAvatar">#EBEBEB</color>
+    <color name="unselectedAvatar">#434343</color>
     <color name="colorWidgetText">#FFFFFF</color>
     <color name="appBarText">#FFFFFF</color>
     <color name="colorWidgetBackground">#367AFF</color>
