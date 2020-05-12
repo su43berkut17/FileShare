@@ -11,11 +11,15 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
+import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat;
+
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -94,10 +98,22 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
         mContext=this;
 
-        Drawable drawable = mConnectionAnimation.getDrawable();
-        if (drawable instanceof Animatable) {
-            ((Animatable) drawable).start();
-        }
+        //Animation
+        final Handler mainHandler = new Handler(Looper.getMainLooper());
+        final AnimatedVectorDrawableCompat mLoadingAnimation=AnimatedVectorDrawableCompat.create(this,R.drawable.rpd_avd_waiting);
+        mConnectionAnimation.setImageDrawable(mLoadingAnimation);
+        mLoadingAnimation.registerAnimationCallback(new Animatable2Compat.AnimationCallback() {
+            @Override
+            public void onAnimationEnd(Drawable drawable) {
+                mainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mLoadingAnimation.start();
+                    }
+                });
+            }
+        });
+        mLoadingAnimation.start();
 
         //toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.rpd_toolbar);

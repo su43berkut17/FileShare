@@ -45,7 +45,7 @@
                     android:layout_height="@dimen/receive_animation"
                     android:layout_margin="@dimen/default_padding"
                     android:contentDescription="@string/pu_avatar_description"
-                    app:srcCompat="@drawable/rpd_avd_waiting" />
+                    app:srcCompat="@drawable/rpd_avd_waiting"/>
 
                 <ImageView
                     android:id="@+id/iv_receive_icon"
@@ -55,7 +55,6 @@
                     android:layout_margin="@dimen/default_padding"
                     android:contentDescription="@string/pu_avatar_description"
                     app:srcCompat="@drawable/avatar_1" />
-
             </FrameLayout>
 
             <TextView
