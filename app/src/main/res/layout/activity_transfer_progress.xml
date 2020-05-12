@@ -8,7 +8,6 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
-
         <FrameLayout
             android:id="@+id/pb_atp_container_frame_layout"
             android:layout_width="match_parent"
@@ -103,23 +102,36 @@
 
                 <TextView
                     android:id="@+id/tv_atp_filename"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/default_padding"
+                    android:layout_marginEnd="@dimen/default_padding"
                     android:contentDescription="@string/atp_tv_filename"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:fadingEdge="horizontal"
                     android:text="@string/atp_tv_filename"
                     android:textSize="@dimen/medium_text"
+                    app:layout_constraintEnd_toStartOf="@+id/tv_atp_files_out_of"
+                    app:layout_constraintHorizontal_chainStyle="spread_inside"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tv_atp_title" />
+                    app:layout_constraintTop_toBottomOf="@+id/tv_atp_title"
+                    tools:ignore="Deprecated"/>
 
                 <TextView
                     android:id="@+id/tv_atp_files_out_of"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/default_padding"
                     android:contentDescription="@string/atp_tv_out_of"
                     android:text="@string/atp_tv_out_of"
                     android:textSize="@dimen/medium_text"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/tv_atp_filename"
                     app:layout_constraintTop_toTopOf="@+id/tv_atp_filename" />
 
                 <TextView

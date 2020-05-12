@@ -246,6 +246,9 @@ public class TransferProgressActivity extends AppCompatActivity implements
             }
         });
 
+        //activate the marquee
+        mTvFileName.setSelected(true);
+
         //initialize fragments
         initializeFragments();
     }

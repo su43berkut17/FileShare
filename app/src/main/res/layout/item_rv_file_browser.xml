@@ -86,6 +86,7 @@
             android:text="@string/fb_file_name_placeholder"
             android:textColor="@color/mainTextDark"
             android:textSize="14sp"
+            android:maxLines="2"
             app:layout_constraintBottom_toTopOf="@+id/guideline"
             app:layout_constraintEnd_toStartOf="@+id/cb_item_file"
             app:layout_constraintHorizontal_bias="0.5"

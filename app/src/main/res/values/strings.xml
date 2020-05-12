@@ -59,7 +59,7 @@
 
     <!--Activity transfer progress-->
     <string name="atp_tv_filename">Filename</string>
-    <string name="atp_tv_out_of">Number of files transferred</string>
+    <string name="atp_tv_out_of">1 of 1</string>
     <string name="atp_tv_percentage">100%</string>
     <string name="atp_tv_files_in_queue">Files to be sent:</string>
     <string name="ats_tv_sent_files">Files sent</string>

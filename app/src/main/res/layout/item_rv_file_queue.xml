@@ -69,6 +69,7 @@
                 android:layout_marginRight="8dp"
                 android:text="@string/fb_file_name_placeholder"
                 android:textColor="@color/mainTextDark"
+                android:maxLines="2"
                 app:layout_constraintBottom_toTopOf="@+id/tv_item_file_size_queue"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
