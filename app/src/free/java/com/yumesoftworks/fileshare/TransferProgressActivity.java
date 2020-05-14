@@ -612,7 +612,9 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     }
 
                     //we update the data
-                    mTvFileName.setText(fileName);
+                    if (!fileName.equals(mTvFileName.getText())) {
+                        mTvFileName.setText(fileName);
+                    }
                     mTvOutOf.setText(finalTextNumbers);
                     mtvPercentage.setText(String.valueOf(mContinuousPercentage) + "%");
                     mTvPercentageCollapsed.setText(String.valueOf(mContinuousPercentage) + "%");
