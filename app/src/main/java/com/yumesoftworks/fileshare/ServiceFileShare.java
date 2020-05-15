@@ -34,11 +34,8 @@ public class ServiceFileShare extends Service implements
 
     //notification
     private static final String NOTIFICATION_CHANNEL="Main Channel";
-    private static final String NOTIFICATION_CHANNEL_FOREGROUND="Foreground Channel";
     private static final int NOTIFICATION_ID=1002;
-    private static final int NOTIFICATION_FOREGROUND_ID=1003;
     private NotificationChannel channel;
-    private NotificationChannel channelSilent;
     private NotificationManager manager;
     private int mTotalFiles=0;
     private int mCurrentFile=0;
@@ -83,33 +80,22 @@ public class ServiceFileShare extends Service implements
         manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            //TODO: Check which notification solution makes notification appear in smart watch, might have to get rid of set ongoing so it appears on wearables
-            //channel foreground silent
-            channelSilent = new NotificationChannel(NOTIFICATION_CHANNEL_FOREGROUND,
-                    getString(R.string.app_name),
-                    NotificationManager.IMPORTANCE_HIGH);
-            channelSilent.setLightColor(Color.BLUE);
-            channelSilent.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-            manager.createNotificationChannel(channelSilent);
-
             //we set the channel
             channel = new NotificationChannel(NOTIFICATION_CHANNEL,
                     getString(R.string.app_name),
-                    NotificationManager.IMPORTANCE_HIGH);
+                    NotificationManager.IMPORTANCE_DEFAULT);
             channel.setLightColor(Color.BLUE);
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             manager.createNotificationChannel(channel);
 
-            Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL_FOREGROUND)
+            Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
                     .setContentTitle(getString(R.string.app_name))
                     .setContentText(getString(R.string.service_notification_text_initialize))
-                    .setOnlyAlertOnce(true)
-                    .setOngoing(true)
                     .setSmallIcon(R.drawable.icon_notification)
                     .build();
 
             try {
-                startForeground(NOTIFICATION_FOREGROUND_ID, notification);
+                startForeground(NOTIFICATION_ID, notification);
             }catch (Exception e){
                 Log.e(TAG,"Couldn't start foreground notification");
                 connectionError();
@@ -119,7 +105,6 @@ public class ServiceFileShare extends Service implements
                     , getString(R.string.app_name)
                     , false)
                     .setOnlyAlertOnce(true)
-                    .setOngoing(true)
                     .setSmallIcon(R.drawable.icon_notification)
                     .build());
         }
@@ -133,16 +118,13 @@ public class ServiceFileShare extends Service implements
         Log.d(TAG,"onBind");
 
         //create the start foreground command
-        Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL_FOREGROUND)
+        Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText(getString(R.string.app_name))
-                .setOnlyAlertOnce(true)
-                .setOngoing(true)
                 .setSmallIcon(R.drawable.icon_notification)
-                .setPriority(NotificationManager.IMPORTANCE_HIGH)
                 .build();
 
-        startForeground(NOTIFICATION_FOREGROUND_ID, notification);
+        startForeground(NOTIFICATION_ID, notification);
 
         return binder;
     }
@@ -360,10 +342,10 @@ public class ServiceFileShare extends Service implements
         return new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)
                     .setContentTitle(title)
                     .setContentText(filename)
+                    .setOnlyAlertOnce(true)
                     .setSmallIcon(R.drawable.icon_notification)
                     .setProgress(mTotalFiles, mCurrentFile, showProgress)
                     .setContentIntent(pendingIntentApp)
-                    .setOngoing(true)
                     .addAction(R.drawable.icon_file_128,getString(R.string.service_notification_action_stop_service),pendingIntentStopService);
 
     }
@@ -432,7 +414,6 @@ public class ServiceFileShare extends Service implements
                 ,"Transfer successful"
                 ,false)
                 .setOnlyAlertOnce(true)
-                .setOngoing(true)
                 .build());
 
         //we deactivate the transfer status
@@ -498,7 +479,6 @@ public class ServiceFileShare extends Service implements
                 ,"Transfer successful"
                 ,false)
                 .setOnlyAlertOnce(true)
-                .setOngoing(true)
                 .build());
 
         //we set the database as not transferring so if they restart the app goes to the main menu
@@ -596,7 +576,6 @@ public class ServiceFileShare extends Service implements
                 ,finalNotificationText
                 ,true)
                 .setOnlyAlertOnce(true)
-                .setOngoing(true)
                 .setProgress(100,percentage,false)
                 .build());
 
@@ -608,7 +587,6 @@ public class ServiceFileShare extends Service implements
         //update the widget
         //we will set a counter to prevent calling an update on the widget several times
         if (mCounterTimesWidget>30 || textInfoSendObject.getMessageType()==com.yumesoftworks.fileshare.TransferProgressActivity.TYPE_END) {
-            Log.d(TAG,fileName+": "+currentNumbers.toString());
             mCounterTimesWidget=0;
             try {
                 updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_TRANSFER, fileName, mTotalFiles, mCurrentFile,percentage);

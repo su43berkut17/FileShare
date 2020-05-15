@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -614,6 +615,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     //we update the data
                     if (!fileName.equals(mTvFileName.getText())) {
                         mTvFileName.setText(fileName);
+                        mTvFileName.setSelected(true);
                     }
                     mTvOutOf.setText(finalTextNumbers);
                     mtvPercentage.setText(String.valueOf(mContinuousPercentage) + "%");
