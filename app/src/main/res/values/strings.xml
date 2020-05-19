@@ -49,13 +49,20 @@
     <!--Activity pick user to send -->
     <string name="pu_avatar_description">User avatar</string>
     <string name="pu_username_description">Username</string>
-    <string name="pu_instructions">Tap the user who will receive the files</string>
+    <string name="pu_instructions">Tap receive on the destination device</string>
     <string name="pu_error_connect_dialog">Cannot connect to the user. Try again.</string>
+    <string name="pu_message_initializing_connection">Initializing server...</string>
+    <string name="pu_message_connection_error">Error: Could not connect to socket</string>
+    <string name="pu_message_discovery_error">Could not start service, please check your connection and try again.</string>
+    <string name="pu_wifi_disabled">"Activate WiFi and try again."</string>
 
     <!--Activity wait user receive -->
+    <string name="ru_message_initializing_connection">Initializing connection...</string>
     <string name="ru_avatar_description">Wait for the sender to connect</string>
     <string name="ru_tv_please_wait">Waiting for sender connection...</string>
+    <string name="ru_message_connection_error">Could not start service, please check your connection and try again.</string>
     <string name="ru_tv_username">Username</string>
+    <string name="ru_wifi_disabled">"Activate WiFi and try again."</string>
 
     <!--Activity transfer progress-->
     <string name="atp_tv_filename">Filename</string>

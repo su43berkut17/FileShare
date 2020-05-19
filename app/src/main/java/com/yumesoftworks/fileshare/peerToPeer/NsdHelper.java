@@ -11,20 +11,15 @@ public class NsdHelper {
     public static final String SERVICE_TYPE = "_http._tcp";
     public static final String TAG = "NsdHelper";
 
-    private Context mContext;
-
     //network service discovery vars
     private NsdManager mNsdManager;
-    private NsdManager.ResolveListener mResolveListener;
     private NsdManager.DiscoveryListener mDiscoveryListener;
     private NsdManager.RegistrationListener mRegistrationListener;
-    //private NsdServiceInfo mService;
 
     //interface to send services added or deleted
     private ChangedServicesListener mServiceListener;
 
     public NsdHelper(Context context) {
-        mContext = context;
         mNsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
 
         if (context instanceof ChangedServicesListener){
@@ -33,13 +28,9 @@ public class NsdHelper {
     }
 
     public void initializeNsd() {
-        if (mResolveListener==null) {
-            //initializeResolveListener();
-        }
-        if (mRegistrationListener==null) {
+        /*if (mRegistrationListener==null) {
             initializeRegistrationListener();
-        }
-        //mNsdManager.init(mContext.getMainLooper(), this);
+        }*/
     }
 
     public void initializeDiscoveryListener() {
@@ -48,6 +39,7 @@ public class NsdHelper {
             @Override
             public void onDiscoveryStarted(String regType) {
                 //Log.d(TAG, "Service discovery started "+regType);
+                mServiceListener.discoveryInitiated();
             }
 
             @Override
@@ -85,7 +77,6 @@ public class NsdHelper {
                     Log.d(TAG,"There was an error on service found");
                     Log.d(TAG,"Compared received service name "+service.getServiceName()+" with local service name: "+mServiceName);
                 }
-
             }
 
             @Override
@@ -112,29 +103,12 @@ public class NsdHelper {
             @Override
             public void onStartDiscoveryFailed(String serviceType, int errorCode) {
                 Log.e(TAG, "Discovery start failed: Error code:" + errorCode);
+                mServiceListener.discoveryFailed();
             }
 
             @Override
             public void onStopDiscoveryFailed(String serviceType, int errorCode) {
                 Log.e(TAG, "Discovery stop failed: Error code:" + errorCode);
-            }
-        };
-    }
-    public void initializeResolveListener() {
-        Log.d(TAG,"initializing nsd resolve listener");
-        mResolveListener = new NsdManager.ResolveListener() {
-            @Override
-            public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                Log.e(TAG, "Resolve failed" + errorCode);
-            }
-            @Override
-            public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                Log.e(TAG, "Resolve Succeeded. " + serviceInfo);
-                if (serviceInfo.getServiceName().equals(mServiceName)) {
-                    Log.d(TAG, "Same IP.");
-                    return;
-                }
-                //mService = serviceInfo;
             }
         };
     }
@@ -146,10 +120,12 @@ public class NsdHelper {
             public void onServiceRegistered(NsdServiceInfo NsdServiceInfo) {
                 //mServiceName = NsdServiceInfo.getServiceName();
                 Log.d(TAG, "Service registered: " + NsdServiceInfo.getServiceName());
+                mServiceListener.serviceRegistered();
             }
             @Override
             public void onRegistrationFailed(NsdServiceInfo arg0, int arg1) {
                 Log.d(TAG, "Service registration failed: " + arg1);
+                mServiceListener.serviceRegistrationError();
             }
             @Override
             public void onServiceUnregistered(NsdServiceInfo arg0) {
@@ -218,20 +194,16 @@ public class NsdHelper {
         }
     }
 
-    public void cancelResolver(){
-        if (mResolveListener!=null){
-            Log.d(TAG,"mResolveListener is not null so we unregister and set it to null");
-            try {
-                mResolveListener=null;
-            }catch (Exception e){
-                Log.d(TAG,"Couldnt cancel the resolve listener");
-            }
-        }
-    }
-
     //interface
     public interface ChangedServicesListener{
+        //sender
         void addedService(NsdServiceInfo serviceInfo);
         void removedService(NsdServiceInfo serviceInfo);
+        void discoveryInitiated();
+        void discoveryFailed();
+
+        //receiver
+        void serviceRegistered();
+        void serviceRegistrationError();
     }
 }

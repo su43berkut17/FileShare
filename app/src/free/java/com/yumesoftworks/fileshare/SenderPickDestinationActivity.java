@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -55,6 +57,8 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     private List<UserSendEntry> mTempUserList;
     private List<SocketListEntry> mSocketList;
 
+    private TextView mConnectionStatus;
+
     //for client socket
     private String localIp;
 
@@ -74,45 +78,55 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
-        //storing local ip address
-        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-        int ipAddress = wm.getConnectionInfo().getIpAddress();
-        localIp = String.format("%d.%d.%d.%d", (ipAddress & 0xff),(ipAddress >> 8 & 0xff),(ipAddress >> 16 & 0xff),(ipAddress >> 24 & 0xff));
-
-        Log.d(TAG,"initializing nsd");
-
-        //create recycler view and adapter
-        mRecyclerView=findViewById(R.id.rv_sdpa_destinations);
-        mLinearLayoutManager=new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLinearLayoutManager);
-        mAdapter=new SendFileUserListAdapter(this,this);
-        mRecyclerView.setAdapter(mAdapter);
-
-        //create a new list
-        mUserList=new ArrayList<>();
-        mTempUserList=new ArrayList<>();
-        mSocketList=new ArrayList<>();
-
-       //server socket
-        try{
-            mServerSocket=new ServerSocket(0);
-        }catch (IOException e){
-            Log.d(TAG,"There was an error registering the server socket");
-        }
-
-        mNsdHelper=new NsdHelper(this);
-        mNsdHelper.initializeNsd();
-        mNsdHelper.registerService(mServerSocket.getLocalPort());
-        //mNsdHelper.discoverServices();
-
-        isFirstExecution=true;
-
         //toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.spd_toolbar);
         setSupportActionBar(myToolbar);
 
         //we set the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        mConnectionStatus=findViewById(R.id.spd_status);
+
+        //Check wifi status
+        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        if (wm.isWifiEnabled()) {
+            //storing local ip address
+            int ipAddress = wm.getConnectionInfo().getIpAddress();
+            localIp = String.format("%d.%d.%d.%d", (ipAddress & 0xff), (ipAddress >> 8 & 0xff), (ipAddress >> 16 & 0xff), (ipAddress >> 24 & 0xff));
+
+            Log.d(TAG,"initializing nsd");
+
+            //create recycler view and adapter
+            mRecyclerView=findViewById(R.id.rv_sdpa_destinations);
+            mLinearLayoutManager=new LinearLayoutManager(this);
+            mRecyclerView.setLayoutManager(mLinearLayoutManager);
+            mAdapter=new SendFileUserListAdapter(this,this);
+            mRecyclerView.setAdapter(mAdapter);
+
+            //create a new list
+            mUserList=new ArrayList<>();
+            mTempUserList=new ArrayList<>();
+            mSocketList=new ArrayList<>();
+
+            //server socket
+            try{
+                mServerSocket=new ServerSocket(0);
+                mConnectionStatus.setText(R.string.pu_message_initializing_connection);
+            }catch (IOException e){
+                Log.d(TAG,"There was an error registering the server socket");
+                mConnectionStatus.setText(R.string.pu_message_connection_error);
+            }
+
+            mNsdHelper=new NsdHelper(this);
+            //mNsdHelper.initializeNsd();
+            //mNsdHelper.registerService(mServerSocket.getLocalPort());
+            mNsdHelper.discoverServices();
+
+            isFirstExecution=true;
+        }else{
+            Toast.makeText(this,getText(R.string.pu_wifi_disabled),Toast.LENGTH_LONG).show();
+            finish();
+        }
     }
 
     @Override
@@ -120,8 +134,6 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         Log.d(TAG,"onPause");
         if (mNsdHelper!=null){
             mNsdHelper.stopDiscovery();
-            mNsdHelper.cancelRegistration();
-            mNsdHelper.cancelResolver();
         }
 
         super.onPause();
@@ -133,12 +145,12 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
         if (!isFirstExecution) {
             if (mNsdHelper != null) {
-                mNsdHelper.initializeNsd();
+                //mNsdHelper.initializeNsd();
                 //mNsdHelper.registerService(mServerSocket.getLocalPort());
+                mNsdHelper.discoverServices();
             }
         }
         isFirstExecution=false;
-        mNsdHelper.discoverServices();
     }
 
     @Override
@@ -146,11 +158,16 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         super.onDestroy();
 
         //we empty the list
-        mUserList.clear();
-        mTempUserList.clear();
+        try {
+            mUserList.clear();
+            mTempUserList.clear();
+        }catch (Exception e){
+            Log.e(TAG,"Values haven't been initialized.");
+        }
     }
 
     //callback
+    //NSD Helper
     @Override
     public void addedService(NsdServiceInfo serviceInfo) {
         Log.d(TAG,"Received a service Info "+serviceInfo.getHost()+" ip "+serviceInfo.getHost().getHostAddress()+" local ip is "+mServerSocket.getInetAddress().getHostAddress());
@@ -172,6 +189,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     }
 
     //update the data of the user
+    //From Sender Pick Socket
     @Override
     public void updateUserDataSocket(UserSendEntry userSendEntry) {
         //look in the list
@@ -193,6 +211,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         });
     }
 
+    //NSD Helper
     @Override
     public void removedService(NsdServiceInfo serviceInfo) {
         Log.d(TAG,"Removing a service: "+serviceInfo.getServiceName());
@@ -222,6 +241,30 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         });
     }
 
+    //NSD Helper
+    @Override
+    public void discoveryInitiated() {
+        mConnectionStatus.setText(R.string.pu_instructions);
+    }
+
+    //NSD Helper
+    @Override
+    public void discoveryFailed() {
+        mConnectionStatus.setText(R.string.pu_message_discovery_error);
+    }
+
+    //NSD Helper
+    @Override
+    public void serviceRegistered() {
+        //No service registration required for sending
+    }
+
+    //NSD Helper
+    @Override
+    public void serviceRegistrationError() {
+        //No service registration required for sending
+    }
+
     //when the user has been clicked
     @Override
     public void onItemClickListener(final int itemId) {
@@ -229,6 +272,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
          mSocketList.get(itemId).getSenderSocket().sendMessage(MESSAGE_OPEN_ACTIVITY);
     }
 
+    //From Sender Pick Socket
     @Override
     public void showErrorDialog() {
         Log.d(TAG, "Couldn't connect to the socket, we show dialog with error ");
@@ -244,6 +288,14 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         builder.show();
     }
 
+    //From Sender Pick Socket
+    @Override
+    public void showConnectionError(){
+        Toast.makeText(this,getText(R.string.pu_message_connection_error),Toast.LENGTH_SHORT).show();
+        finish();
+    }
+
+    //From Sender Pick Socket
     @Override
     public void openNextActivity(UserSendEntry sendEntry) {
         //close the socket

@@ -9,10 +9,8 @@ import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.data.UserSendEntry;
 
-import java.io.DataOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 public class SenderPickSocket {
@@ -21,7 +19,8 @@ public class SenderPickSocket {
     //types of message
     private static final String TYPE_UPDATE="typeUpdate";
     private static final String TYPE_END="typeEnd";
-    private static final String TYPE_ERROR="typeError";
+    private static final String TYPE_ERROR_SEND_MESSAGE ="typeErrorMessage";
+    private static final String TYPE_ERROR_CONNECTION ="typeErrorConnection";
 
     //thread
     private Handler socketHandler;
@@ -76,16 +75,20 @@ public class SenderPickSocket {
                        // try {
                         if(!isInitialized) {
                             Log.d(TAG, "Object input stream started");
-                            ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
-                            UserInfoEntry readEntry = (UserInfoEntry) messageIn.readObject();
-                            //messageIn.close();
+                            try {
+                                ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
+                                UserInfoEntry readEntry = (UserInfoEntry) messageIn.readObject();
+                                messageIn.close();
 
-                            //set the right data
-                            mUserList.setAvatar(readEntry.getPickedAvatar());
-                            mUserList.setUsername(readEntry.getUsername());
-                            isInitialized=true;
+                                //set the right data
+                                mUserList.setAvatar(readEntry.getPickedAvatar());
+                                mUserList.setUsername(readEntry.getUsername());
+                                isInitialized = true;
 
-                            socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_UPDATE, mUserList));
+                                socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_UPDATE, mUserList));
+                            }catch (Exception e){
+                                Log.e(TAG,"Couldn't read input stream");
+                            }
                         }
 
                         if (messageToSend!=null) {
@@ -96,6 +99,7 @@ public class SenderPickSocket {
                                 TextInfoSendObject sendObject = new TextInfoSendObject(TransferProgressActivity.TYPE_END, messageToSend, "");
                                 ObjectOutputStream messageOut = new ObjectOutputStream(mSocket.getOutputStream());
                                 messageOut.writeObject(sendObject);
+                                messageOut.close();
                                 messageToSend = null;
                                 doWeRepeat=false;
 
@@ -105,12 +109,13 @@ public class SenderPickSocket {
                                 Log.d(TAG,"Error sending message: "+messageToSend+" "+e.getMessage());
                                 e.printStackTrace();
                                 messageToSend=null;
-                                socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_ERROR, null));
+                                socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_ERROR_SEND_MESSAGE, null));
                             }
                         }
                     }
                 } catch (Exception e) {
                     Log.d(TAG, "the socket creation has failed" + e.getMessage());
+                    socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_ERROR_CONNECTION,null));
                     doWeRepeat=false;
                 }
             }
@@ -142,9 +147,14 @@ public class SenderPickSocket {
                     mSenderInterface.updateUserDataSocket(user);
                     break;
 
-                case TYPE_ERROR:
+                case TYPE_ERROR_SEND_MESSAGE:
                     //dialog
                     mSenderInterface.showErrorDialog();
+                    break;
+
+                case TYPE_ERROR_CONNECTION:
+                    //dialog
+                    mSenderInterface.showConnectionError();
                     break;
 
                 case TYPE_END:
@@ -159,6 +169,7 @@ public class SenderPickSocket {
     public interface SocketSenderConnectionInterface{
         void updateUserDataSocket(UserSendEntry userSendEntry);
         void showErrorDialog();
+        void showConnectionError();
         void openNextActivity(UserSendEntry userList);
     }
 

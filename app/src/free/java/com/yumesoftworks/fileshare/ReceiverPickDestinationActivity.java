@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.net.nsd.NsdServiceInfo;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
@@ -24,13 +26,13 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.AvatarDefaultImages;
 import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
@@ -41,7 +43,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.List;
 
-public class ReceiverPickDestinationActivity extends AppCompatActivity implements ReceiverPickSocket.SocketReceiverConnectionInterface{
+public class ReceiverPickDestinationActivity extends AppCompatActivity implements ReceiverPickSocket.SocketReceiverConnectionInterface, NsdHelper.ChangedServicesListener{
 
     private static final String TAG="ReceiverDesActivity";
 
@@ -58,13 +60,14 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     //database
     private UserInfoEntry mUserInfoEntry;
-    private AppDatabase mDb;
+    //private AppDatabase mDb;
     private ReceiverPickDestinationViewModel viewModel;
 
     //ui
     private TextView mUserName;
     private ImageView mUserIcon;
     private ImageView mConnectionAnimation;
+    private TextView mConnectionStatus;
 
     //lifecycle
     private Boolean isFirstExecution=true;
@@ -95,6 +98,8 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         mUserName=(TextView)findViewById(R.id.tv_receive_username);
         mUserIcon=(ImageView)findViewById(R.id.iv_receive_icon);
         mConnectionAnimation=(ImageView)findViewById(R.id.iv_receive_animation);
+        mConnectionStatus=findViewById(R.id.tv_receive_wait);
+        mConnectionStatus.setText(R.string.ru_message_initializing_connection);
 
         mContext=this;
 
@@ -122,8 +127,15 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         //we set the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        //get file write access
-        askForFilePermission();
+        //check wifi
+        WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        if (wm.isWifiEnabled()) {
+            //get file write access
+            askForFilePermission();
+        }else{
+            Toast.makeText(this,getText(R.string.ru_wifi_disabled),Toast.LENGTH_LONG).show();
+            finish();
+        }
     }
 
     private void initialize(){
@@ -132,7 +144,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         NSDInitialized=false;
 
         //we will use livedata for user
-        mDb=AppDatabase.getInstance(getApplicationContext());
         setupViewModel();
     }
 
@@ -204,8 +215,9 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
             Log.d(TAG,"There was an error registering the server socket");
         }
 
-        mNsdHelper = new NsdHelper(this);
-        mNsdHelper.initializeNsd();
+        mNsdHelper = new NsdHelper(mContext);
+        //mNsdHelper.initializeNsd();
+        mNsdHelper.initializeRegistrationListener();
         mNsdHelper.registerService(mServerSocket.getLocalPort());
 
         //we create the receiver pick socket
@@ -220,7 +232,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         super.onPause();
         if (mNsdHelper!=null){
             mNsdHelper.cancelRegistration();
-            mNsdHelper.cancelResolver();
         }
 
         //we destroy the socket
@@ -243,7 +254,8 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
             Log.d(TAG,"it is not 1st execution anymore");
             if (mServerSocket != null) {
                 //we resume the service discovery
-                mNsdHelper.initializeNsd();
+                //mNsdHelper.initializeNsd();
+                mNsdHelper.initializeRegistrationListener();
                 mNsdHelper.registerService(mServerSocket.getLocalPort());
 
                 Log.d(TAG, "recreating socket");
@@ -301,5 +313,45 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void addedService(NsdServiceInfo serviceInfo) {
+        //only for sender
+    }
+
+    @Override
+    public void removedService(NsdServiceInfo serviceInfo) {
+        //only for sender
+    }
+
+    @Override
+    public void discoveryInitiated() {
+        //only for sender
+    }
+
+    @Override
+    public void discoveryFailed() {
+        //only for sender
+    }
+
+    @Override
+    public void serviceRegistered() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mConnectionStatus.setText(R.string.ru_tv_please_wait);
+            }
+        });
+    }
+
+    @Override
+    public void serviceRegistrationError() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mConnectionStatus.setText(R.string.ru_message_connection_error);
+            }
+        });
     }
 }

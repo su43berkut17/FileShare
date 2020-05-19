@@ -65,11 +65,12 @@ public class ReceiverPickSocket {
                                 Log.d(TAG, "Async:Sending the user data");
                                 ObjectOutputStream messageOut = new ObjectOutputStream(mSocket.getOutputStream());
                                 messageOut.writeObject(mUserInfoEntry);
-                                //messageOut.close();
+                                messageOut.close();
                                 isInitialized=true;
                             }catch (Exception e){
-                                Log.d(TAG,"Error:"+e.getMessage());
-                                keepLooping=false;
+                                Log.d(TAG,"Error:"+e.getMessage()+" try again");
+                                isInitialized=false;
+                                //keepLooping=false;
                             }
                         }
 
@@ -77,7 +78,7 @@ public class ReceiverPickSocket {
                         try {
                             ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
                             TextInfoSendObject message = (TextInfoSendObject) messageIn.readObject();
-                            //messageIn.close();
+                            messageIn.close();
 
                             Log.d(TAG, "ObjectInputStreamReceived closed, the message is "+message.getMessageContent());
 
