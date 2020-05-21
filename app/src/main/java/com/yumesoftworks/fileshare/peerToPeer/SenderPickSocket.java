@@ -78,7 +78,6 @@ public class SenderPickSocket {
                             try {
                                 ObjectInputStream messageIn = new ObjectInputStream(mSocket.getInputStream());
                                 UserInfoEntry readEntry = (UserInfoEntry) messageIn.readObject();
-                                messageIn.close();
 
                                 //set the right data
                                 mUserList.setAvatar(readEntry.getPickedAvatar());
@@ -99,7 +98,6 @@ public class SenderPickSocket {
                                 TextInfoSendObject sendObject = new TextInfoSendObject(TransferProgressActivity.TYPE_END, messageToSend, "");
                                 ObjectOutputStream messageOut = new ObjectOutputStream(mSocket.getOutputStream());
                                 messageOut.writeObject(sendObject);
-                                messageOut.close();
                                 messageToSend = null;
                                 doWeRepeat=false;
 

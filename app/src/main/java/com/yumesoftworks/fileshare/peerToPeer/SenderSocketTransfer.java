@@ -252,7 +252,9 @@ public class SenderSocketTransfer{
 
                     if (currentSocketRetries==totalSocketRetries){
                         doWeRepeat=false;
-                        mSenderInterface.socketErrorSend();
+                        if (mSenderInterface!=null) {
+                            mSenderInterface.socketErrorSend();
+                        }
                         Log.d(TAG, "we ran out of tries for the socket");
                     }else{
                         //wait 1 second before trying again

@@ -333,7 +333,9 @@ public class ReceiverSocketTransfer {
 
                     if (currentSocketRetries==totalSocketRetries) {
                         doWeRepeat=false;
-                        mReceiverInterface.socketReceiveFailedClient();
+                        if(mReceiverInterface!=null) {
+                            mReceiverInterface.socketReceiveFailedClient();
+                        }
                         Log.d(TAG, "we ran out of tries for the socket");
                     }else{
                         try{
