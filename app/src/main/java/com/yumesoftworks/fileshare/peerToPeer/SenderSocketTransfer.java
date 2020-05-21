@@ -252,8 +252,10 @@ public class SenderSocketTransfer{
 
                     if (currentSocketRetries==totalSocketRetries){
                         doWeRepeat=false;
-                        if (mSenderInterface!=null) {
+                        try{
                             mSenderInterface.socketErrorSend();
+                        }catch (Exception ie){
+                            Log.e(TAG,"Interface Unavailable");
                         }
                         Log.d(TAG, "we ran out of tries for the socket");
                     }else{
