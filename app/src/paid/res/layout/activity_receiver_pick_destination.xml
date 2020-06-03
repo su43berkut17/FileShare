@@ -6,14 +6,17 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/rpd_toolbar"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ToolbarWhite"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+        android:layout_height="wrap_content">
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/rpd_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:elevation="4dp"
+            android:theme="@style/ToolbarWhite"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight"/>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -32,13 +35,35 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
-                android:id="@+id/iv_receive_logo"
-                android:layout_width="@dimen/welcome_icon_size"
-                android:layout_height="@dimen/welcome_icon_size"
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/iv_receive_animation"
+                    android:layout_width="@dimen/receive_animation"
+                    android:layout_height="@dimen/receive_animation"
+                    android:layout_margin="@dimen/default_padding"
+                    android:contentDescription="@string/pu_avatar_description"
+                    app:srcCompat="@drawable/rpd_avd_waiting"/>
+
+                <ImageView
+                    android:id="@+id/iv_receive_icon"
+                    android:layout_width="@dimen/receive_icon"
+                    android:layout_height="@dimen/receive_icon"
+                    android:layout_gravity="center"
+                    android:layout_margin="@dimen/default_padding"
+                    android:contentDescription="@string/pu_avatar_description"
+                    app:srcCompat="@drawable/avatar_1" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tv_receive_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_margin="@dimen/default_padding"
-                android:contentDescription="@string/pu_avatar_description"
-                app:srcCompat="@drawable/wait_transfer" />
+                android:text="@string/ru_tv_username"
+                android:textSize="@dimen/receive_username" />
 
             <TextView
                 android:id="@+id/tv_receive_wait"
@@ -47,6 +72,7 @@
                 android:layout_margin="@dimen/default_padding"
                 android:text="@string/ru_tv_please_wait"
                 android:textSize="@dimen/medium_text" />
+
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

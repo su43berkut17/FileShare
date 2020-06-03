@@ -6,14 +6,17 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/spd_toolbar"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ToolbarWhite"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+        android:layout_height="wrap_content">
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/spd_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:elevation="4dp"
+            android:theme="@style/ToolbarWhite"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight"/>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -26,10 +29,11 @@
             android:layout_margin="@dimen/default_padding"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:contentDescription="@string/app_name"
+            android:contentDescription="@string/app_name_real"
             app:srcCompat="@drawable/logo_128" />
 
         <TextView
+            android:id="@+id/spd_status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/default_padding"
@@ -45,6 +49,5 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </ScrollView>
-
     </LinearLayout>
 </LinearLayout>

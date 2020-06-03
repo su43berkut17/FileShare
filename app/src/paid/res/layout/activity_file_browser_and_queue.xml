@@ -4,16 +4,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/mainBackground"
     android:orientation="vertical">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/afv_toolbar"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ToolbarWhite"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+        android:layout_height="wrap_content">
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/afv_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:elevation="4dp"
+            android:theme="@style/ToolbarWhite"
+            app:popupTheme="@style/ToolbarOptionsMenu"/>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -22,10 +26,9 @@
         tools:context=".FileBrowserAndQueueActivity">
 
         <FrameLayout
+            android:id="@+id/frag_afv_main"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/frag_afv_main"
             android:layout_weight="1"></FrameLayout>
-
     </LinearLayout>
 </LinearLayout>

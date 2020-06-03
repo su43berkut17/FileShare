@@ -82,14 +82,14 @@ public class ServiceFileShare extends Service implements
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             //we set the channel
             channel = new NotificationChannel(NOTIFICATION_CHANNEL,
-                    getString(R.string.app_name),
+                    getString(R.string.app_name_real),
                     NotificationManager.IMPORTANCE_DEFAULT);
             channel.setLightColor(Color.BLUE);
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             manager.createNotificationChannel(channel);
 
             Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
-                    .setContentTitle(getString(R.string.app_name))
+                    .setContentTitle(getString(R.string.app_name_real))
                     .setContentText(getString(R.string.service_notification_text_initialize))
                     .setSmallIcon(R.drawable.icon_notification)
                     .build();
@@ -101,8 +101,8 @@ public class ServiceFileShare extends Service implements
                 connectionError();
             }
         } else {
-            manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
-                    , getString(R.string.app_name)
+            manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name_real)
+                    , getString(R.string.app_name_real)
                     , false)
                     .setOnlyAlertOnce(true)
                     .setSmallIcon(R.drawable.icon_notification)
@@ -119,8 +119,8 @@ public class ServiceFileShare extends Service implements
 
         //create the start foreground command
         Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL)
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText(getString(R.string.app_name))
+                .setContentTitle(getString(R.string.app_name_real))
+                .setContentText(getString(R.string.app_name_real))
                 .setSmallIcon(R.drawable.icon_notification)
                 .build();
 
@@ -410,7 +410,7 @@ public class ServiceFileShare extends Service implements
         updateGeneralUI(endObject);
 
         //we update the notification
-        manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
+        manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name_real)
                 ,"Transfer successful"
                 ,false)
                 .setOnlyAlertOnce(true)
@@ -475,7 +475,7 @@ public class ServiceFileShare extends Service implements
         updateGeneralUI(endObject);
 
         //we update the notification
-        manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
+        manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name_real)
                 ,"Transfer successful"
                 ,false)
                 .setOnlyAlertOnce(true)
@@ -572,7 +572,7 @@ public class ServiceFileShare extends Service implements
         bundle.putSerializable(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI_DATA,textInfoSendObject);
 
         //we update the notification
-        manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name)
+        manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name_real)
                 ,finalNotificationText
                 ,true)
                 .setOnlyAlertOnce(true)

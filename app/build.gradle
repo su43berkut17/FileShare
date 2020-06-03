@@ -44,11 +44,13 @@ android {
         free {
             dimension "tier"
             applicationId 'com.yumesoftworks.fileshare.free'
+            resValue "string", "app_name", "FileShare Free"
         }
 
         paid {
             dimension "tier"
             applicationId 'com.yumesoftworks.fileshare.paid'
+            resValue "string", "app_name", "FileShare"
         }
     }
     compileOptions {

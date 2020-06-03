@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FileShare</string>
+    <string name="app_name_real">FileShare</string>
 
     <!-- General purpose -->
     <string name="gen_button_ok">OK</string>
