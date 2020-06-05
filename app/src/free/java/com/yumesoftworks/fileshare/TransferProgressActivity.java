@@ -19,7 +19,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import android.os.IBinder;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -27,12 +26,17 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.ads.consent.ConsentInfoUpdateListener;
+import com.google.ads.consent.ConsentInformation;
+import com.google.ads.consent.ConsentStatus;
+import com.google.ads.consent.DebugGeography;
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.FileListRepository;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
@@ -96,9 +100,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
     private FileTransferProgress fragmentFileTransferProgress;
     private FragmentManager fragmentManager;
 
-    //analytics and admob
-    private FirebaseAnalytics mFireAnalytics;
-
     //viewmodel
     private FileTransferViewModel fileTransferViewModel;
     private TransferProgressActivityViewModel transferProgressActivityViewModel;
@@ -148,16 +149,52 @@ public class TransferProgressActivity extends AppCompatActivity implements
         thisActivity=this;
         Log.d(TAG,"onCreate called");
 
-        //analytics
-        mFireAnalytics=FirebaseAnalytics.getInstance(this);
+        //consent and ads
+        ConsentInformation consentInformation = ConsentInformation.getInstance(thisActivity);
+        consentInformation.setDebugGeography(DebugGeography.DEBUG_GEOGRAPHY_EEA);
+        String[] publisherIds = {"pub-0123456789012345"};
+        consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
+            @Override
+            public void onConsentInfoUpdated(ConsentStatus consentStatus) {
+                // User's consent status successfully updated.
+                if (consentStatus==ConsentStatus.PERSONALIZED){
+                    MobileAds.initialize(thisActivity,
+                            "ca-app-pub-3940256099942544/6300978111");
 
-        //ads
-        MobileAds.initialize(this,
-                "ca-app-pub-3940256099942544/6300978111");
+                    mAdView = findViewById(R.id.ad_view_transfer_progress);
+                    AdRequest adRequest = new AdRequest.Builder().build();
+                    mAdView.loadAd(adRequest);
 
-        mAdView = findViewById(R.id.ad_view_transfer_progress);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+                    //Crash logging
+                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true);
+                }else{
+                    MobileAds.initialize(thisActivity,
+                            "ca-app-pub-3940256099942544/6300978111");
+
+                    mAdView = findViewById(R.id.ad_view_transfer_progress);
+
+                    Bundle extras = new Bundle();
+                    extras.putString("npa", "1");
+
+                    AdRequest adRequest = new AdRequest.Builder()
+                            .addNetworkExtrasBundle(AdMobAdapter.class,extras)
+                            .build();
+                    mAdView.loadAd(adRequest);
+
+                    //Crash logging
+                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
+                }
+            }
+
+            @Override
+            public void onFailedToUpdateConsentInfo(String errorDescription) {
+                // User's consent status failed to update.
+                Log.e(TAG,"Cannot initiate ads "+errorDescription);
+
+                //Crash logging
+                FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
+            }
+        });
 
         //we get the instance of the indeterminate progress bar
         mWaitingScreen =findViewById(R.id.pb_atp_waitingForConnection);

@@ -29,10 +29,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.ads.consent.ConsentInfoUpdateListener;
+import com.google.ads.consent.ConsentInformation;
+import com.google.ads.consent.ConsentStatus;
+import com.google.ads.consent.DebugGeography;
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.yumesoftworks.fileshare.data.AvatarDefaultImages;
 import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
@@ -47,8 +52,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     private static final String TAG="ReceiverDesActivity";
 
-    //analytics and admob
-    private FirebaseAnalytics mFireAnalytics;
+    //admob
     private AdView mAdView;
 
     //nds vars
@@ -60,7 +64,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     //database
     private UserInfoEntry mUserInfoEntry;
-    //private AppDatabase mDb;
     private ReceiverPickDestinationViewModel viewModel;
 
     //ui
@@ -83,16 +86,54 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receiver_pick_destination);
 
-        //analytics
-        mFireAnalytics=FirebaseAnalytics.getInstance(this);
+        mContext=this;
 
-        //ads
-        MobileAds.initialize(this,
-                "ca-app-pub-3940256099942544/6300978111");
+        //consent and ads
+        ConsentInformation consentInformation = ConsentInformation.getInstance(mContext);
+        consentInformation.setDebugGeography(DebugGeography.DEBUG_GEOGRAPHY_EEA);
+        String[] publisherIds = {"pub-0123456789012345"};
+        consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
+            @Override
+            public void onConsentInfoUpdated(ConsentStatus consentStatus) {
+                // User's consent status successfully updated.
+                if (consentStatus==ConsentStatus.PERSONALIZED){
+                    MobileAds.initialize(mContext,
+                            "ca-app-pub-3940256099942544/6300978111");
 
-        mAdView = findViewById(R.id.ad_view_receiver_pick_destination);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+                    mAdView = findViewById(R.id.ad_view_receiver_pick_destination);
+                    AdRequest adRequest = new AdRequest.Builder().build();
+                    mAdView.loadAd(adRequest);
+
+                    //Crash logging
+                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true);
+                }else{
+                    MobileAds.initialize(mContext,
+                            "ca-app-pub-3940256099942544/6300978111");
+
+                    mAdView = findViewById(R.id.ad_view_receiver_pick_destination);
+
+                    Bundle extras = new Bundle();
+                    extras.putString("npa", "1");
+
+                    AdRequest adRequest = new AdRequest.Builder()
+                            .addNetworkExtrasBundle(AdMobAdapter.class,extras)
+                            .build();
+                    mAdView.loadAd(adRequest);
+
+                    //Crash logging
+                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
+                }
+            }
+
+            @Override
+            public void onFailedToUpdateConsentInfo(String errorDescription) {
+                // User's consent status failed to update.
+                Log.e(TAG,"Cannot initiate ads "+errorDescription);
+
+                //Crash logging
+                FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
+            }
+        });
 
         //assign views
         mUserName=(TextView)findViewById(R.id.tv_receive_username);
@@ -100,8 +141,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         mConnectionAnimation=(ImageView)findViewById(R.id.iv_receive_animation);
         mConnectionStatus=findViewById(R.id.tv_receive_wait);
         mConnectionStatus.setText(R.string.ru_message_initializing_connection);
-
-        mContext=this;
 
         //Animation
         final Handler mainHandler = new Handler(Looper.getMainLooper());

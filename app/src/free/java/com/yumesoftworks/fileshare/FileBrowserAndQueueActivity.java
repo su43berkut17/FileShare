@@ -1,6 +1,5 @@
 package com.yumesoftworks.fileshare;
 
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -22,10 +21,15 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.MenuItem;
 
+import com.google.ads.consent.ConsentInfoUpdateListener;
+import com.google.ads.consent.ConsentInformation;
+import com.google.ads.consent.ConsentStatus;
+import com.google.ads.consent.DebugGeography;
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.StorageListEntry;
 import com.yumesoftworks.fileshare.utils.ChangeShownPath;
@@ -51,8 +55,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private int mCurrentFragment;
     private static final String CURRENT_FRAGMENT_TAG="currentFragmentTag";
 
-    //analytics and admob
-    private FirebaseAnalytics mFireAnalytics;
+    //admob
     private AdView mAdView;
 
     //fragment parts
@@ -65,6 +68,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private CombinedDataViewModel queueViewerViewModel;
     private String mPath;
     private static final String CURRENT_PATH_TAG="CurrentPathTag";
+    private Context thisActivity;
 
     //for deletion in the queue viewer
     private boolean mIsNotDeletion=true;
@@ -81,16 +85,54 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_browser_and_queue);
 
-        //analytics
-        mFireAnalytics=FirebaseAnalytics.getInstance(this);
+        thisActivity=this;
 
-        //ads
-        MobileAds.initialize(this,
-                "ca-app-pub-3940256099942544/6300978111");
+        //consent and ads
+        ConsentInformation consentInformation = ConsentInformation.getInstance(thisActivity);
+        consentInformation.setDebugGeography(DebugGeography.DEBUG_GEOGRAPHY_EEA);
+        String[] publisherIds = {"pub-0123456789012345"};
+        consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
+            @Override
+            public void onConsentInfoUpdated(ConsentStatus consentStatus) {
+                // User's consent status successfully updated.
+                if (consentStatus==ConsentStatus.PERSONALIZED){
+                    MobileAds.initialize(thisActivity,
+                            "ca-app-pub-3940256099942544/6300978111");
 
-        mAdView = findViewById(R.id.ad_view_activity_file_browser_and_queue);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+                    mAdView = findViewById(R.id.ad_view_activity_file_browser_and_queue);
+                    AdRequest adRequest = new AdRequest.Builder().build();
+                    mAdView.loadAd(adRequest);
+
+                    //Crash logging
+                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true);
+                }else{
+                    MobileAds.initialize(thisActivity,
+                            "ca-app-pub-3940256099942544/6300978111");
+
+                    mAdView = findViewById(R.id.ad_view_activity_file_browser_and_queue);
+
+                    Bundle extras = new Bundle();
+                    extras.putString("npa", "1");
+
+                    AdRequest adRequest = new AdRequest.Builder()
+                            .addNetworkExtrasBundle(AdMobAdapter.class,extras)
+                            .build();
+                    mAdView.loadAd(adRequest);
+
+                    //Crash logging
+                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
+                }
+            }
+
+            @Override
+            public void onFailedToUpdateConsentInfo(String errorDescription) {
+                // User's consent status failed to update.
+                Log.e(TAG,"Cannot initiate ads "+errorDescription);
+
+                //Crash logging
+                FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
+            }
+        });
 
         if(savedInstanceState!=null){
             mCurrentFragment=savedInstanceState.getInt(CURRENT_FRAGMENT_TAG);

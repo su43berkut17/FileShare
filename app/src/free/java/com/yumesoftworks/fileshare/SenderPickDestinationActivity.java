@@ -1,5 +1,6 @@
 package com.yumesoftworks.fileshare;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.nsd.NsdServiceInfo;
@@ -14,12 +15,17 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.ads.consent.ConsentInfoUpdateListener;
+import com.google.ads.consent.ConsentInformation;
+import com.google.ads.consent.ConsentStatus;
+import com.google.ads.consent.DebugGeography;
+import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.yumesoftworks.fileshare.data.SocketListEntry;
 import com.yumesoftworks.fileshare.data.UserSendEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
@@ -39,8 +45,8 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     public final static String MESSAGE_OPEN_ACTIVITY="pleaseOpenANewActivity";
 
     //analytics and admob
-    private FirebaseAnalytics mFireAnalytics;
     private AdView mAdView;
+    private Context mContext;
 
     //nds vars
     private NsdHelper mNsdHelper;
@@ -67,16 +73,54 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sender_pick_destination);
 
-        //analytics
-        mFireAnalytics=FirebaseAnalytics.getInstance(this);
+        mContext=this;
 
-        //ads
-         MobileAds.initialize(this,
-                "ca-app-pub-3940256099942544/6300978111");
+        //consent and ads
+        ConsentInformation consentInformation = ConsentInformation.getInstance(mContext);
+        consentInformation.setDebugGeography(DebugGeography.DEBUG_GEOGRAPHY_EEA);
+        String[] publisherIds = {"pub-0123456789012345"};
+        consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
+            @Override
+            public void onConsentInfoUpdated(ConsentStatus consentStatus) {
+                // User's consent status successfully updated.
+                if (consentStatus==ConsentStatus.PERSONALIZED){
+                    MobileAds.initialize(mContext,
+                            "ca-app-pub-3940256099942544/6300978111");
 
-        mAdView = findViewById(R.id.ad_view_sender_pick_destination);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+                    mAdView = findViewById(R.id.ad_view_sender_pick_destination);
+                    AdRequest adRequest = new AdRequest.Builder().build();
+                    mAdView.loadAd(adRequest);
+
+                    //Crash logging
+                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true);
+                }else{
+                    MobileAds.initialize(mContext,
+                            "ca-app-pub-3940256099942544/6300978111");
+
+                    mAdView = findViewById(R.id.ad_view_sender_pick_destination);
+
+                    Bundle extras = new Bundle();
+                    extras.putString("npa", "1");
+
+                    AdRequest adRequest = new AdRequest.Builder()
+                            .addNetworkExtrasBundle(AdMobAdapter.class,extras)
+                            .build();
+                    mAdView.loadAd(adRequest);
+
+                    //Crash logging
+                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
+                }
+            }
+
+            @Override
+            public void onFailedToUpdateConsentInfo(String errorDescription) {
+                // User's consent status failed to update.
+                Log.e(TAG,"Cannot initiate ads "+errorDescription);
+
+                //Crash logging
+                FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
+            }
+        });
 
         //toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.spd_toolbar);
