@@ -34,6 +34,7 @@ import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.StorageListEntry;
 import com.yumesoftworks.fileshare.utils.ChangeShownPath;
 import com.yumesoftworks.fileshare.utils.MergeFileListAndDatabase;
+import com.yumesoftworks.fileshare.utils.UserConsent;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -43,7 +44,8 @@ import java.util.List;
 public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         FileViewer.OnFragmentFileInteractionListener,
         FileViewer.OnButtonGoToQueueInterface,
-        QueueViewer.QueueFragmentClickListener{
+        QueueViewer.QueueFragmentClickListener,
+        UserConsent.UserConsentInterface{
     private static final String TAG="FileBaQActivity";
     private static final int FILE_FRAGMENT=1000;
     private static final int QUEUE_FRAGMENT=1001;
@@ -86,6 +88,10 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_file_browser_and_queue);
 
         thisActivity=this;
+
+        //check the user consent
+        UserConsent userConsent=new UserConsent(thisActivity);
+        userConsent.checkConsent();
 
         //consent and ads
         ConsentInformation consentInformation = ConsentInformation.getInstance(thisActivity);
@@ -540,5 +546,28 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     public void changeActionBarName(String newTitle) {
         ActionBar titleUp=getSupportActionBar();
         titleUp.setTitle(newTitle);
+    }
+
+    @Override
+    public void initAd(Boolean isTracking) {
+        MobileAds.initialize(thisActivity,
+                "ca-app-pub-3940256099942544/6300978111");
+
+        mAdView = findViewById(R.id.ad_view_activity_file_browser_and_queue);
+        AdRequest adRequest;
+
+        if (isTracking){
+            adRequest = new AdRequest.Builder().build();
+        }else{
+            Bundle extras = new Bundle();
+            extras.putString("npa", "1");
+
+            adRequest = new AdRequest.Builder()
+                    .addNetworkExtrasBundle(AdMobAdapter.class,extras)
+                    .build();
+        }
+
+        mAdView.loadAd(adRequest);
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(isTracking);
     }
 }

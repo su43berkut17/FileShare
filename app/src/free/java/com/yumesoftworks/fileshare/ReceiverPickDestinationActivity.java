@@ -43,12 +43,15 @@ import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
 import com.yumesoftworks.fileshare.peerToPeer.ReceiverPickSocket;
+import com.yumesoftworks.fileshare.utils.UserConsent;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.List;
 
-public class ReceiverPickDestinationActivity extends AppCompatActivity implements ReceiverPickSocket.SocketReceiverConnectionInterface, NsdHelper.ChangedServicesListener{
+public class ReceiverPickDestinationActivity extends AppCompatActivity implements ReceiverPickSocket.SocketReceiverConnectionInterface,
+        NsdHelper.ChangedServicesListener,
+        UserConsent.UserConsentInterface {
 
     private static final String TAG="ReceiverDesActivity";
 
@@ -88,52 +91,9 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
         mContext=this;
 
-        //consent and ads
-        ConsentInformation consentInformation = ConsentInformation.getInstance(mContext);
-        consentInformation.setDebugGeography(DebugGeography.DEBUG_GEOGRAPHY_EEA);
-        String[] publisherIds = {"pub-0123456789012345"};
-        consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
-            @Override
-            public void onConsentInfoUpdated(ConsentStatus consentStatus) {
-                // User's consent status successfully updated.
-                if (consentStatus==ConsentStatus.PERSONALIZED){
-                    MobileAds.initialize(mContext,
-                            "ca-app-pub-3940256099942544/6300978111");
-
-                    mAdView = findViewById(R.id.ad_view_receiver_pick_destination);
-                    AdRequest adRequest = new AdRequest.Builder().build();
-                    mAdView.loadAd(adRequest);
-
-                    //Crash logging
-                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true);
-                }else{
-                    MobileAds.initialize(mContext,
-                            "ca-app-pub-3940256099942544/6300978111");
-
-                    mAdView = findViewById(R.id.ad_view_receiver_pick_destination);
-
-                    Bundle extras = new Bundle();
-                    extras.putString("npa", "1");
-
-                    AdRequest adRequest = new AdRequest.Builder()
-                            .addNetworkExtrasBundle(AdMobAdapter.class,extras)
-                            .build();
-                    mAdView.loadAd(adRequest);
-
-                    //Crash logging
-                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
-                }
-            }
-
-            @Override
-            public void onFailedToUpdateConsentInfo(String errorDescription) {
-                // User's consent status failed to update.
-                Log.e(TAG,"Cannot initiate ads "+errorDescription);
-
-                //Crash logging
-                FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
-            }
-        });
+        //check the user consent
+        UserConsent userConsent=new UserConsent(this);
+        userConsent.checkConsent();
 
         //assign views
         mUserName=(TextView)findViewById(R.id.tv_receive_username);
@@ -392,5 +352,28 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
                 mConnectionStatus.setText(R.string.ru_message_connection_error);
             }
         });
+    }
+
+    @Override
+    public void initAd(Boolean isTracking) {
+        MobileAds.initialize(mContext,
+                "ca-app-pub-3940256099942544/6300978111");
+
+        mAdView = findViewById(R.id.ad_view_receiver_pick_destination);
+        AdRequest adRequest;
+
+        if (isTracking){
+            adRequest = new AdRequest.Builder().build();
+        }else{
+            Bundle extras = new Bundle();
+            extras.putString("npa", "1");
+
+            adRequest = new AdRequest.Builder()
+                    .addNetworkExtrasBundle(AdMobAdapter.class,extras)
+                    .build();
+        }
+
+        mAdView.loadAd(adRequest);
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(isTracking);
     }
 }

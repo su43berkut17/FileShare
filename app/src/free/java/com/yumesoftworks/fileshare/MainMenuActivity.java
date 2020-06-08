@@ -25,13 +25,11 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 
-import com.google.ads.consent.*;
+import com.yumesoftworks.fileshare.utils.UserConsent;
 
-public class MainMenuActivity extends AppCompatActivity implements View.OnClickListener{
+public class MainMenuActivity extends AppCompatActivity implements View.OnClickListener, UserConsent.UserConsentInterface {
     //buttons
     ConstraintLayout sendFilesButton;
     ConstraintLayout receiveFilesButton;
@@ -43,7 +41,6 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
 
     //admob
     private AdView mAdView;
-    private ConsentForm form;
 
     //loading for 1st run
     private LinearLayout mLoadingScreen;
@@ -63,117 +60,9 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         //this activity
         thisActivity=this;
 
-        //consent
-        ConsentInformation consentInformation = ConsentInformation.getInstance(thisActivity);
-        consentInformation.setDebugGeography(DebugGeography.DEBUG_GEOGRAPHY_EEA);
-        String[] publisherIds = {"pub-0123456789012345"};
-        consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
-            @Override
-            public void onConsentInfoUpdated(ConsentStatus consentStatus) {
-                // User's consent status successfully updated.
-                if (consentStatus==ConsentStatus.PERSONALIZED){
-                    MobileAds.initialize(thisActivity,
-                            "ca-app-pub-3940256099942544/6300978111");
-
-                    mAdView = findViewById(R.id.ad_view_main_menu);
-                    AdRequest adRequest = new AdRequest.Builder().build();
-                    mAdView.loadAd(adRequest);
-
-                    //Crash logging
-                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true);
-
-                    setupViewModel();
-                }else if(consentStatus==ConsentStatus.NON_PERSONALIZED){
-                    MobileAds.initialize(thisActivity,
-                            "ca-app-pub-3940256099942544/6300978111");
-
-                    mAdView = findViewById(R.id.ad_view_main_menu);
-
-                    Bundle extras = new Bundle();
-                    extras.putString("npa", "1");
-
-                    AdRequest adRequest = new AdRequest.Builder()
-                            .addNetworkExtrasBundle(AdMobAdapter.class,extras)
-                            .build();
-                    mAdView.loadAd(adRequest);
-
-                    //Crash logging
-                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
-
-                    setupViewModel();
-                }else{
-                    //initialize consent dialog
-                    URL privacyUrl = null;
-                    try {
-                        // TODO: Replace with your app's privacy policy URL.
-                        privacyUrl = new URL("https://www.yumesoftworks.com/");
-                    } catch (MalformedURLException e) {
-                        e.printStackTrace();
-
-                        //Crash logging
-                        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
-                        setupViewModel();
-                    }
-
-                    form= new ConsentForm.Builder(thisActivity, privacyUrl)
-                    .withListener(new ConsentFormListener() {
-                        @Override
-                        public void onConsentFormLoaded() {
-                            // Consent form loaded successfully.
-                            form.show();
-                        }
-
-                        @Override
-                        public void onConsentFormOpened() {
-                            // Consent form was displayed.
-                        }
-
-                        @Override
-                        public void onConsentFormClosed(ConsentStatus consentStatus, Boolean userPrefersAdFree) {
-                            // Consent form was closed.
-                            ConsentInformation.getInstance(thisActivity).setConsentStatus(consentStatus);
-
-                            //check consent status for crash logging
-                            if (consentStatus==ConsentStatus.PERSONALIZED){
-                                FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true);
-                            }else{
-                                FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
-                            }
-
-                            //continue loading
-                            setupViewModel();
-                        }
-
-                        @Override
-                        public void onConsentFormError(String errorDescription) {
-                            // Consent form error.
-                            Log.e(TAG,"Coudln't show form "+errorDescription);
-
-                            //Crash logging
-                            FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
-
-                            setupViewModel();
-                        }
-                    })
-                    .withPersonalizedAdsOption()
-                    .withNonPersonalizedAdsOption()
-                    .withAdFreeOption()
-                    .build();
-                    form.load();
-                }
-            }
-
-            @Override
-            public void onFailedToUpdateConsentInfo(String errorDescription) {
-                // User's consent status failed to update.
-                Log.e(TAG,"Cannot initiate ads "+errorDescription);
-
-                //Crash logging
-                FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
-
-                setupViewModel();
-            }
-        });
+        //check the user consent
+        UserConsent userConsent=new UserConsent(thisActivity);
+        userConsent.checkConsent();
 
         //loading screen
         mLoadingScreen=findViewById(R.id.wel_loading_layout);
@@ -282,5 +171,30 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
             default:
                 break;
         }
+    }
+
+    @Override
+    public void initAd(Boolean isTracking) {
+        MobileAds.initialize(thisActivity,
+                "ca-app-pub-3940256099942544/6300978111");
+
+        mAdView = findViewById(R.id.ad_view_main_menu);
+        AdRequest adRequest;
+
+        if (isTracking){
+            adRequest = new AdRequest.Builder().build();
+        }else{
+            Bundle extras = new Bundle();
+            extras.putString("npa", "1");
+
+            adRequest = new AdRequest.Builder()
+                    .addNetworkExtrasBundle(AdMobAdapter.class,extras)
+                    .build();
+        }
+
+
+        mAdView.loadAd(adRequest);
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(isTracking);
+        setupViewModel();
     }
 }

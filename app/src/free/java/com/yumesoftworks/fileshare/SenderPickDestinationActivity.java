@@ -15,10 +15,6 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.ads.consent.ConsentInfoUpdateListener;
-import com.google.ads.consent.ConsentInformation;
-import com.google.ads.consent.ConsentStatus;
-import com.google.ads.consent.DebugGeography;
 import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -31,6 +27,7 @@ import com.yumesoftworks.fileshare.data.UserSendEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
 import com.yumesoftworks.fileshare.peerToPeer.SenderPickSocket;
 import com.yumesoftworks.fileshare.recyclerAdapters.SendFileUserListAdapter;
+import com.yumesoftworks.fileshare.utils.UserConsent;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -39,7 +36,8 @@ import java.util.List;
 
 public class SenderPickDestinationActivity extends AppCompatActivity implements NsdHelper.ChangedServicesListener,
         SendFileUserListAdapter.ItemClickListener,
-    SenderPickSocket.SocketSenderConnectionInterface{
+        SenderPickSocket.SocketSenderConnectionInterface,
+        UserConsent.UserConsentInterface {
 
     private final static String TAG="SendPickActivity";
     public final static String MESSAGE_OPEN_ACTIVITY="pleaseOpenANewActivity";
@@ -75,52 +73,9 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
         mContext=this;
 
-        //consent and ads
-        ConsentInformation consentInformation = ConsentInformation.getInstance(mContext);
-        consentInformation.setDebugGeography(DebugGeography.DEBUG_GEOGRAPHY_EEA);
-        String[] publisherIds = {"pub-0123456789012345"};
-        consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
-            @Override
-            public void onConsentInfoUpdated(ConsentStatus consentStatus) {
-                // User's consent status successfully updated.
-                if (consentStatus==ConsentStatus.PERSONALIZED){
-                    MobileAds.initialize(mContext,
-                            "ca-app-pub-3940256099942544/6300978111");
-
-                    mAdView = findViewById(R.id.ad_view_sender_pick_destination);
-                    AdRequest adRequest = new AdRequest.Builder().build();
-                    mAdView.loadAd(adRequest);
-
-                    //Crash logging
-                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true);
-                }else{
-                    MobileAds.initialize(mContext,
-                            "ca-app-pub-3940256099942544/6300978111");
-
-                    mAdView = findViewById(R.id.ad_view_sender_pick_destination);
-
-                    Bundle extras = new Bundle();
-                    extras.putString("npa", "1");
-
-                    AdRequest adRequest = new AdRequest.Builder()
-                            .addNetworkExtrasBundle(AdMobAdapter.class,extras)
-                            .build();
-                    mAdView.loadAd(adRequest);
-
-                    //Crash logging
-                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
-                }
-            }
-
-            @Override
-            public void onFailedToUpdateConsentInfo(String errorDescription) {
-                // User's consent status failed to update.
-                Log.e(TAG,"Cannot initiate ads "+errorDescription);
-
-                //Crash logging
-                FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
-            }
-        });
+        //check the user consent
+        UserConsent userConsent=new UserConsent(this);
+        userConsent.checkConsent();
 
         //toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.spd_toolbar);
@@ -390,5 +345,28 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void initAd(Boolean isTracking) {
+        MobileAds.initialize(mContext,
+                "ca-app-pub-3940256099942544/6300978111");
+
+        mAdView = findViewById(R.id.ad_view_sender_pick_destination);
+        AdRequest adRequest;
+
+        if (isTracking){
+            adRequest = new AdRequest.Builder().build();
+        }else{
+            Bundle extras = new Bundle();
+            extras.putString("npa", "1");
+
+            adRequest = new AdRequest.Builder()
+                    .addNetworkExtrasBundle(AdMobAdapter.class,extras)
+                    .build();
+        }
+
+        mAdView.loadAd(adRequest);
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(isTracking);
     }
 }

@@ -41,12 +41,14 @@ import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.FileListRepository;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
+import com.yumesoftworks.fileshare.utils.UserConsent;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TransferProgressActivity extends AppCompatActivity implements
-        FileTransferProgress.OnFragmentInteractionListener{
+        FileTransferProgress.OnFragmentInteractionListener,
+        UserConsent.UserConsentInterface {
 
     private static final String TAG="TransferProgressAct";
 
@@ -149,52 +151,9 @@ public class TransferProgressActivity extends AppCompatActivity implements
         thisActivity=this;
         Log.d(TAG,"onCreate called");
 
-        //consent and ads
-        ConsentInformation consentInformation = ConsentInformation.getInstance(thisActivity);
-        consentInformation.setDebugGeography(DebugGeography.DEBUG_GEOGRAPHY_EEA);
-        String[] publisherIds = {"pub-0123456789012345"};
-        consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
-            @Override
-            public void onConsentInfoUpdated(ConsentStatus consentStatus) {
-                // User's consent status successfully updated.
-                if (consentStatus==ConsentStatus.PERSONALIZED){
-                    MobileAds.initialize(thisActivity,
-                            "ca-app-pub-3940256099942544/6300978111");
-
-                    mAdView = findViewById(R.id.ad_view_transfer_progress);
-                    AdRequest adRequest = new AdRequest.Builder().build();
-                    mAdView.loadAd(adRequest);
-
-                    //Crash logging
-                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true);
-                }else{
-                    MobileAds.initialize(thisActivity,
-                            "ca-app-pub-3940256099942544/6300978111");
-
-                    mAdView = findViewById(R.id.ad_view_transfer_progress);
-
-                    Bundle extras = new Bundle();
-                    extras.putString("npa", "1");
-
-                    AdRequest adRequest = new AdRequest.Builder()
-                            .addNetworkExtrasBundle(AdMobAdapter.class,extras)
-                            .build();
-                    mAdView.loadAd(adRequest);
-
-                    //Crash logging
-                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
-                }
-            }
-
-            @Override
-            public void onFailedToUpdateConsentInfo(String errorDescription) {
-                // User's consent status failed to update.
-                Log.e(TAG,"Cannot initiate ads "+errorDescription);
-
-                //Crash logging
-                FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
-            }
-        });
+        //check the user consent
+        UserConsent userConsent=new UserConsent(this);
+        userConsent.checkConsent();
 
         //we get the instance of the indeterminate progress bar
         mWaitingScreen =findViewById(R.id.pb_atp_waitingForConnection);
@@ -767,5 +726,28 @@ public class TransferProgressActivity extends AppCompatActivity implements
         if (fileTransferViewModel!=null && fileTransferViewModel.getFileListInfo().hasObservers()) {
             fileTransferViewModel.getFileListInfo().removeObservers(this);
         }
+    }
+
+    @Override
+    public void initAd(Boolean isTracking) {
+        MobileAds.initialize(thisActivity,
+                "ca-app-pub-3940256099942544/6300978111");
+
+        mAdView = findViewById(R.id.ad_view_transfer_progress);
+        AdRequest adRequest;
+
+        if (isTracking){
+            adRequest = new AdRequest.Builder().build();
+        }else{
+            Bundle extras = new Bundle();
+            extras.putString("npa", "1");
+
+            adRequest = new AdRequest.Builder()
+                    .addNetworkExtrasBundle(AdMobAdapter.class,extras)
+                    .build();
+        }
+
+        mAdView.loadAd(adRequest);
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(isTracking);
     }
 }
