@@ -60,10 +60,6 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         //this activity
         thisActivity=this;
 
-        //check the user consent
-        UserConsent userConsent=new UserConsent(thisActivity);
-        userConsent.checkConsent();
-
         //loading screen
         mLoadingScreen=findViewById(R.id.wel_loading_layout);
 
@@ -82,6 +78,23 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         //toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.mm_toolbar);
         setSupportActionBar(myToolbar);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        //check the user consent
+        UserConsent userConsent=new UserConsent(thisActivity);
+        userConsent.checkConsent();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        //remove the viewmodel
+        viewModel.getUserInfo().removeObservers(this);
     }
 
     //view model

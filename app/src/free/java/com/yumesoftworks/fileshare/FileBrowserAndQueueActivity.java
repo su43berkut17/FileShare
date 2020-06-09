@@ -93,53 +93,6 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         UserConsent userConsent=new UserConsent(thisActivity);
         userConsent.checkConsent();
 
-        //consent and ads
-        ConsentInformation consentInformation = ConsentInformation.getInstance(thisActivity);
-        consentInformation.setDebugGeography(DebugGeography.DEBUG_GEOGRAPHY_EEA);
-        String[] publisherIds = {"pub-0123456789012345"};
-        consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
-            @Override
-            public void onConsentInfoUpdated(ConsentStatus consentStatus) {
-                // User's consent status successfully updated.
-                if (consentStatus==ConsentStatus.PERSONALIZED){
-                    MobileAds.initialize(thisActivity,
-                            "ca-app-pub-3940256099942544/6300978111");
-
-                    mAdView = findViewById(R.id.ad_view_activity_file_browser_and_queue);
-                    AdRequest adRequest = new AdRequest.Builder().build();
-                    mAdView.loadAd(adRequest);
-
-                    //Crash logging
-                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true);
-                }else{
-                    MobileAds.initialize(thisActivity,
-                            "ca-app-pub-3940256099942544/6300978111");
-
-                    mAdView = findViewById(R.id.ad_view_activity_file_browser_and_queue);
-
-                    Bundle extras = new Bundle();
-                    extras.putString("npa", "1");
-
-                    AdRequest adRequest = new AdRequest.Builder()
-                            .addNetworkExtrasBundle(AdMobAdapter.class,extras)
-                            .build();
-                    mAdView.loadAd(adRequest);
-
-                    //Crash logging
-                    FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
-                }
-            }
-
-            @Override
-            public void onFailedToUpdateConsentInfo(String errorDescription) {
-                // User's consent status failed to update.
-                Log.e(TAG,"Cannot initiate ads "+errorDescription);
-
-                //Crash logging
-                FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(false);
-            }
-        });
-
         if(savedInstanceState!=null){
             mCurrentFragment=savedInstanceState.getInt(CURRENT_FRAGMENT_TAG);
             mPath=savedInstanceState.getString(CURRENT_PATH_TAG);

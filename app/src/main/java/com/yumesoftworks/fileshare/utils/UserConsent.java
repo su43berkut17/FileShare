@@ -20,29 +20,45 @@ public class UserConsent {
     private ConsentForm form;
     private Context mContext;
 
+    //General consent
+    private ConsentInformation consentInformation;
+
     //interface to send services added or deleted
     private UserConsentInterface mServiceListener;
+    private UserConsentISEEA mUSerConsentISEEA;
 
     public UserConsent(Context context) {
         mContext = context;
+
+        consentInformation = ConsentInformation.getInstance(mContext);
+
         if (context instanceof UserConsentInterface) {
             mServiceListener = (UserConsentInterface) context;
+        }
+        if (context instanceof UserConsentISEEA){
+            mUSerConsentISEEA=(UserConsentISEEA) context;
         }
     }
 
     public void checkConsent(){
         Log.d(TAG,"Checking the user consent");
         //consent
-        ConsentInformation consentInformation = ConsentInformation.getInstance(mContext);
         consentInformation.setDebugGeography(DebugGeography.DEBUG_GEOGRAPHY_EEA);
-        String[] publisherIds = {"pub-7259763270201885"};
+        String[] publisherIds = {"pub-1123123"};
         consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
             @Override
             public void onConsentInfoUpdated(ConsentStatus consentStatus) {
                 if (!ConsentInformation.getInstance(mContext).isRequestLocationInEeaOrUnknown()) {
                     mServiceListener.initAd(true);
+                    if (mUSerConsentISEEA!=null) {
+                        mUSerConsentISEEA.isEEA(false);
+                    }
+
                     Log.d(TAG,"Not in EEA");
                 }else {
+                    if (mUSerConsentISEEA!=null) {
+                        mUSerConsentISEEA.isEEA(true);
+                    }
                     // User's consent status successfully updated.
                     if (consentStatus == ConsentStatus.PERSONALIZED) {
                         Log.d(TAG,"Consent is true");
@@ -122,5 +138,9 @@ public class UserConsent {
 
     public interface UserConsentInterface {
         void initAd(Boolean isTracking);
+    }
+
+    public interface UserConsentISEEA{
+        void isEEA(Boolean isEEA);
     }
 }

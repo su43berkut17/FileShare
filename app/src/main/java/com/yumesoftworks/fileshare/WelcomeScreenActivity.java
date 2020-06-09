@@ -21,6 +21,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -32,12 +35,15 @@ import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.recyclerAdapters.AvatarAdapter;
 import com.yumesoftworks.fileshare.utils.JsonAvatarParser;
+import com.yumesoftworks.fileshare.utils.UserConsent;
 
 import java.util.List;
 
 public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAdapter.ItemClickListener,
         JsonAvatarParser.OnLoadedAvatars,
-        View.OnClickListener{
+        View.OnClickListener,
+        UserConsent.UserConsentInterface,
+        UserConsent.UserConsentISEEA {
 
     private static final String TAG=WelcomeScreenActivity.class.getSimpleName();
     private static final String NAME_ROTATION_AVATAR_STATE="savedAvatarId";
@@ -60,6 +66,11 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     private TextView tvUsername;
     private Button buttonGo;
     private Button buttonCancel;
+    private LinearLayout lineaLayoutGDRP;
+    private Switch switchGDRP;
+    private Boolean mSwitchAllowed=false;
+
+    private Context mContext;
 
     //database
     private WelcomeScreenViewModel viewModel;
@@ -70,8 +81,29 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome_screen);
 
+        mContext=this;
+
         //analytics
         mFireAnalytics=FirebaseAnalytics.getInstance(this);
+
+        //initialize linear layout and switch
+        lineaLayoutGDRP=findViewById(R.id.ll_aws_gdrp);
+        switchGDRP=findViewById(R.id.swi_aws_gdrp);
+
+        //check the user consent
+        UserConsent userConsent=new UserConsent(this);
+        userConsent.checkConsent();
+
+        //listener
+        switchGDRP.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (mSwitchAllowed==true) {
+                    userConsent.generateForm();
+                    mSwitchAllowed=false;
+                }
+            }
+        });
 
         //rotation values
         if (savedInstanceState==null){
@@ -276,6 +308,19 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void initAd(Boolean isTracking) {
+        switchGDRP.setChecked(isTracking);
+        mSwitchAllowed=true;
+    }
+
+    @Override
+    public void isEEA(Boolean isEEA) {
+        if (!isEEA || mIsThisSettings==false) {
+            lineaLayoutGDRP.setVisibility(View.GONE);
         }
     }
 }
