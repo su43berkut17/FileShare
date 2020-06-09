@@ -18,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 
 import java.util.List;
@@ -32,9 +31,6 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
 
     //view model
     private CombinedDataViewModel fileViewerViewModel;
-
-    //analytics and admob
-    private FirebaseAnalytics mFireAnalytics;
 
     //loading for 1st run
     private LinearLayout mLoadingScreen;
@@ -53,9 +49,6 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
 
         //this activity
         thisActivity=this;
-
-        //analytics
-        mFireAnalytics=FirebaseAnalytics.getInstance(this);
 
         //loading screen
         mLoadingScreen=findViewById(R.id.wel_loading_layout);

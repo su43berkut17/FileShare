@@ -1,6 +1,5 @@
 package com.yumesoftworks.fileshare;
 
-import android.app.Activity;
 import android.app.ActivityOptions;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -27,7 +26,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.firebase.analytics.FirebaseAnalytics;
 
 import com.yumesoftworks.fileshare.data.AvatarAndVersion;
 import com.yumesoftworks.fileshare.data.AvatarDefaultImages;
@@ -48,9 +46,6 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     private static final String TAG=WelcomeScreenActivity.class.getSimpleName();
     private static final String NAME_ROTATION_AVATAR_STATE="savedAvatarId";
     public static final String EXTRA_SETTINGS_NAME="isThisSettings";
-
-    //analytics and admob
-    private FirebaseAnalytics mFireAnalytics;
 
     //this member variable will let us know if this activity is opened as settings or the first time
     private boolean mIsThisSettings;
@@ -83,27 +78,28 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
         mContext=this;
 
-        //analytics
-        mFireAnalytics=FirebaseAnalytics.getInstance(this);
-
         //initialize linear layout and switch
         lineaLayoutGDRP=findViewById(R.id.ll_aws_gdrp);
         switchGDRP=findViewById(R.id.swi_aws_gdrp);
 
-        //check the user consent
-        UserConsent userConsent=new UserConsent(this);
-        userConsent.checkConsent();
+        if (BuildConfig.FLAVOR=="paid"){
+            lineaLayoutGDRP.setVisibility(View.GONE);
+        }else {
+            //check the user consent
+            UserConsent userConsent = new UserConsent(this);
+            userConsent.checkConsent();
 
-        //listener
-        switchGDRP.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (mSwitchAllowed==true) {
-                    userConsent.generateForm();
-                    mSwitchAllowed=false;
+            //listener
+            switchGDRP.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (mSwitchAllowed == true) {
+                        userConsent.generateForm();
+                        mSwitchAllowed = false;
+                    }
                 }
-            }
-        });
+            });
+        }
 
         //rotation values
         if (savedInstanceState==null){
