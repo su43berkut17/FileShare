@@ -81,7 +81,7 @@ public class TransferProgressWidget extends AppWidgetProvider {
 
                 //update the texts
                 views.setTextViewText(R.id.tv_widget_current_file,mNameOfCurrentFile);
-                views.setTextViewText(R.id.tv_widget_number_of_transfers,String.valueOf(mCurrentNumberOfFiles)+" of "+String.valueOf(mTotalNumberOfFiles));
+                views.setTextViewText(R.id.tv_widget_number_of_transfers,String.valueOf(mCurrentNumberOfFiles)+" "+context.getString(R.string.atp_tv__number_connector)+" "+String.valueOf(mTotalNumberOfFiles));
 
                 //calculate the percentage
                 /*try {

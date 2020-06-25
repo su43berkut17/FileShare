@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name_real">FileShare</string>
+    <string name="app_name_real" translatable="false">FileShare</string>
 
     <!-- General purpose -->
     <string name="gen_button_ok">OK</string>
@@ -9,13 +9,13 @@
     <!-- Activity Welcome Screen -->
     <string name="aws_pick_avatar">Pick an avatar:</string>
     <string name="aws_username">Username:</string>
-    <string name="aws_input_username"></string>
+    <string name="aws_input_username" translatable="false"></string>
     <string name="aws_input_username_hint">Type a username</string>
     <string name="aws_gdrp">Show personalized ads</string>
     <string name="aws_button_go">Go</string>
     <string name="aws_button_save">Save Changes</string>
     <string name="aws_keyboard_ime_action">Done</string>
-    <string name="aws_username_digits">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789</string>
+    <string name="aws_username_digits" translatable="false">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789</string>
 
     <!-- Dialog Activity Welcome Screen -->
     <string name="aws_dialog_title">Warning!</string>
@@ -29,16 +29,16 @@
     <string name="mm_receive_des">Receive Files</string>
 
     <!-- Options -->
-    <string name="menu_options_title">Options</string>
+    <string name="menu_options_title">Settings</string>
 
     <!-- Activity file browser -->
-    <string name="fb_file_name_placeholder">testFile.jpg</string>
-    <string name="fb_file_size_placeholder">6 MB</string>
+    <string name="fb_file_name_placeholder" translatable="false">testFile.jpg</string>
+    <string name="fb_file_size_placeholder" translatable="false">6 MB</string>
     <string name="fb_icon_description">File icon</string>
     <string name="fb_button_review_queue">Review Queue</string>
     <string name="fb_path_description">The filepath</string>
-    <string name="fb_path">/</string>
-    <string name="fb_incompatible_file">No available apps to open this file.</string>
+    <string name="fb_path" translatable="false">/</string>
+    <string name="fb_incompatible_file">No available apps to open this file</string>
 
     <!-- Activity file queue -->
     <string name="fq_tv_title_queue">Files to be sent:</string>
@@ -67,8 +67,9 @@
 
     <!--Activity transfer progress-->
     <string name="atp_tv_filename">Filename</string>
-    <string name="atp_tv_out_of">1 of 1</string>
-    <string name="atp_tv_percentage">100%</string>
+    <string name="atp_tv_out_of" translatable="false">1 of 1</string>
+    <string name="atp_tv__number_connector">of</string>
+    <string name="atp_tv_percentage" translatable="false">100%</string>
     <string name="atp_tv_files_in_queue">Files to be sent:</string>
     <string name="ats_tv_sent_files">Files sent</string>
     <string name="ats_tv_received_files">Files received:</string>
@@ -86,12 +87,11 @@
     <!-- Widget -->
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
-    <string name="widget_tv_title">FileShare</string>
+    <string name="widget_tv_title" translatable="false">FileShare</string>
     <string name="widget_tv_lifetime">Lifetime transfers</string>
-    <string name="widget_tv_number">0</string>
+    <string name="widget_tv_number" translatable="false">0</string>
     <string name="widget_tv_of">1 of 1</string>
     <string name="widget_tv_of_description">Progress by file number</string>
     <string name="widget_tv_filename">File to be transferred</string>
     <string name="widget_tv_currently">Transferring...</string>
-
 </resources>

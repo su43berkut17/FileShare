@@ -72,14 +72,7 @@ public class updateWidgetService extends JobIntentService {
             mTotalNumberOfFiles=0;
             mCurrentNumberOfFiles=0;
             mPercentage=0;
-
-            //read it from the database
-            //Log.d(TAG,"update current state is null so it is scheduled update");
         }
-
-        //Log.d(TAG,"this is startActionUpdateWidget "+
-               // mCurrentState+"-"+mNameOfCurrentFile+"-"+
-               // mTotalNumberOfFiles+" of "+mCurrentNumberOfFiles);
 
         //we start the intent
         Intent intent=new Intent(context,updateWidgetService.class);

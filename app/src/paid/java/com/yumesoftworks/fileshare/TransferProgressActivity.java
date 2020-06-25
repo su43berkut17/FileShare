@@ -586,7 +586,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     String fileName = textInfoSendObject.getMessageContent();
                     String stringNumbers = textInfoSendObject.getAdditionalInfo();
                     String[] currentNumbers = stringNumbers.split(",");
-                    String finalTextNumbers = currentNumbers[0] + " of " + currentNumbers[1];
+                    String finalTextNumbers = currentNumbers[0] +" "+getString(R.string.atp_tv__number_connector)+" "+ currentNumbers[1];
 
                     int percentage=0;
                     if (currentNumbers.length>2) {
