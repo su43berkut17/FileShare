@@ -159,7 +159,7 @@ public class ReceiverSocketTransfer {
                                 mTotalFiles=currentNumbers[1];
                                 mCurrentFileSize=currentNumbers[2];
 
-                                Long currentFileSizeLong=Long.parseLong(mCurrentFile);
+                                Long currentFileSizeLong=Long.parseLong(mCurrentFileSize);
 
                                 //fix the initial message
                                 message.setAdditionalInfo(currentNumbers[0]+","+currentNumbers[1]);
@@ -177,9 +177,9 @@ public class ReceiverSocketTransfer {
                                 }
 
                                 Log.d(TAG,"Comparing the filesize to the available storage, space available: "+
-                                        spaceAvailable.toString()+" file size "+mCurrentFileSize);
+                                        spaceAvailable.toString()+" file size "+currentFileSizeLong.toString());
 
-                                if (spaceAvailable>currentFileSizeLong) {
+                                if (spaceAvailable.compareTo(currentFileSizeLong)>0) {
                                     //change the action to get ready to receive file
                                     mCurrentAction = ACTION_CONFIRM_DETAILS;
                                     Log.d(TAG, "We got the details of the file, confirm with sender");
