@@ -75,10 +75,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
     private ImageView mConnectionAnimation;
     private TextView mConnectionStatus;
 
-    //lifecycle
-    private Boolean isFirstExecution=true;
-    private Boolean NSDInitialized=false;
-
     private Context mContext;
 
     //prevent double launch app
@@ -125,7 +121,9 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
         //we set the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
 
+    private void checkWifi(){
         //check wifi
         WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         if (wm.isWifiEnabled()) {
@@ -138,10 +136,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
     }
 
     private void initialize(){
-        //we reset the execution
-        isFirstExecution=true;
-        NSDInitialized=false;
-
         //we will use livedata for user
         setupViewModel();
     }
@@ -196,10 +190,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
                 Glide.with(mContext).load(imageUri).into(mUserIcon);
 
-                if (!NSDInitialized) {
-                    initializeNsd();
-                    NSDInitialized=true;
-                }
+                initializeNsd();
             }
         });
     }
@@ -215,20 +206,30 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         }
 
         mNsdHelper = new NsdHelper(mContext);
-        //mNsdHelper.initializeNsd();
         mNsdHelper.initializeRegistrationListener();
         mNsdHelper.registerService(mServerSocket.getLocalPort());
 
         //we create the receiver pick socket
-        if (mReceiverSocket==null) {
+        try{
             mReceiverSocket = new ReceiverPickSocket(this,mServerSocket, mUserInfoEntry);
+        }catch (Exception e){
+            Log.e(TAG,"Couldnt initialize the socket");
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG,"onResume");
+
+        checkWifi();
     }
 
     @Override
     protected void onPause() {
         Log.d(TAG,"onPause");
         super.onPause();
+
         if (mNsdHelper!=null){
             mNsdHelper.cancelRegistration();
         }
@@ -241,29 +242,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
             Log.d(TAG,"Couldn't destroy socket on pause");
             mReceiverSocket=null;
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG,"onResume");
-
-        //we check if it is the initial execution
-        if (!isFirstExecution) {
-            Log.d(TAG,"it is not 1st execution anymore");
-            if (mServerSocket != null) {
-                //we resume the service discovery
-                //mNsdHelper.initializeNsd();
-                mNsdHelper.initializeRegistrationListener();
-                mNsdHelper.registerService(mServerSocket.getLocalPort());
-
-                Log.d(TAG, "recreating socket");
-                mReceiverSocket = new ReceiverPickSocket(this, mServerSocket, mUserInfoEntry);
-            }
-        }
-
-        //we change the initial execution counter
-        isFirstExecution=false;
     }
 
     @Override
