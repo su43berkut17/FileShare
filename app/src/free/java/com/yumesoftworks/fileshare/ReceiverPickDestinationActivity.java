@@ -236,8 +236,11 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
         //we destroy the socket
         try {
-            mReceiverSocket.destroySocket();
-            mReceiverSocket=null;
+            if (mReceiverSocket.destroySocket()) {
+                mReceiverSocket.removeCallbacks();
+                mReceiverSocket = null;
+                Log.d(TAG,"Removing callbacks an set to null");
+            }
         }catch (Exception e){
             Log.d(TAG,"Couldn't destroy socket on pause");
             mReceiverSocket=null;

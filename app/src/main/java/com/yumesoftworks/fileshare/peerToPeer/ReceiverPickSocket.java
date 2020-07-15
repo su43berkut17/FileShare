@@ -136,9 +136,25 @@ public class ReceiverPickSocket {
             Log.d(TAG,"Cannot close socket "+e.getMessage());
         }
 
+        //cancel server socket
+        try{
+            mServerSocket.close();
+        }catch (Exception e){
+            Log.d(TAG,"Cannot close server socket "+e.getMessage());
+        }
+
         //destroy the thread
         socketThread.interrupt();
+        mSocket=null;
+        mServerSocket=null;
 
         return true;
+    }
+
+    //remove callbacks
+    public void removeCallbacks(){
+        socketHandler.removeCallbacksAndMessages(null);
+        socketHandler=null;
+        mReceiverInterface=null;
     }
 }

@@ -19,6 +19,7 @@ public class SenderPickSocket {
     //types of message
     private static final String TYPE_UPDATE="typeUpdate";
     private static final String TYPE_END="typeEnd";
+    private static final String TYPE_RESTART_CONNECTION ="typeRestartConnection";
     private static final String TYPE_ERROR_SEND_MESSAGE ="typeErrorMessage";
     private static final String TYPE_ERROR_CONNECTION ="typeErrorConnection";
 
@@ -86,7 +87,8 @@ public class SenderPickSocket {
 
                                 socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_UPDATE, mUserList));
                             }catch (Exception e){
-                                Log.e(TAG,"Couldn't read input stream");
+                                Log.e(TAG,"Couldn't read input stream"+e.getMessage());
+                                socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_ERROR_SEND_MESSAGE,mUserList));
                             }
                         }
 
@@ -144,6 +146,13 @@ public class SenderPickSocket {
                     //we send it back to the main activity via interface
                     mSenderInterface.updateUserDataSocket(user);
                     break;
+                case TYPE_RESTART_CONNECTION:
+                    Log.d(TAG,"Restating the connection");
+
+                    //we send it back to the main activity via interface
+                    mSenderInterface.restartSocketConnection(mSocket,user);
+
+                    break;
 
                 case TYPE_ERROR_SEND_MESSAGE:
                     //dialog
@@ -166,6 +175,7 @@ public class SenderPickSocket {
     //interface
     public interface SocketSenderConnectionInterface{
         void updateUserDataSocket(UserSendEntry userSendEntry);
+        void restartSocketConnection(Socket socket, UserSendEntry userSendEntry);
         void showErrorDialog();
         void showConnectionError();
         void openNextActivity(UserSendEntry userList);
@@ -185,6 +195,12 @@ public class SenderPickSocket {
         //destroy the thread
         socketThread.interrupt();
         mSocket=null;
+    }
+
+    //remove callbacks
+    public void removeCallbacks(){
+        socketHandler.removeCallbacksAndMessages(null);
+        socketHandler=null;
         mSenderInterface=null;
     }
 }
