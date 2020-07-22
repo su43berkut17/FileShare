@@ -8,18 +8,17 @@ import com.yumesoftworks.fileshare.SenderPickDestinationActivity;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 
-import java.io.DataInputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 public class ReceiverPickSocket {
     private static final String TAG="ReceiverPickSocket";
 
     private static final String TYPE_END="typeEnd";
+    private static final String TYPE_RESTART="typeRestart";
 
     //local server socket
     private ServerSocket mServerSocket;
@@ -54,6 +53,7 @@ public class ReceiverPickSocket {
                     //wait for a connection
                     Log.d(TAG, "Async:Waiting for the socket to be connected " + mServerSocket.getLocalPort());
 
+                    mServerSocket.setSoTimeout(10000);
                     mSocket = mServerSocket.accept();
 
                     Boolean keepLooping=true;
@@ -67,10 +67,14 @@ public class ReceiverPickSocket {
                                 messageOut.writeObject(mUserInfoEntry);
 
                                 isInitialized=true;
+                            }catch (SocketTimeoutException e){
+                                Log.d(TAG,"Error:"+e.getMessage()+" try again");
+                                isInitialized=false;
+                                socketHandler.post(new ReceiverPickSocket.updateUIThread(TYPE_RESTART));
                             }catch (Exception e){
                                 Log.d(TAG,"Error:"+e.getMessage()+" try again");
                                 isInitialized=false;
-                                //keepLooping=false;
+                                socketHandler.post(new ReceiverPickSocket.updateUIThread(TYPE_RESTART));
                             }
                         }
 
@@ -90,12 +94,15 @@ public class ReceiverPickSocket {
                                 repeatSocketConnection=false;
                                 mSocket.close();
                             }
-                        } catch (Exception e) {
+                        }catch (SocketTimeoutException e){
+                            isInitialized=false;
+                        }catch (Exception e) {
                             //Log.d(TAG, "Error reading input stream");
+                            isInitialized=false;
                         }
                     }
                 } catch (Exception e) {
-                    Log.d(TAG, "Async:the socket accept has failed, trying again");
+                    Log.d(TAG, "Async:the socket accept has failed, trying again "+e.getMessage());
                 }
             }
         }
@@ -117,6 +124,10 @@ public class ReceiverPickSocket {
                     destroySocket();
                     mReceiverInterface.openNexActivity();
                     break;
+                case TYPE_RESTART:
+                    destroySocket();
+                    mReceiverInterface.restartReceiverPickSocket();
+                    break;
             }
         }
     }
@@ -124,6 +135,7 @@ public class ReceiverPickSocket {
     //interface
     public interface SocketReceiverConnectionInterface{
         void openNexActivity();
+        void restartReceiverPickSocket();
     }
 
     //kill the socket

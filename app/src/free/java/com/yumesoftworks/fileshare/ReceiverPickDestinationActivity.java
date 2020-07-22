@@ -336,6 +336,16 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
     }
 
     @Override
+    public void restartReceiverPickSocket() {
+        //we create the receiver pick socket
+        try{
+            mReceiverSocket = new ReceiverPickSocket(this,mServerSocket, mUserInfoEntry);
+        }catch (Exception e){
+            Log.e(TAG,"Couldnt initialize the socket");
+        }
+    }
+
+    @Override
     public void initAd(Boolean isTracking) {
         MobileAds.initialize(mContext,
                 "ca-app-pub-3940256099942544/6300978111");
