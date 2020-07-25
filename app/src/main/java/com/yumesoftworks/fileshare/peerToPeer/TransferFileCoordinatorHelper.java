@@ -165,6 +165,11 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
 
     @Override
     public void socketReceiveFailedClient() {
+        try {
+            mReceiverSocketTransfer.destroy();
+        }catch (Exception e){
+            Log.d(TAG,e.getMessage());
+        }
         mReceiverInterface.socketReceiveFailedClient();
     }
 
@@ -203,7 +208,12 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
     }
 
     @Override
-    public void socketErrorSend() {
+    public void socketSendFailedClient() {
+        try {
+            mSenderSocketTransfer.destroy();
+        }catch (Exception e){
+            Log.d(TAG,e.getMessage());
+        }
         mSenderInterface.socketSendFailedClient();
     }
 

@@ -159,9 +159,11 @@ public class ServiceFileShare extends Service implements
         //}
 
         //make sure to destroy the transfer and threads by any chance if it is still active
-        Boolean isItDestroyed;
+        Boolean isItDestroyed=false;
 
         if (mTransferFileCoordinatorHelper!=null) {
+            int destructionTries=10;
+            int currentDestructionTries=0;
             do {
                 //try
                 try {
@@ -170,11 +172,13 @@ public class ServiceFileShare extends Service implements
                         TimeUnit.SECONDS.sleep(1);
                     } catch (Exception e) {
                         Log.e(TAG, "Couldn't interrupt "+e.getMessage());
-                        isItDestroyed=true;
                     }
                 }catch (Exception e){
                     Log.e(TAG,"couldn't complete user cancelled action is destroyed");
-                    isItDestroyed=true;
+                    currentDestructionTries++;
+                    if(destructionTries>=currentDestructionTries) {
+                        isItDestroyed = true;
+                    }
                 }
             } while (isItDestroyed == false);
         }

@@ -29,10 +29,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.google.ads.consent.ConsentInfoUpdateListener;
-import com.google.ads.consent.ConsentInformation;
-import com.google.ads.consent.ConsentStatus;
-import com.google.ads.consent.DebugGeography;
 import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -86,10 +82,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         setContentView(R.layout.activity_receiver_pick_destination);
 
         mContext=this;
-
-        //check the user consent
-        UserConsent userConsent=new UserConsent(this);
-        userConsent.checkConsent();
 
         //assign views
         mUserName=(TextView)findViewById(R.id.tv_receive_username);

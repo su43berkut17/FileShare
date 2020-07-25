@@ -26,10 +26,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.ads.consent.ConsentInfoUpdateListener;
-import com.google.ads.consent.ConsentInformation;
-import com.google.ads.consent.ConsentStatus;
-import com.google.ads.consent.DebugGeography;
 import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -238,7 +234,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 mTvProgress.setAlpha(1-value);
                 mTvTitle.setAlpha(1-value);
 
-                //frameRecycler.setTranslationY(appBarLayout.getTotalScrollRange()+verticalOffset);
                 frameRecycler.setPadding(0,appBarLayout.getTotalScrollRange()+verticalOffset,0,0);
             }
         });

@@ -1,5 +1,6 @@
 package com.yumesoftworks.fileshare;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.nsd.NsdServiceInfo;
@@ -15,7 +16,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.SocketListEntry;
 import com.yumesoftworks.fileshare.data.UserSendEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
@@ -24,6 +24,7 @@ import com.yumesoftworks.fileshare.recyclerAdapters.SendFileUserListAdapter;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     public final static String MESSAGE_OPEN_ACTIVITY="pleaseOpenANewActivity";
 
     //analytics and admob
-    private FirebaseAnalytics mFireAnalytics;
+    private Context mContext;
 
     //nds vars
     private NsdHelper mNsdHelper;
@@ -62,8 +63,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sender_pick_destination);
 
-        //analytics
-        mFireAnalytics=FirebaseAnalytics.getInstance(this);
+        mContext=this;
 
         //toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.spd_toolbar);
@@ -105,8 +105,6 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
             }
 
             mNsdHelper=new NsdHelper(this);
-            //mNsdHelper.initializeNsd();
-            //mNsdHelper.registerService(mServerSocket.getLocalPort());
             mNsdHelper.discoverServices();
 
             isFirstExecution=true;
@@ -119,8 +117,31 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     @Override
     protected void onPause() {
         Log.d(TAG,"onPause");
+
+        //stop discovery
         if (mNsdHelper!=null){
             mNsdHelper.stopDiscovery();
+        }
+
+        //close all sockets
+        try {
+            mServerSocket.close();
+        }catch (Exception e){
+            Log.d(TAG,"Couldn't remove server socket");
+        }
+
+        //we empty the list
+        try {
+            mUserList.clear();
+            mTempUserList.clear();
+        }catch (Exception e){
+            Log.e(TAG,"Values haven't been initialized.");
+        }
+
+        //close all the sockets on the list
+        for (int i=0;i<mUserList.size();i++){
+            mSocketList.get(i).getSenderSocket().destroySocket();
+            mSocketList.get(i).getSenderSocket().removeCallbacks();
         }
 
         super.onPause();
@@ -132,8 +153,6 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
         if (!isFirstExecution) {
             if (mNsdHelper != null) {
-                //mNsdHelper.initializeNsd();
-                //mNsdHelper.registerService(mServerSocket.getLocalPort());
                 mNsdHelper.discoverServices();
             }
         }
@@ -143,14 +162,6 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        //we empty the list
-        try {
-            mUserList.clear();
-            mTempUserList.clear();
-        }catch (Exception e){
-            Log.e(TAG,"Values haven't been initialized.");
-        }
     }
 
     //callback
@@ -167,7 +178,6 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
             UserSendEntry entry = new UserSendEntry("reading info...", 1, serviceInfo.getServiceName(), serviceInfo.getHost(), serviceInfo.getPort());
 
             //we push it to the temp
-            //mTempUserList.add(entry)
             mUserList.add(entry);
 
             //we check the real information with the socket
@@ -215,6 +225,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         for (int j=0;j<mSocketList.size();j++){
             if (mSocketList.get(j).getServiceName().equals(serviceInfo.getServiceName())){
                 mSocketList.get(j).getSenderSocket().destroySocket();
+                mSocketList.get(j).getSenderSocket().removeCallbacks();
                 mSocketList.remove(j);
             }
         }
@@ -257,6 +268,22 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     public void onItemClickListener(final int itemId) {
         //we send the message
         mSocketList.get(itemId).getSenderSocket().sendMessage(MESSAGE_OPEN_ACTIVITY);
+    }
+
+    //From Sender Pick Socket
+
+
+    @Override
+    public void restartSocketConnection(Socket recSocket, UserSendEntry recEntry) {
+        //look in the list
+        for (int i=0;i<mUserList.size();i++){
+            if (mSocketList.get(i).getIpAddress().equals(recEntry.getIpAddress().getHostAddress())){//chekc if it is the right ip
+                //destroy and restart the socket
+                mSocketList.get(i).getSenderSocket().destroySocket();
+                mSocketList.get(i).getSenderSocket().removeCallbacks();
+                mSocketList.get(i).setSenderSocket(new SenderPickSocket(this,recEntry));
+            }
+        }
     }
 
     //From Sender Pick Socket

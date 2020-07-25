@@ -1,7 +1,5 @@
 package com.yumesoftworks.fileshare.peerToPeer;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
 import com.yumesoftworks.fileshare.TransferProgressActivity;
@@ -240,7 +238,7 @@ public class SenderSocketTransfer{
                         mSenderInterface.finishedSendTransfer(mNextActionDetail);
                     }else if(mCurrentAction==ACTION_EXCEPTION){
                         doWeRepeat=false;
-                        mSenderInterface.socketErrorSend();
+                        mSenderInterface.socketSendFailedClient();
                         return;
                     }else{
                         doWeRepeat=false;
@@ -253,7 +251,7 @@ public class SenderSocketTransfer{
                     if (currentSocketRetries==totalSocketRetries){
                         doWeRepeat=false;
                         try{
-                            mSenderInterface.socketErrorSend();
+                            mSenderInterface.socketSendFailedClient();
                         }catch (Exception ie){
                             Log.e(TAG,"Interface Unavailable");
                         }
@@ -299,6 +297,6 @@ public class SenderSocketTransfer{
         void updateSendSendUI(TextInfoSendObject textInfoSendObject);
         void updateSendSentFile(FileListEntry fileListEntry);
         void finishedSendTransfer(int typeFinishTransfer);
-        void socketErrorSend();
+        void socketSendFailedClient();
     }
 }

@@ -29,23 +29,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.AvatarDefaultImages;
 import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
 import com.yumesoftworks.fileshare.peerToPeer.ReceiverPickSocket;
+import com.yumesoftworks.fileshare.utils.UserConsent;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.List;
 
-public class ReceiverPickDestinationActivity extends AppCompatActivity implements ReceiverPickSocket.SocketReceiverConnectionInterface, NsdHelper.ChangedServicesListener{
+public class ReceiverPickDestinationActivity extends AppCompatActivity implements ReceiverPickSocket.SocketReceiverConnectionInterface,
+        NsdHelper.ChangedServicesListener{
 
     private static final String TAG="ReceiverDesActivity";
-
-    //analytics and admob
-    private FirebaseAnalytics mFireAnalytics;
 
     //nds vars
     private NsdHelper mNsdHelper;
@@ -74,8 +72,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receiver_pick_destination);
 
-        //analytics
-        mFireAnalytics=FirebaseAnalytics.getInstance(this);
+        mContext=this;
 
         //assign views
         mUserName=(TextView)findViewById(R.id.tv_receive_username);
@@ -83,8 +80,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         mConnectionAnimation=(ImageView)findViewById(R.id.iv_receive_animation);
         mConnectionStatus=findViewById(R.id.tv_receive_wait);
         mConnectionStatus.setText(R.string.ru_message_initializing_connection);
-
-        mContext=this;
 
         //Animation
         final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -224,8 +219,11 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
         //we destroy the socket
         try {
-            mReceiverSocket.destroySocket();
-            mReceiverSocket=null;
+            if (mReceiverSocket.destroySocket()) {
+                mReceiverSocket.removeCallbacks();
+                mReceiverSocket = null;
+                Log.d(TAG,"Removing callbacks an set to null");
+            }
         }catch (Exception e){
             Log.d(TAG,"Couldn't destroy socket on pause");
             mReceiverSocket=null;
@@ -318,5 +316,15 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
                 mConnectionStatus.setText(R.string.ru_message_connection_error);
             }
         });
+    }
+
+    @Override
+    public void restartReceiverPickSocket() {
+        //we create the receiver pick socket
+        try{
+            mReceiverSocket = new ReceiverPickSocket(this,mServerSocket, mUserInfoEntry);
+        }catch (Exception e){
+            Log.e(TAG,"Couldnt initialize the socket");
+        }
     }
 }
