@@ -72,7 +72,7 @@ public class SenderPickSocket {
                     Boolean streamLoop=true;
                     Boolean isInitialized=false;
 
-                    while(streamLoop && !socketThread.isInterrupted()) {
+                    while(streamLoop && !socketThread.isInterrupted() && !mSocket.isClosed()) {
                        // try {
                         if(!isInitialized) {
                             Log.d(TAG, "Object input stream started");
@@ -151,7 +151,6 @@ public class SenderPickSocket {
 
                     //we send it back to the main activity via interface
                     mSenderInterface.restartSocketConnection(mSocket,user);
-
                     break;
 
                 case TYPE_ERROR_SEND_MESSAGE:

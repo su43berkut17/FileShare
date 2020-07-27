@@ -294,7 +294,7 @@ public class ReceiverSocketTransfer {
                             mCurrentAction=ACTION_NEXT_ACTION;
                         }
 
-                    }while (mCurrentAction!=ACTION_NEXT_ACTION && mCurrentAction!=ACTION_EXCEPTION && !socketThread.isInterrupted());
+                    }while (mCurrentAction!=ACTION_NEXT_ACTION && mCurrentAction!=ACTION_EXCEPTION && !socketThread.isInterrupted() && !mSocket.isClosed() && !mServerSocket.isClosed());
 
                     //close the socket
                     if (!mSocket.isClosed()) {

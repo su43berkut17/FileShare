@@ -118,8 +118,6 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
             }
 
             mNsdHelper=new NsdHelper(this);
-            //mNsdHelper.initializeNsd();
-            //mNsdHelper.registerService(mServerSocket.getLocalPort());
             mNsdHelper.discoverServices();
 
             isFirstExecution=true;
@@ -168,8 +166,6 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
         if (!isFirstExecution) {
             if (mNsdHelper != null) {
-                //mNsdHelper.initializeNsd();
-                //mNsdHelper.registerService(mServerSocket.getLocalPort());
                 mNsdHelper.discoverServices();
             }
         }
@@ -289,8 +285,6 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     }
 
     //From Sender Pick Socket
-
-
     @Override
     public void restartSocketConnection(Socket recSocket, UserSendEntry recEntry) {
         //look in the list
@@ -330,13 +324,6 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     //From Sender Pick Socket
     @Override
     public void openNextActivity(UserSendEntry sendEntry) {
-        //close the socket
-        try {
-            mServerSocket.close();
-        }catch (Exception e){
-            Log.d(TAG,"cannot close main socket");
-        }
-
         //we call the activity that will start the service with the info
         Intent intent = new Intent(this, TransferProgressActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -350,17 +337,6 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         bundleSend.putInt(TransferProgressActivity.LOCAL_PORT, mServerSocket.getLocalPort());
         bundleSend.putString(TransferProgressActivity.REMOTE_IP, sendEntry.getIpAddress().getHostAddress());
         bundleSend.putInt(TransferProgressActivity.REMOTE_PORT, sendEntry.getPort());
-
-        //we close and destroy all the sockets
-        for (int i=0;i<mSocketList.size();i++){
-            mSocketList.get(i).getSenderSocket().destroySocket();
-        }
-
-        try {
-            mServerSocket.close();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
 
         //open the activity
         Log.d(TAG, "Opening new activity with socket");

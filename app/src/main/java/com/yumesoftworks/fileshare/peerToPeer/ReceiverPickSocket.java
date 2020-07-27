@@ -17,7 +17,7 @@ import java.net.SocketTimeoutException;
 public class ReceiverPickSocket {
     private static final String TAG="ReceiverPickSocket";
 
-    private static final String TYPE_END="typeEnd";
+    private static final String TYPE_START_TRANSFER ="typeStartTransfer";
     private static final String TYPE_RESTART="typeRestart";
 
     //local server socket
@@ -47,13 +47,12 @@ public class ReceiverPickSocket {
         @Override
         public void run() {
             Boolean repeatSocketConnection=true;
-            while(repeatSocketConnection && !socketThread.isInterrupted()){
+            while(repeatSocketConnection && !socketThread.isInterrupted() && !mServerSocket.isClosed()){
                 // Socket object
                 try {
                     //wait for a connection
                     Log.d(TAG, "Async:Waiting for the socket to be connected " + mServerSocket.getLocalPort());
 
-                    mServerSocket.setSoTimeout(10000);
                     mSocket = mServerSocket.accept();
 
                     Boolean keepLooping=true;
@@ -88,7 +87,7 @@ public class ReceiverPickSocket {
                             if (message.getMessageContent().equals(SenderPickDestinationActivity.MESSAGE_OPEN_ACTIVITY)) {
                                 //we will open the new activity and wait for the connection via interface
                                 Log.d(TAG, "We will open the new intent");
-                                socketHandler.post(new ReceiverPickSocket.updateUIThread(TYPE_END));
+                                socketHandler.post(new ReceiverPickSocket.updateUIThread(TYPE_START_TRANSFER));
 
                                 keepLooping = false;
                                 repeatSocketConnection=false;
@@ -120,7 +119,7 @@ public class ReceiverPickSocket {
         public void run() {
             //Log.d(TAG,"UpdateUIThread Message is:"+msg);
             switch (type){
-                case TYPE_END:
+                case TYPE_START_TRANSFER:
                     destroySocket();
                     mReceiverInterface.openNexActivity();
                     break;
@@ -146,13 +145,6 @@ public class ReceiverPickSocket {
             mSocket.close();
         }catch (Exception e){
             Log.d(TAG,"Cannot close socket "+e.getMessage());
-        }
-
-        //cancel server socket
-        try{
-            mServerSocket.close();
-        }catch (Exception e){
-            Log.d(TAG,"Cannot close server socket "+e.getMessage());
         }
 
         //destroy the thread

@@ -220,7 +220,7 @@ public class SenderSocketTransfer{
                                 Log.d(TAG, "Waiting client to communicate "+e.getMessage());
                             }
                         }
-                    }while(mCurrentAction!=ACTION_NEXT_ACTION && mCurrentAction!=ACTION_EXCEPTION && !socketThread.isInterrupted());
+                    }while(mCurrentAction!=ACTION_NEXT_ACTION && mCurrentAction!=ACTION_EXCEPTION && !socketThread.isInterrupted() && !mSocket.isClosed());
 
                     //close the socket
                     if (!mSocket.isClosed()) {

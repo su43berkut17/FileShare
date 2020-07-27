@@ -193,6 +193,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         //server socket
         try{
             mServerSocket=new ServerSocket(0);
+            mServerSocket.setSoTimeout(10000);
         }catch (IOException e){
             Log.d(TAG,"There was an error registering the server socket");
         }
@@ -237,6 +238,14 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
             Log.d(TAG,"Couldn't destroy socket on pause");
             mReceiverSocket=null;
         }
+
+        //destroy server socket
+        try {
+            mServerSocket.close();
+            Log.d(TAG, "server socket is closed " + mServerSocket.isClosed());
+        } catch (Exception e) {
+            Log.d(TAG, "cant close server socket");
+        }
     }
 
     @Override
@@ -250,13 +259,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
     public void openNexActivity() {
         if (!mLaunchNewActivity) {
             mLaunchNewActivity=true;
-            //we close the socket
-            try {
-                mServerSocket.close();
-                Log.d(TAG, "server socket is closed " + mServerSocket.isClosed());
-            } catch (Exception e) {
-                Log.d(TAG, "cant close server socket");
-            }
 
             //we open the next activity with the socket information
             //we call the activity that will start the service with the info
@@ -331,6 +333,8 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
     public void restartReceiverPickSocket() {
         //we create the receiver pick socket
         try{
+            mReceiverSocket.destroySocket();
+            mReceiverSocket.removeCallbacks();
             mReceiverSocket = new ReceiverPickSocket(this,mServerSocket, mUserInfoEntry);
         }catch (Exception e){
             Log.e(TAG,"Couldnt initialize the socket");
