@@ -69,10 +69,12 @@ public class ReceiverPickSocket {
                             }catch (SocketTimeoutException e){
                                 Log.d(TAG,"Error:"+e.getMessage()+" try again");
                                 isInitialized=false;
+                                closeSocket(mSocket);
                                 socketHandler.post(new ReceiverPickSocket.updateUIThread(TYPE_RESTART));
                             }catch (Exception e){
                                 Log.d(TAG,"Error:"+e.getMessage()+" try again");
                                 isInitialized=false;
+                                closeSocket(mSocket);
                                 socketHandler.post(new ReceiverPickSocket.updateUIThread(TYPE_RESTART));
                             }
                         }
@@ -87,11 +89,11 @@ public class ReceiverPickSocket {
                             if (message.getMessageContent().equals(SenderPickDestinationActivity.MESSAGE_OPEN_ACTIVITY)) {
                                 //we will open the new activity and wait for the connection via interface
                                 Log.d(TAG, "We will open the new intent");
-                                socketHandler.post(new ReceiverPickSocket.updateUIThread(TYPE_START_TRANSFER));
 
                                 keepLooping = false;
                                 repeatSocketConnection=false;
-                                mSocket.close();
+                                closeSocket(mSocket);
+                                socketHandler.post(new ReceiverPickSocket.updateUIThread(TYPE_START_TRANSFER));
                             }
                         }catch (SocketTimeoutException e){
                             isInitialized=false;
@@ -131,6 +133,16 @@ public class ReceiverPickSocket {
         }
     }
 
+    private Boolean closeSocket(Socket socket){
+        try {
+            mSocket.close();
+            return true;
+        }catch (Exception e){
+            Log.d(TAG,"Cannot close socket "+e.getMessage());
+            return false;
+        }
+    }
+
     //interface
     public interface SocketReceiverConnectionInterface{
         void openNexActivity();
@@ -139,14 +151,6 @@ public class ReceiverPickSocket {
 
     //kill the socket
     public Boolean destroySocket(){
-        //cancel socket
-        Log.d(TAG,"Trying to close socket");
-        try {
-            mSocket.close();
-        }catch (Exception e){
-            Log.d(TAG,"Cannot close socket "+e.getMessage());
-        }
-
         //destroy the thread
         socketThread.interrupt();
         mSocket=null;

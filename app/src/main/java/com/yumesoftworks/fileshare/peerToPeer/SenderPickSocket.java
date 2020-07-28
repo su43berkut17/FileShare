@@ -88,6 +88,7 @@ public class SenderPickSocket {
                                 socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_UPDATE, mUserList));
                             }catch (Exception e){
                                 Log.e(TAG,"Couldn't read input stream"+e.getMessage());
+                                closeSocket(mSocket);
                                 socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_ERROR_SEND_MESSAGE,mUserList));
                             }
                         }
@@ -104,17 +105,20 @@ public class SenderPickSocket {
                                 doWeRepeat=false;
 
                                 //we open the next activity
+                                closeSocket(mSocket);
                                 socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_END, null));
                             }catch (Exception e){
                                 Log.d(TAG,"Error sending message: "+messageToSend+" "+e.getMessage());
                                 e.printStackTrace();
                                 messageToSend=null;
+                                closeSocket(mSocket);
                                 socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_ERROR_SEND_MESSAGE, null));
                             }
                         }
                     }
                 } catch (Exception e) {
                     Log.d(TAG, "the socket creation has failed" + e.getMessage());
+                    closeSocket(mSocket);
                     socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_ERROR_CONNECTION,null));
                     doWeRepeat=false;
                 }
@@ -171,6 +175,16 @@ public class SenderPickSocket {
         }
     }
 
+    private Boolean closeSocket(Socket socket){
+        try {
+            mSocket.close();
+            return true;
+        }catch (Exception e){
+            Log.d(TAG,"Cannot close socket "+e.getMessage());
+            return false;
+        }
+    }
+
     //interface
     public interface SocketSenderConnectionInterface{
         void updateUserDataSocket(UserSendEntry userSendEntry);
@@ -182,15 +196,6 @@ public class SenderPickSocket {
 
     //kill the socket
     public void destroySocket(){
-        //cancel socket
-        Log.d(TAG,"Trying to close socket");
-        try {
-            mSocket.close();
-            Log.d(TAG,"socket was closed "+mSocket.isClosed());
-        }catch (Exception e){
-            Log.d(TAG,"Cannot close socket "+e.getMessage());
-        }
-
         //destroy the thread
         socketThread.interrupt();
         mSocket=null;
