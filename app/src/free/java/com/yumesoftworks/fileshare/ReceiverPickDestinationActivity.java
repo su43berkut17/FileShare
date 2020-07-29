@@ -83,6 +83,10 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
         mContext=this;
 
+        /check the user consent
+        UserConsent userConsent=new UserConsent(this);
+        userConsent.checkConsent();
+
         //assign views
         mUserName=(TextView)findViewById(R.id.tv_receive_username);
         mUserIcon=(ImageView)findViewById(R.id.iv_receive_icon);
@@ -222,6 +226,11 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
     protected void onPause() {
         Log.d(TAG,"onPause");
         super.onPause();
+
+        //remove the observers
+        if (viewModel!=null && viewModel.getUserInfo().hasObservers()){
+            viewModel.getUserInfo().removeObservers(this);
+        }
 
         if (mNsdHelper!=null){
             mNsdHelper.cancelRegistration();

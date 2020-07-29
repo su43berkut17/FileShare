@@ -28,7 +28,6 @@ import android.widget.TextView;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.FileListRepository;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
@@ -92,9 +91,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
     private FileTransferProgress fragmentFileTransferProgress;
     private FragmentManager fragmentManager;
 
-    //analytics and admob
-    private FirebaseAnalytics mFireAnalytics;
-
     //viewmodel
     private FileTransferViewModel fileTransferViewModel;
     private TransferProgressActivityViewModel transferProgressActivityViewModel;
@@ -140,9 +136,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
         thisActivity=this;
         Log.d(TAG,"onCreate called");
-
-        //analytics
-        mFireAnalytics=FirebaseAnalytics.getInstance(this);
 
         //we get the instance of the indeterminate progress bar
         mWaitingScreen =findViewById(R.id.pb_atp_waitingForConnection);
@@ -227,7 +220,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 mTvProgress.setAlpha(1-value);
                 mTvTitle.setAlpha(1-value);
 
-                //frameRecycler.setTranslationY(appBarLayout.getTotalScrollRange()+verticalOffset);
                 frameRecycler.setPadding(0,appBarLayout.getTotalScrollRange()+verticalOffset,0,0);
             }
         });
@@ -586,7 +578,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     String fileName = textInfoSendObject.getMessageContent();
                     String stringNumbers = textInfoSendObject.getAdditionalInfo();
                     String[] currentNumbers = stringNumbers.split(",");
-                    String finalTextNumbers = currentNumbers[0] +" "+getString(R.string.atp_tv__number_connector)+" "+ currentNumbers[1];
+                    String finalTextNumbers = currentNumbers[0] +" "+getString(R.string.atp_tv__number_connector)+" " + currentNumbers[1];
 
                     int percentage=0;
                     if (currentNumbers.length>2) {
