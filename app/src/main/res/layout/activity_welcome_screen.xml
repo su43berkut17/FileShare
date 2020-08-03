@@ -112,7 +112,19 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_margin="@dimen/default_padding"/>
+
                     </LinearLayout>
+
+                    <Button
+                        android:id="@+id/button_unlock_ads"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:theme="@style/MyButtonsOutline"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/aws_unlock_ads"
+                        android:text="@string/aws_unlock_ads"
+                        app:icon="@android:drawable/ic_lock_idle_lock" />
+
                 </LinearLayout>
 
                 <LinearLayout

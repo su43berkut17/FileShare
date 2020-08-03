@@ -17,4 +17,6 @@
     <color name="buttonText">#FFFFFF</color>
     <color name="dialogText">#367AFF</color>
     <color name="actionBar">#367AFF</color>
+    <color name="outlineButton">#367AFF</color>
+    <color name="progressBar">#FFFFFF</color>
 </resources>

@@ -51,9 +51,13 @@
         <item name="colorOnPrimary">@color/buttonText</item>
     </style>
 
+    <style name="MyButtonsOutline" parent="">
+        <item name="colorPrimary">@color/dialogText</item>
+    </style>
+
     <!--Widget-->
     <style name="AppThemeProgressBar" parent="Base.Widget.AppCompat.ProgressBar.Horizontal">
-        <item name="android:progressTint">@color/colorCardWhite</item>
+        <item name="android:progressTint">@color/progressBar</item>
         <item name="android:progressBackgroundTint">@color/colorPrimaryDark</item>
     </style>
 </resources>

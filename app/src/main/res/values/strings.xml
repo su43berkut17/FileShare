@@ -12,6 +12,7 @@
     <string name="aws_input_username" translatable="false"></string>
     <string name="aws_input_username_hint">Type a username</string>
     <string name="aws_gdrp">Show personalized ads</string>
+    <string name="aws_unlock_ads">Hide Ads</string>
     <string name="aws_button_go">Go</string>
     <string name="aws_button_save">Save Changes</string>
     <string name="aws_keyboard_ime_action">Done</string>

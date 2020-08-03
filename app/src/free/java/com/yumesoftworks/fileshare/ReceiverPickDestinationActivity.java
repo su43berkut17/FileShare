@@ -83,7 +83,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
         mContext=this;
 
-        /check the user consent
+        //check the user consent
         UserConsent userConsent=new UserConsent(this);
         userConsent.checkConsent();
 

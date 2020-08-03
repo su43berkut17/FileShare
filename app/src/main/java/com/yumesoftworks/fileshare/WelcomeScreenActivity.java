@@ -9,12 +9,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.appcompat.widget.Toolbar;
 
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -61,6 +62,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     private TextView tvUsername;
     private Button buttonGo;
     private Button buttonCancel;
+    private Button buttonUnlockAds;
     private LinearLayout lineaLayoutGDRP;
     private Switch switchGDRP;
     private Boolean mSwitchAllowed=false;
@@ -131,6 +133,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         //set the listener in the button
         buttonGo=(Button)findViewById(R.id.button_go);
         buttonCancel=(Button)findViewById(R.id.button_cancel);
+        buttonUnlockAds=(Button)findViewById(R.id.button_unlock_ads);
         tvUsername=(TextView)findViewById(R.id.tv_aws_input_username);
 
         tvUsername.setOnEditorActionListener(new TextView.OnEditorActionListener(){
@@ -147,6 +150,12 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
         buttonGo.setOnClickListener(this);
         buttonCancel.setOnClickListener(this);
+
+        if (BuildConfig.FLAVOR.equals("free")){
+            buttonUnlockAds.setOnClickListener(this);
+        }else{
+            buttonUnlockAds.setVisibility(View.GONE);
+        }
 
         setupViewModel();
 
@@ -227,6 +236,9 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                 //return to former activity
                 super.onBackPressed();
                 break;
+            case R.id.button_unlock_ads:
+                openUnlockAds();
+                break;
         }
     }
 
@@ -267,6 +279,15 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                 goMainActivity();
             }
         }
+    }
+
+    //open unlock ads
+    private void openUnlockAds(){
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(
+                "https://play.google.com/store/apps/details?id=com.yumesoftworks.fileshare.paid"));
+        intent.setPackage("com.android.vending");
+        startActivity(intent);
     }
 
     //listener of click in each avatar
