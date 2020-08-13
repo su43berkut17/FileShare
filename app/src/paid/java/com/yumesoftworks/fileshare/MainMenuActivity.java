@@ -73,6 +73,24 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         setupViewModel();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        //empty the file list
+        fileViewerViewModel.deleteTable();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        //remove observers
+        if (viewModel!=null && viewModel.getUserInfo().hasObservers()) {
+            viewModel.getUserInfo().removeObservers(this);
+        }
+    }
+
     //view model
     private void setupViewModel(){
         viewModel=ViewModelProviders.of(this).get(WelcomeScreenViewModel.class);
@@ -109,16 +127,6 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
                 }
             }
         });
-    }
-
-    @Override
-    protected void onDestroy() {
-        //remove observers
-        if (viewModel!=null && viewModel.getUserInfo().hasObservers()) {
-            viewModel.getUserInfo().removeObservers(this);
-        }
-
-        super.onDestroy();
     }
 
     @Override

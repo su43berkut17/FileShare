@@ -73,7 +73,6 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
 
         //we empty the stored database
         fileViewerViewModel= ViewModelProviders.of(this).get(CombinedDataViewModel.class);
-        fileViewerViewModel.deleteTable();
 
         //toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.mm_toolbar);
@@ -84,6 +83,9 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
     protected void onResume() {
         super.onResume();
 
+        //empty the file list
+        fileViewerViewModel.deleteTable();
+
         //check the user consent
         UserConsent userConsent=new UserConsent(thisActivity);
         userConsent.checkConsent();
@@ -93,8 +95,10 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
     protected void onPause() {
         super.onPause();
 
-        //remove the viewmodel
-        viewModel.getUserInfo().removeObservers(this);
+        //remove observers
+        if (viewModel!=null && viewModel.getUserInfo().hasObservers()) {
+            viewModel.getUserInfo().removeObservers(this);
+        }
     }
 
     //view model
@@ -133,16 +137,6 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
                 }
             }
         });
-    }
-
-    @Override
-    protected void onDestroy() {
-        //remove observers
-        if (viewModel!=null && viewModel.getUserInfo().hasObservers()) {
-            viewModel.getUserInfo().removeObservers(this);
-        }
-
-        super.onDestroy();
     }
 
     @Override
@@ -204,7 +198,6 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
                     .addNetworkExtrasBundle(AdMobAdapter.class,extras)
                     .build();
         }
-
 
         mAdView.loadAd(adRequest);
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(isTracking);
