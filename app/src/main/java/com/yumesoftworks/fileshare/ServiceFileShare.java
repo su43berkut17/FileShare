@@ -176,7 +176,7 @@ public class ServiceFileShare extends Service implements
                 }catch (Exception e){
                     Log.e(TAG,"couldn't complete user cancelled action is destroyed");
                     currentDestructionTries++;
-                    if(destructionTries>=currentDestructionTries) {
+                    if(destructionTries<=currentDestructionTries) {
                         isItDestroyed = true;
                     }
                 }

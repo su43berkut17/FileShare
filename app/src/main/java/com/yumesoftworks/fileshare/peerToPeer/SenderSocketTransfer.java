@@ -272,7 +272,30 @@ public class SenderSocketTransfer{
     public Boolean destroy(){
         Log.d(TAG, "Destroy sockets");
 
+        //check if socket is closed
         try{
+            mSocket.close();
+            Log.d(TAG,"Socket is closed successfully");
+        }catch (Exception exception){
+            //if it isnt null we need to try to close again
+            if (mSocket!=null){
+                return false;
+            }
+        }
+
+        //it is null so we can assume it is closed
+        try{
+            //socket closed
+            mSenderInterface = null;
+            socketThread.interrupt();
+
+            Log.d(TAG, "Socket destroyed successfully");
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+
+        /*try{
             mSocket.close();
 
             if (mSocket.isClosed()) {
@@ -289,7 +312,7 @@ public class SenderSocketTransfer{
         }catch (Exception e){
             Log.d(TAG, "Cannot close socket " + e.getMessage());
             return false;
-        }
+        }*/
     }
 
     //interface
