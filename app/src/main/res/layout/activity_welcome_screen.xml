@@ -116,6 +116,15 @@
                     </LinearLayout>
 
                     <Button
+                        android:id="@+id/button_help"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/aws_button_help"
+                        android:text="@string/aws_button_help"
+                        android:theme="@style/MyButtonsOutline"/>
+
+                    <Button
                         android:id="@+id/button_unlock_ads"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:theme="@style/MyButtonsOutline"

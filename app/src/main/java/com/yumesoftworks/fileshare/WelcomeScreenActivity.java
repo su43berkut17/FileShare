@@ -62,6 +62,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     private TextView tvUsername;
     private Button buttonGo;
     private Button buttonCancel;
+    private Button buttonHelp;
     private Button buttonUnlockAds;
     private LinearLayout lineaLayoutGDRP;
     private Switch switchGDRP;
@@ -134,6 +135,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         buttonGo=(Button)findViewById(R.id.button_go);
         buttonCancel=(Button)findViewById(R.id.button_cancel);
         buttonUnlockAds=(Button)findViewById(R.id.button_unlock_ads);
+        buttonHelp=(Button)findViewById(R.id.button_help);
         tvUsername=(TextView)findViewById(R.id.tv_aws_input_username);
 
         tvUsername.setOnEditorActionListener(new TextView.OnEditorActionListener(){
@@ -150,6 +152,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
         buttonGo.setOnClickListener(this);
         buttonCancel.setOnClickListener(this);
+        buttonHelp.setOnClickListener(this);
 
         if (BuildConfig.FLAVOR.equals("free")){
             buttonUnlockAds.setOnClickListener(this);
@@ -239,6 +242,10 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
             case R.id.button_unlock_ads:
                 openUnlockAds();
                 break;
+
+            case R.id.button_help:
+                openHelp();
+                break;
         }
     }
 
@@ -287,6 +294,14 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         intent.setData(Uri.parse(
                 "https://play.google.com/store/apps/details?id=com.yumesoftworks.fileshare.paid"));
         intent.setPackage("com.android.vending");
+        startActivity(intent);
+    }
+
+    //open help
+    private void openHelp(){
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(
+                "https://www.yumesoftworks.com/"));
         startActivity(intent);
     }
 
