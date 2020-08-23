@@ -118,8 +118,16 @@ public class SenderPickSocket {
                     }
                 } catch (Exception e) {
                     Log.d(TAG, "the socket creation has failed" + e.getMessage());
-                    closeSocket(mSocket);
-                    socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_ERROR_CONNECTION,null));
+                    try {
+                        closeSocket(mSocket);
+                    }catch (Exception ee){
+                        Log.e(TAG,"Socket is null");
+                    }
+                    try {
+                        socketHandler.post(new SenderPickSocket.updateUIThread(TYPE_ERROR_CONNECTION, null));
+                    }catch (Exception ee){
+                        Log.e(TAG,"couldnt post error to activity");
+                    }
                     doWeRepeat=false;
                 }
             }

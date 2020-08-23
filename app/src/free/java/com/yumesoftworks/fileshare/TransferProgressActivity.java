@@ -339,6 +339,15 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
     //file observer sorting
     private void sortFilesBySendOrReceive(List<FileListEntry> fileListEntries){
+        //check if the type of service has been initialized
+        try{
+            if (mTypeServiceOrRelaunch==0){
+                mTypeServiceOrRelaunch=mService.typeOfService();
+            }
+        }catch (Exception e){
+            Log.d(TAG,"Unable to get the type of service yet");
+        }
+
         try {
             //we create a list for the not transferred and one for the transferred
             List<FileListEntry> tempSent = new ArrayList<>();
