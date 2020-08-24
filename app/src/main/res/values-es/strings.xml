@@ -43,6 +43,7 @@
     <string name="ru_message_connection_error">No se puede iniciar el servicio, chequee su conexión e inténtelo nuevamente.</string>
     <string name="ru_tv_username">Usuario</string>
     <string name="ru_wifi_disabled">Active el WiFi e inténtelo nuevamente.</string>
+    <string name="ru_version">Versión</string>
     <string name="atp_tv_filename">Nombre de archivo</string>
     <string name="atp_tv__number_connector">de</string>
     <string name="atp_tv_files_in_queue">Archivos a enviar:</string>
@@ -53,7 +54,7 @@
     <string name="service_notification_text_initialize">Iniciando transferencia...</string>
     <string name="service_notification_action_stop_service">Cancelar</string>
     <string name="service_finished_transfer">Envío de archivos finalizado.</string>
-    <string name="service_socket_error">Error dea conexión. Inténtelo nuevamente.</string>
+    <string name="service_socket_error">Error de conexión. Inténtelo nuevamente.</string>
     <string name="service_out_of_space_error">No hay espacio disponible en el dispositivo receptor. No se puede completar la transferencia.</string>
     <string name="service_success">Éxito!</string>
     <string name="appwidget_text">EJEMPLO</string>

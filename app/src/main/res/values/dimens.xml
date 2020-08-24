@@ -6,6 +6,7 @@
     <dimen name="large_padding">16dp</dimen>
     <dimen name="zero_padding">0dp</dimen>
     <dimen name="medium_text">18sp</dimen>
+    <dimen name="small_text">14sp</dimen>
 
     <!-- Activity file browser -->
     <dimen name="file_icon_size">80dp</dimen>

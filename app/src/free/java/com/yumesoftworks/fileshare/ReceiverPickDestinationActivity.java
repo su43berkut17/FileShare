@@ -70,6 +70,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
     private ImageView mUserIcon;
     private ImageView mConnectionAnimation;
     private TextView mConnectionStatus;
+    private TextView mTvVersion;
 
     private Context mContext;
 
@@ -93,6 +94,8 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
         mConnectionAnimation=(ImageView)findViewById(R.id.iv_receive_animation);
         mConnectionStatus=findViewById(R.id.tv_receive_wait);
         mConnectionStatus.setText(R.string.ru_message_initializing_connection);
+        mTvVersion=findViewById(R.id.rpd_tv_version);
+        mTvVersion.setText(BuildConfig.VERSION_NAME);
 
         //Animation
         final Handler mainHandler = new Handler(Looper.getMainLooper());

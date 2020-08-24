@@ -72,6 +72,16 @@
                 android:layout_margin="@dimen/default_padding"
                 android:text="@string/ru_tv_please_wait"
                 android:textSize="@dimen/medium_text" />
+            <TextView
+                android:id="@+id/rpd_tv_version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_padding"
+                android:textAlignment="center"
+                android:gravity="center_horizontal"
+                android:text="@string/ru_version"
+                android:textSize="@dimen/small_text"
+                />
 
         </LinearLayout>
 

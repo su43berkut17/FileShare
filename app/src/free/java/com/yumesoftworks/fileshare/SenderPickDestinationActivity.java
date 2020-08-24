@@ -61,6 +61,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     private List<UserSendEntry> mUserList;
     private List<UserSendEntry> mTempUserList;
     private List<SocketListEntry> mSocketList;
+    private TextView mTvVersion;
 
     private TextView mConnectionStatus;
 
@@ -102,6 +103,8 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
             mRecyclerView.setLayoutManager(mLinearLayoutManager);
             mAdapter=new SendFileUserListAdapter(this,this);
             mRecyclerView.setAdapter(mAdapter);
+            mTvVersion=findViewById(R.id.spd_tv_version);
+            mTvVersion.setText(BuildConfig.VERSION_NAME);
 
             //create a new list
             mUserList=new ArrayList<>();
