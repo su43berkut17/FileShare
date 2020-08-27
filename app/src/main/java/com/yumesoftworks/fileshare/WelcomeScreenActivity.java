@@ -1,6 +1,8 @@
 package com.yumesoftworks.fileshare;
 
 import android.app.ActivityOptions;
+
+import androidx.annotation.NonNull;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -16,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,7 +42,6 @@ import com.yumesoftworks.fileshare.utils.UserConsent;
 import java.util.List;
 
 public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAdapter.ItemClickListener,
-        JsonAvatarParser.OnLoadedAvatars,
         View.OnClickListener,
         UserConsent.UserConsentInterface,
         UserConsent.UserConsentISEEA {
@@ -85,7 +87,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         lineaLayoutGDRP=findViewById(R.id.ll_aws_gdrp);
         switchGDRP=findViewById(R.id.swi_aws_gdrp);
 
-        if (BuildConfig.FLAVOR=="paid"){
+        if (BuildConfig.FLAVOR.equals("paid")){
             lineaLayoutGDRP.setVisibility(View.GONE);
         }else {
             //check the user consent
@@ -93,13 +95,10 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
             userConsent.checkConsent();
 
             //listener
-            switchGDRP.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (mSwitchAllowed == true) {
-                        userConsent.generateForm();
-                        mSwitchAllowed = false;
-                    }
+            switchGDRP.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (mSwitchAllowed) {
+                    userConsent.generateForm();
+                    mSwitchAllowed = false;
                 }
             });
         }
@@ -127,27 +126,20 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         //add the 8 standard avatars in the adapter
         mAvatarAdapter.setAvatar(AvatarDefaultImages.getDefaultImages());
 
-        //load the remote avatars, we will use an interface once the avatars have loaded
-        JsonAvatarParser parser=new JsonAvatarParser(this);
-        parser.loadData();
-
         //set the listener in the button
-        buttonGo=(Button)findViewById(R.id.button_go);
-        buttonCancel=(Button)findViewById(R.id.button_cancel);
-        buttonUnlockAds=(Button)findViewById(R.id.button_unlock_ads);
-        buttonHelp=(Button)findViewById(R.id.button_help);
-        tvUsername=(TextView)findViewById(R.id.tv_aws_input_username);
+        buttonGo= findViewById(R.id.button_go);
+        buttonCancel=findViewById(R.id.button_cancel);
+        buttonUnlockAds=findViewById(R.id.button_unlock_ads);
+        buttonHelp=findViewById(R.id.button_help);
+        tvUsername=findViewById(R.id.tv_aws_input_username);
 
-        tvUsername.setOnEditorActionListener(new TextView.OnEditorActionListener(){
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                boolean handled = false;
-                if (actionId == EditorInfo.IME_ACTION_DONE || actionId==EditorInfo.IME_ACTION_UNSPECIFIED) {
-                    saveChanges();
-                    handled = true;
-                }
-                return handled;
+        tvUsername.setOnEditorActionListener((v, actionId, event) -> {
+            boolean handled = false;
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId==EditorInfo.IME_ACTION_UNSPECIFIED) {
+                saveChanges();
+                handled = true;
             }
+            return handled;
         });
 
         buttonGo.setOnClickListener(this);
@@ -163,19 +155,21 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         setupViewModel();
 
         //toolbar
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.aws_toolbar);
+        Toolbar myToolbar = findViewById(R.id.aws_toolbar);
         setSupportActionBar(myToolbar);
 
         //navigation bar settings
-        if (mIsThisSettings==false) {
-            getSupportActionBar().hide();
-        }else{
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar()!=null) {
+            if (!mIsThisSettings) {
+                getSupportActionBar().hide();
+            } else {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
         }
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         //we save the data to restore on rotation
@@ -186,26 +180,23 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     //view model
     private void setupViewModel(){
         viewModel=ViewModelProviders.of(this).get(WelcomeScreenViewModel.class);
-        viewModel.getUserInfo().observe(this, new Observer<List<UserInfoEntry>>() {
-            @Override
-            public void onChanged(@Nullable List<UserInfoEntry> userInfoEntries) {
-                //for 1st run
-                if (userInfoEntries.isEmpty()){
-                    //we hide the cancel button and the loading screen
-                    buttonCancel.setVisibility(View.GONE);
-                }else{
-                    //for settings
-                    if (mIsThisSettings){
-                        //we change the go button text to save changes
-                        buttonGo.setText(R.string.aws_button_save);
+        viewModel.getUserInfo().observe(this, userInfoEntries -> {
+            //for 1st run
+            if (userInfoEntries.isEmpty()){
+                //we hide the cancel button and the loading screen
+                buttonCancel.setVisibility(View.GONE);
+            }else{
+                //for settings
+                if (mIsThisSettings){
+                    //we change the go button text to save changes
+                    buttonGo.setText(R.string.aws_button_save);
 
-                        //we set the loaded data to the ui
-                        mSelectedAvatar=userInfoEntries.get(0).getPickedAvatar();
-                        mVersion=userInfoEntries.get(0).getAssetVersion();
-                        mFilesTransferred=userInfoEntries.get(0).getNumberFilesTransferred();
-                        tvUsername.setText(userInfoEntries.get(0).getUsername());
-                        mIsTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
-                    }
+                    //we set the loaded data to the ui
+                    mSelectedAvatar=userInfoEntries.get(0).getPickedAvatar();
+                    mVersion=userInfoEntries.get(0).getAssetVersion();
+                    mFilesTransferred=userInfoEntries.get(0).getNumberFilesTransferred();
+                    tvUsername.setText(userInfoEntries.get(0).getUsername());
+                    mIsTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
                 }
             }
         });
@@ -265,12 +256,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                 alertDialogBuilder.setMessage(R.string.aws_dialog_username);
             }
             alertDialogBuilder.setTitle(R.string.aws_dialog_title);
-            alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
+            alertDialogBuilder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
 
             alertDialogBuilder.show();
 
@@ -313,25 +299,6 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     }
 
     @Override
-    public void LoadedRemoteAvatars(AvatarAndVersion retAvatarAndVersion) {
-        //if it is not null we load the new views, otherwise we don't do anything
-        if (retAvatarAndVersion!=null) {
-            //we store the version
-            mVersion=retAvatarAndVersion.getVersion();
-
-            List<AvatarStaticEntry> receivedAvatars = AvatarDefaultImages.getDefaultImages();
-            receivedAvatars.addAll(retAvatarAndVersion.getAvatarList());
-
-            mAvatarAdapter.setAvatar(receivedAvatars);
-        }
-
-        //set the selected avatar if it exists
-        if (mSelectedAvatar!=-1){
-            mAvatarAdapter.setSelectedAvatar(mSelectedAvatar);
-        }
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case android.R.id.home:
@@ -351,7 +318,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
     @Override
     public void isEEA(Boolean isEEA) {
-        if (!isEEA || mIsThisSettings==false) {
+        if (!isEEA || !mIsThisSettings) {
             lineaLayoutGDRP.setVisibility(View.GONE);
         }
     }
