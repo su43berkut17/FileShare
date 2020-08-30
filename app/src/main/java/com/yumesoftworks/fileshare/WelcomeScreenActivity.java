@@ -197,6 +197,9 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                     mFilesTransferred=userInfoEntries.get(0).getNumberFilesTransferred();
                     tvUsername.setText(userInfoEntries.get(0).getUsername());
                     mIsTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
+
+                    //set the selected avatar
+                    mAvatarAdapter.setSelectedAvatar(mSelectedAvatar);
                 }
             }
         });

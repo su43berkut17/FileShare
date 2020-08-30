@@ -9,7 +9,7 @@ public class AvatarDefaultImages {
     public static List<AvatarStaticEntry> getDefaultImages(){
         mAvatarList=new ArrayList<>();
 
-        for (int i=0; i<8;i++){
+        for (int i=0; i<12;i++){
             String path="avatar_"+Integer.toString(i+1);
 
             mAvatarList.add(new AvatarStaticEntry(i,AvatarStaticEntry.TYPE_LOCAL,path,false));
