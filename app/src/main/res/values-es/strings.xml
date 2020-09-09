@@ -21,7 +21,7 @@
     <string name="mm_receive_des">Recibir Archivos</string>
     <string name="menu_options_title">Opciones</string>
     <string name="fb_icon_description">Icono de archivo</string>
-    <string name="fb_button_review_queue">Revisar lista</string>
+    <string name="fb_button_review_queue">Regresar a lista</string>
     <string name="fb_path_description">Ruta de archivo</string>
     <string name="fb_incompatible_file">Aplicación para abrir archivo no disponible</string>
     <string name="fq_tv_title_queue">Archivos a enviar:</string>
