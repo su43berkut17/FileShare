@@ -19,6 +19,8 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.os.Environment;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.google.ads.consent.ConsentInfoUpdateListener;
@@ -115,6 +117,13 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater=getMenuInflater();
+        inflater.inflate(R.menu.add_file_menu,menu);
+        return true;
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(CURRENT_FRAGMENT_TAG,mCurrentFragment);
@@ -128,86 +137,42 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         //we check if we have old versions of the fragments
         fragmentManager=getSupportFragmentManager();
 
-       /* int mainId=R.id.frag_afv_main;
-        int queueId=R.id.frag_afv_queue;
+        //we need to check which fragment we will restore the instance of
+        Log.d(TAG, "1 panel, we decide which one to load an which one to create");
 
-        //we set the id vars
-        if (mTwoPanel){
-            //2 panels so we do different ids
-            Log.d(TAG,"2 panel");
-        }else{
-            //reset the id for the queue
-            queueId=R.id.frag_afv_main;
-        }*/
-
-        /*if (mTwoPanel) {
-            //2 panels
-            //we need to check which fragment we will restore the instance of
-            Log.d(TAG, "2 panels");
-
+        if (mCurrentFragment==FILE_FRAGMENT) {
             //for the file one
-            Fragment fragmentFileViewerTemp = fragmentManager.findFragmentById(mainId);
+            Fragment fragmentFileViewerTemp = fragmentManager.findFragmentById(R.id.frag_afv_main);
 
             if (fragmentFileViewerTemp == null) {
                 Log.d(TAG, "file fragment is null we create a new instance");
                 fragmentFileViewer = new FileViewer();
             } else {
                 Log.d(TAG, "fragment exists we take from fragment manager");
-                fragmentFileViewer = (FileViewer) fragmentManager.findFragmentById(mainId);
+                fragmentFileViewer = (FileViewer) fragmentManager.findFragmentById(R.id.frag_afv_main);
             }
 
-            //hide the file viewer button
-            fragmentFileViewer.hideButton();
+            //we create the queue one from scratch
+            fragmentQueueViewer=new QueueViewer();
+        }
 
+        if (mCurrentFragment==QUEUE_FRAGMENT) {
             //queue one
-            Fragment fragmentQueueViewerTemp = fragmentManager.findFragmentById(queueId);
+            Fragment fragmentQueueViewerTemp = fragmentManager.findFragmentById(R.id.frag_afv_main);
 
             if (fragmentQueueViewerTemp == null) {
                 Log.d(TAG, "queue fragment is null we create a new instance");
                 fragmentQueueViewer = new QueueViewer();
             } else {
                 Log.d(TAG, "queue fragment is null we create a new instance");
-                fragmentQueueViewer = (QueueViewer) fragmentManager.findFragmentById(queueId);
-            }
-        }else{*/
-            //1 panel, check which fragment is active to be reloaded from the saved instance state
-            //we need to check which fragment we will restore the instance of
-            Log.d(TAG, "1 panel, we decide which one to load an which one to create");
-
-            if (mCurrentFragment==FILE_FRAGMENT) {
-                //for the file one
-                Fragment fragmentFileViewerTemp = fragmentManager.findFragmentById(R.id.frag_afv_main);
-
-                if (fragmentFileViewerTemp == null) {
-                    Log.d(TAG, "file fragment is null we create a new instance");
-                    fragmentFileViewer = new FileViewer();
-                } else {
-                    Log.d(TAG, "fragment exists we take from fragment manager");
-                    fragmentFileViewer = (FileViewer) fragmentManager.findFragmentById(R.id.frag_afv_main);
-                }
-
-                //we create the queue one from scratch
-                fragmentQueueViewer=new QueueViewer();
+                fragmentQueueViewer = (QueueViewer) fragmentManager.findFragmentById(R.id.frag_afv_main);
             }
 
-            if (mCurrentFragment==QUEUE_FRAGMENT) {
-                //queue one
-                Fragment fragmentQueueViewerTemp = fragmentManager.findFragmentById(R.id.frag_afv_main);
-
-                if (fragmentQueueViewerTemp == null) {
-                    Log.d(TAG, "queue fragment is null we create a new instance");
-                    fragmentQueueViewer = new QueueViewer();
-                } else {
-                    Log.d(TAG, "queue fragment is null we create a new instance");
-                    fragmentQueueViewer = (QueueViewer) fragmentManager.findFragmentById(R.id.frag_afv_main);
-                }
-
-                //we create the file one from scratch only is if is api>21
-                if (Build.VERSION.SDK_INT<21) {
-                    fragmentFileViewer = new FileViewer();
-                }
+            //we create the file one from scratch only is if is api>21
+            if (Build.VERSION.SDK_INT<21) {
+                fragmentFileViewer = new FileViewer();
             }
-        //}
+        }
 
         //we load the files
         loadFragments();
@@ -237,18 +202,12 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
         //queue
         if (mCurrentFragment==QUEUE_FRAGMENT || mCurrentFragment==0){
-            /*if (mTwoPanel){
-                fragmentManager.beginTransaction()
-                        .replace(R.id.frag_afv_queue, fragmentQueueViewer)
-                        .commit();
-            }else {*/
-                fragmentManager.beginTransaction()
-                        .replace(R.id.frag_afv_main, fragmentQueueViewer)
-                        .commit();
-            //}
+            fragmentManager.beginTransaction()
+                 .replace(R.id.frag_afv_main, fragmentQueueViewer)
+                    .commit();
         }
 
-        //we attach the observers to the activiy
+        //we attach the observers to the activity
         if (Build.VERSION.SDK_INT<21) {
             fileViewerViewModel.getData().observe(this, fileViewerViewModelObserver);
         }
@@ -371,20 +330,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
     @Override
     public void onButtonQueueInteraction() {
-        // we go back to the queue
-        //we reload the  fragment
-        fragmentManager.beginTransaction()
-                .setCustomAnimations(R.anim.anim_enter_left, R.anim.anim_exit_right)
-                .replace(R.id.frag_afv_main, fragmentQueueViewer)
-                .commit();
-
-        mAllowLivedataUpdate = true;
-
-        //we update the data and path
-        queueFragmentRequestUpdate();
-
-        //we reset the deletion
-        mIsNotDeletion=true;
+        //backstack
+        fragmentManager.popBackStack();
     }
 
     @Override
@@ -428,10 +375,33 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     //override the back button normal behaviour
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        //return super.onOptionsItemSelected(item);
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
+                return true;
+            case R.id.menu_add_files:
+                //check if file browser or SAF
+                if (Build.VERSION.SDK_INT<21){
+                    fragmentFileViewer=new FileViewer();
+
+                    //we reload the  fragment
+                    fragmentManager.beginTransaction()
+                            .setCustomAnimations(R.anim.anim_enter_right, R.anim.anim_exit_left,R.anim.anim_enter_left,R.anim.anim_exit_right)
+                            .replace(R.id.frag_afv_main, fragmentFileViewer)
+                            .addToBackStack("null")
+                            .commit();
+
+                    mAllowLivedataUpdate = true;
+
+                    mCurrentFragment=FILE_FRAGMENT;
+
+                    //we update the data and path
+                    fileFragmentRequestUpdate();
+                }else{
+                    //use SAF
+
+                }
+
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -441,25 +411,11 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     @Override
     public void onBackPressed() {
         //we check the current fragment
-        if (mCurrentFragment == QUEUE_FRAGMENT) {
-            //go back
-            Log.d(TAG, "current is queue fragment so we go back");
-            super.onBackPressed();
-        }else{
-            //we are on the 1st fragment so we can go back
-            Log.d(TAG,"The file history size is: "+mFileHistory.size());
+        if (fragmentManager.getBackStackEntryCount()>0){
+            //we are in browser
             if (mFileHistory.size()<=1) {
                 //go back to the queue
-                //we reload the  fragment
-                fragmentManager.beginTransaction()
-                        .setCustomAnimations(R.anim.anim_enter_left, R.anim.anim_exit_right)
-                        .replace(R.id.frag_afv_main, fragmentQueueViewer)
-                        .commit();
-
-                mAllowLivedataUpdate = true;
-
-                //we update the data and path
-                queueFragmentRequestUpdate();
+                fragmentManager.popBackStack();
             }else {
                 //we browse to the upper level
                 mFileHistory.remove(mFileHistory.size()-1);
@@ -467,6 +423,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                 mAllowLivedataUpdate=true;
                 mergeFileAndData(fileViewerViewModel.getData().getValue(),FILETREE_UPDATE);
             }
+        }else{
+            super.onBackPressed();
         }
     }
 

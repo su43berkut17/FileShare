@@ -48,7 +48,6 @@ public class FileViewer extends Fragment implements
 
     //ui
     private Button btnQueue;
-    private Boolean mIsButtonShown;
     private TextView textPath;
     private AutoCompleteTextView storagePicker;
 
@@ -113,13 +112,6 @@ public class FileViewer extends Fragment implements
         rvFileList=mainView.findViewById(R.id.rv_file_viewer);
         mLinearLayoutManager=new LinearLayoutManager(getContext());
         rvFileList.setLayoutManager(mLinearLayoutManager);
-
-        //we hide the button
-        if (mIsButtonShown!=null) {
-            if (mIsButtonShown == false) {
-                btnQueue.setVisibility(View.GONE);
-            }
-        }
 
         rvAdapter = new FileListAdapter(getContext(),this);
 
@@ -234,11 +226,6 @@ public class FileViewer extends Fragment implements
     //update the checkbox
     public void updateCheckbox(FileListEntry recFileListEntry){
         rvAdapter.updateChecklist(recFileListEntry);
-    }
-
-    //hide the button here
-    public void hideButton(){
-        mIsButtonShown=false;
     }
 
     @Override
