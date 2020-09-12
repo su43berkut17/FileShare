@@ -1,6 +1,7 @@
 package com.yumesoftworks.fileshare.data;
 
 import android.app.Application;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -46,6 +47,22 @@ public class FileListRepository {
         });
 
         //new saveDatabaseAsyncTask(database).execute(fileListEntry);
+    }
+
+    //add multiple files to the list
+    public void saveFiles(final List<Uri> uriList){
+        Executor myExecutor=Executors.newSingleThreadExecutor();
+
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                for (Uri uri:uriList
+                     ) {
+                    FileListEntry fileListEntry=new FileListEntry(uri.getEncodedPath(),uri.getEncodedAuthority(),0,"",1,"",false);
+                    database.fileListDao().insertFile(fileListEntry);
+                }
+            }
+        });
     }
 
     /*private static class saveDatabaseAsyncTask extends AsyncTask<FileListEntry,Void,Void> {

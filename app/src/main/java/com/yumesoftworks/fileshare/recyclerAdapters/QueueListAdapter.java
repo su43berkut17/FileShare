@@ -1,6 +1,7 @@
 package com.yumesoftworks.fileshare.recyclerAdapters;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
@@ -8,7 +9,9 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Build;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,16 +53,30 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
     public void onBindViewHolder(@NonNull QueueListViewHolder queueListViewHolder, int i) {
         FileListEntry fileListEntry=mFileList.get(i);
 
+        //check if it is via saf or file
+        if (Build.VERSION.SDK_INT>=21) {
+            Uri realURI=Uri.parse(fileListEntry.getPath());
+            realURI=realURI.buildUpon().appendEncodedPath(fileListEntry.getPath()).authority(fileListEntry.getFileName()).build();
+            Log.d(TAG,"Uri: "+realURI.toString());
+
+            Cursor returnCursor = mContext.getContentResolver().query(realURI, null, null, null, null);
+
+            //public FileListEntry(int id, String path, String fileName, int isTransferred, String parentFolder, int isSelected, String mimeType){
+            int rowName=returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+
+            fileListEntry.setFileName(returnCursor.getString(rowName));
+        }
+
         //set values in view
         queueListViewHolder.tv_fileName.setText(fileListEntry.getFileName());
-        queueListViewHolder.fileContents=fileListEntry;
+        queueListViewHolder.fileContents = fileListEntry;
 
-        Log.d(TAG,"mime type is "+fileListEntry.getMimeType());
-        Log.d(TAG,"the path is "+fileListEntry.getPath());
+        Log.d(TAG, "mime type is " + fileListEntry.getMimeType());
+        Log.d(TAG, "the path is " + fileListEntry.getPath());
 
         //placeholder uri
-        int placeholderUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
-        RequestOptions smallSize=new RequestOptions().override(200,200);
+        int placeholderUri = mContext.getResources().getIdentifier("icon_file_128", "drawable", mContext.getPackageName());
+        RequestOptions smallSize = new RequestOptions().override(200, 200);
 
         File tempFile = new File(fileListEntry.getPath());
 
@@ -67,51 +84,51 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
         queueListViewHolder.tv_size.setVisibility(View.VISIBLE);
 
         //size
-        Long fileSize=tempFile.length();
+        Long fileSize = tempFile.length();
         String sizeUnit;
 
-        if (fileSize>1024*1024){
+        if (fileSize > 1024 * 1024) {
             //megabytes
-            fileSize=fileSize/1024/1024;
-            sizeUnit=" MB";
-        }else{
+            fileSize = fileSize / 1024 / 1024;
+            sizeUnit = " MB";
+        } else {
             //kilobytes
-            fileSize=fileSize/1024;
-            sizeUnit=" KB";
+            fileSize = fileSize / 1024;
+            sizeUnit = " KB";
         }
 
-        queueListViewHolder.tv_size.setText(fileSize+sizeUnit);
+        queueListViewHolder.tv_size.setText(fileSize + sizeUnit);
 
         //it is a file
-        if (fileListEntry.getMimeType()!=null) {
+        if (fileListEntry.getMimeType() != null) {
             if (fileListEntry.getMimeType().startsWith("image")) {
-                Uri uri=Uri.fromFile(new File(fileListEntry.getPath()));
-                int tempUri = mContext.getResources().getIdentifier("icon_image_128","drawable",mContext.getPackageName());
+                Uri uri = Uri.fromFile(new File(fileListEntry.getPath()));
+                int tempUri = mContext.getResources().getIdentifier("icon_image_128", "drawable", mContext.getPackageName());
                 Glide.with(mContext)
                         .load(uri)
                         .placeholder(tempUri)
                         .centerCrop()
                         .apply(smallSize)
                         .into(queueListViewHolder.iv_icon);
-            } else if (fileListEntry.getMimeType().startsWith("video")){
-                Uri uri=Uri.fromFile(new File(fileListEntry.getPath()));
-                int tempUri = mContext.getResources().getIdentifier("icon_video_128","drawable",mContext.getPackageName());
+            } else if (fileListEntry.getMimeType().startsWith("video")) {
+                Uri uri = Uri.fromFile(new File(fileListEntry.getPath()));
+                int tempUri = mContext.getResources().getIdentifier("icon_video_128", "drawable", mContext.getPackageName());
                 Glide.with(mContext)
                         .load(uri)
                         .placeholder(tempUri)
                         .centerCrop()
                         .apply(smallSize)
                         .into(queueListViewHolder.iv_icon);
-            }else if (fileListEntry.getMimeType().startsWith("audio")){
-                int tempUri = mContext.getResources().getIdentifier("icon_music_128","drawable",mContext.getPackageName());
+            } else if (fileListEntry.getMimeType().startsWith("audio")) {
+                int tempUri = mContext.getResources().getIdentifier("icon_music_128", "drawable", mContext.getPackageName());
                 Glide.with(mContext)
                         .load(tempUri)
                         .centerCrop()
                         .apply(smallSize)
                         .placeholder(placeholderUri)
                         .into(queueListViewHolder.iv_icon);
-            }else {
-                int tempUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
+            } else {
+                int tempUri = mContext.getResources().getIdentifier("icon_file_128", "drawable", mContext.getPackageName());
                 Glide.with(mContext)
                         .load(tempUri)
                         .centerCrop()

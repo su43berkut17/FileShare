@@ -3,9 +3,11 @@ package com.yumesoftworks.fileshare;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -54,6 +56,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private static final int LIVEDATA_UPDATE=2000;
     private static final int FILETREE_UPDATE=2001;
 
+    private static final int FILE_PICK_CODE=5001;
+
     //fragment
     private int mCurrentFragment;
     private static final String CURRENT_FRAGMENT_TAG="currentFragmentTag";
@@ -72,6 +76,9 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private String mPath;
     private static final String CURRENT_PATH_TAG="CurrentPathTag";
     private Context thisActivity;
+
+    //uri paths
+    private List<Uri> uriPaths;
 
     //for deletion in the queue viewer
     private boolean mIsNotDeletion=true;
@@ -256,6 +263,16 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                     mIsNotDeletion = true;
                 }
             }
+            /*
+            //check if the uri list has been updated
+            try {
+                if (uriPaths.size() > 0) {
+                    //send the uri path to database repo
+                    queueViewerViewModel.saveFiles(uriPaths);
+                }
+            }catch (Exception e){
+                //nothing happens
+            }*/
         }
     };
 
@@ -399,12 +416,40 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                     fileFragmentRequestUpdate();
                 }else{
                     //use SAF
-
+                    Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    i.setType("*/*");
+                    i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                    i.addCategory(Intent.CATEGORY_OPENABLE);
+                    i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivityForResult(i, FILE_PICK_CODE);
                 }
 
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == FILE_PICK_CODE && resultCode == Activity.RESULT_OK) {
+
+            //check if 1 or multiple files
+            //get result after user action (selecting files) and transform it into array of Uris
+            uriPaths = new ArrayList<>();
+            if (data.getData() != null) { // only one uri was selected by user
+                uriPaths.add(data.getData());
+            } else if (data.getClipData() != null) {
+                int selectedCount = data.getClipData().getItemCount();
+
+                for (int i = 0; i < selectedCount; i++) {
+                    uriPaths.add(data.getClipData().getItemAt(i).getUri());
+                }
+            }
+
+            queueViewerViewModel.saveFiles(uriPaths);
         }
     }
 

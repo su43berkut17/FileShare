@@ -1,6 +1,7 @@
 package com.yumesoftworks.fileshare;
 
 import android.app.Application;
+import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 
@@ -13,6 +14,7 @@ import com.yumesoftworks.fileshare.data.FileListRepository;
 import com.yumesoftworks.fileshare.utils.ReadFileList;
 
 import java.io.File;
+import java.net.URI;
 import java.util.List;
 
 public class CombinedDataViewModel extends AndroidViewModel {
@@ -35,6 +37,8 @@ public class CombinedDataViewModel extends AndroidViewModel {
     public void saveFile(FileListEntry file){
         repository.saveFile(file);
     }
+
+    public void saveFiles(List<Uri> uriList){repository.saveFiles(uriList);}
 
     public void deleteFile(FileListEntry list){
         repository.deleteFile(list);
