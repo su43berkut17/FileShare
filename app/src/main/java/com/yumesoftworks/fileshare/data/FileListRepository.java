@@ -58,7 +58,7 @@ public class FileListRepository {
             public void run() {
                 for (Uri uri:uriList
                      ) {
-                    FileListEntry fileListEntry=new FileListEntry(uri.getEncodedPath(),uri.getEncodedAuthority(),0,"",1,"",false);
+                    FileListEntry fileListEntry=new FileListEntry(uri.toString(),"",0,"",1,"",false);
                     database.fileListDao().insertFile(fileListEntry);
                 }
             }

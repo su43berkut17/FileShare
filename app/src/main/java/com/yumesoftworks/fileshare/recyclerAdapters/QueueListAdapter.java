@@ -7,9 +7,11 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Build;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.Log;
@@ -25,6 +27,7 @@ import com.yumesoftworks.fileshare.R;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.QueueListViewHolder> {
@@ -52,39 +55,33 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
     @Override
     public void onBindViewHolder(@NonNull QueueListViewHolder queueListViewHolder, int i) {
         FileListEntry fileListEntry=mFileList.get(i);
+        Long fileSize=0L;
 
         //check if it is via saf or file
         if (Build.VERSION.SDK_INT>=21) {
             Uri realURI=Uri.parse(fileListEntry.getPath());
-            realURI=realURI.buildUpon().appendEncodedPath(fileListEntry.getPath()).authority(fileListEntry.getFileName()).build();
-            Log.d(TAG,"Uri: "+realURI.toString());
+            //realURI=realURI.buildUpon().appendEncodedPath(fileListEntry.getPath()).authority(fileListEntry.getFileName()).build();
+            Log.d(TAG,"Uri: "+realURI.toString()+" authority:"+realURI.getAuthority());
 
-            Cursor returnCursor = mContext.getContentResolver().query(realURI, null, null, null, null);
+            //type
+            fileListEntry.setMimeType(mContext.getContentResolver().getType(realURI));
 
-            //public FileListEntry(int id, String path, String fileName, int isTransferred, String parentFolder, int isSelected, String mimeType){
-            int rowName=returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            try{
+                DocumentFile file=DocumentFile.fromSingleUri(mContext,realURI);
+                fileListEntry.setFileName(file.getName());
+                fileSize=file.length();
 
-            fileListEntry.setFileName(returnCursor.getString(rowName));
+            }catch (Exception e){
+                Log.e(TAG,e.getMessage());
+            }
+
+        }else{
+            File tempFile = new File(fileListEntry.getPath());
+
+            //size
+            fileSize = tempFile.length();
         }
 
-        //set values in view
-        queueListViewHolder.tv_fileName.setText(fileListEntry.getFileName());
-        queueListViewHolder.fileContents = fileListEntry;
-
-        Log.d(TAG, "mime type is " + fileListEntry.getMimeType());
-        Log.d(TAG, "the path is " + fileListEntry.getPath());
-
-        //placeholder uri
-        int placeholderUri = mContext.getResources().getIdentifier("icon_file_128", "drawable", mContext.getPackageName());
-        RequestOptions smallSize = new RequestOptions().override(200, 200);
-
-        File tempFile = new File(fileListEntry.getPath());
-
-        //date and size
-        queueListViewHolder.tv_size.setVisibility(View.VISIBLE);
-
-        //size
-        Long fileSize = tempFile.length();
         String sizeUnit;
 
         if (fileSize > 1024 * 1024) {
@@ -99,10 +96,32 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
 
         queueListViewHolder.tv_size.setText(fileSize + sizeUnit);
 
+        //date and size
+        queueListViewHolder.tv_size.setVisibility(View.VISIBLE);
+
+        //set values in view
+        queueListViewHolder.tv_fileName.setText(fileListEntry.getFileName());
+        queueListViewHolder.fileContents = fileListEntry;
+
+        Log.d(TAG, "mime type is " + fileListEntry.getMimeType());
+        Log.d(TAG, "the path is " + fileListEntry.getPath());
+
+        //placeholder uri
+        int placeholderUri = mContext.getResources().getIdentifier("icon_file_128", "drawable", mContext.getPackageName());
+        RequestOptions smallSize = new RequestOptions().override(200, 200);
+
         //it is a file
         if (fileListEntry.getMimeType() != null) {
+            Uri uri;
+
+            //get uri
+            if (Build.VERSION.SDK_INT>=21) {
+                uri = Uri.parse(fileListEntry.getPath());
+            }else{
+                uri = Uri.fromFile(new File(fileListEntry.getPath()));
+            }
+
             if (fileListEntry.getMimeType().startsWith("image")) {
-                Uri uri = Uri.fromFile(new File(fileListEntry.getPath()));
                 int tempUri = mContext.getResources().getIdentifier("icon_image_128", "drawable", mContext.getPackageName());
                 Glide.with(mContext)
                         .load(uri)
@@ -111,7 +130,6 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
                         .apply(smallSize)
                         .into(queueListViewHolder.iv_icon);
             } else if (fileListEntry.getMimeType().startsWith("video")) {
-                Uri uri = Uri.fromFile(new File(fileListEntry.getPath()));
                 int tempUri = mContext.getResources().getIdentifier("icon_video_128", "drawable", mContext.getPackageName());
                 Glide.with(mContext)
                         .load(uri)

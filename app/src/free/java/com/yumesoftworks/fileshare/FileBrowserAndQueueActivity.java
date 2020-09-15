@@ -435,16 +435,17 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == FILE_PICK_CODE && resultCode == Activity.RESULT_OK) {
-
             //check if 1 or multiple files
             //get result after user action (selecting files) and transform it into array of Uris
             uriPaths = new ArrayList<>();
             if (data.getData() != null) { // only one uri was selected by user
+                //thisActivity.getContentResolver().takePersistableUriPermission(receivedFileList,Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 uriPaths.add(data.getData());
             } else if (data.getClipData() != null) {
                 int selectedCount = data.getClipData().getItemCount();
 
                 for (int i = 0; i < selectedCount; i++) {
+                    //thisActivity.getContentResolver().takePersistableUriPermission(data.getClipData().getItemAt(i).getUri(),Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     uriPaths.add(data.getClipData().getItemAt(i).getUri());
                 }
             }
