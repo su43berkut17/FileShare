@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.yumesoftworks.fileshare.ConstantValues;
 import com.yumesoftworks.fileshare.R;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 
@@ -58,7 +59,12 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
         Long fileSize=0L;
 
         //check if it is via saf or file
-        if (Build.VERSION.SDK_INT>=21) {
+        if (Build.VERSION.SDK_INT< ConstantValues.SAF_SDK) {
+            File tempFile = new File(fileListEntry.getPath());
+
+            //size
+            fileSize = tempFile.length();
+        }else{
             Uri realURI=Uri.parse(fileListEntry.getPath());
             //realURI=realURI.buildUpon().appendEncodedPath(fileListEntry.getPath()).authority(fileListEntry.getFileName()).build();
             Log.d(TAG,"Uri: "+realURI.toString()+" authority:"+realURI.getAuthority());
@@ -74,12 +80,6 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
             }catch (Exception e){
                 Log.e(TAG,e.getMessage());
             }
-
-        }else{
-            File tempFile = new File(fileListEntry.getPath());
-
-            //size
-            fileSize = tempFile.length();
         }
 
         String sizeUnit;
@@ -115,10 +115,10 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
             Uri uri;
 
             //get uri
-            if (Build.VERSION.SDK_INT>=21) {
-                uri = Uri.parse(fileListEntry.getPath());
-            }else{
+            if (Build.VERSION.SDK_INT<ConstantValues.SAF_SDK) {
                 uri = Uri.fromFile(new File(fileListEntry.getPath()));
+            }else{
+                uri = Uri.parse(fileListEntry.getPath());
             }
 
             if (fileListEntry.getMimeType().startsWith("image")) {

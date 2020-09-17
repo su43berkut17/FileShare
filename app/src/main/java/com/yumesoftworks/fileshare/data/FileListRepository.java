@@ -2,9 +2,12 @@ package com.yumesoftworks.fileshare.data;
 
 import android.app.Application;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
+
+import com.yumesoftworks.fileshare.ConstantValues;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -115,7 +118,12 @@ public class FileListRepository {
         myExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                database.fileListDao().deleteFile(fileListEntry);
+                if (Build.VERSION.SDK_INT< ConstantValues.SAF_SDK){
+                    database.fileListDao().deleteFile(fileListEntry);
+                }else{
+                    database.fileListDao().deleteFileNotSameId(fileListEntry.getPath());
+                }
+
             }
         });
         //new deleteDatabaseAsyncTask(database).execute(fileListEntry);

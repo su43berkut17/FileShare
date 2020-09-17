@@ -176,7 +176,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             }
 
             //we create the file one from scratch only is if is api>21
-            if (Build.VERSION.SDK_INT<21) {
+            if (Build.VERSION.SDK_INT<ConstantValues.SAF_SDK) {
                 fragmentFileViewer = new FileViewer();
             }
         }
@@ -188,7 +188,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private void loadFragments(){
         Log.d(TAG,"Load fragments");
         //we create the viewmodel observers if they are null
-        if (Build.VERSION.SDK_INT<21) {
+        if (Build.VERSION.SDK_INT<ConstantValues.SAF_SDK) {
             if (fileViewerViewModel == null) {
                 fileViewerViewModel = ViewModelProviders.of(this).get(CombinedDataViewModel.class);
             }
@@ -215,7 +215,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         }
 
         //we attach the observers to the activity
-        if (Build.VERSION.SDK_INT<21) {
+        if (Build.VERSION.SDK_INT<ConstantValues.SAF_SDK) {
             fileViewerViewModel.getData().observe(this, fileViewerViewModelObserver);
         }
         queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
@@ -278,7 +278,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
     private void askForFilePermission(){
         //we ask for permission before continuing
-        if (Build.VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= ConstantValues.STORAGE_PERMISSION_SDK) {
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
                 //we create the fragments
@@ -378,8 +378,11 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     public void onItemSwiped(FileListEntry file, Boolean isLastSwipe) {
         //we delete it from the database
         mIsNotDeletion = isLastSwipe;
-
-        fileViewerViewModel.deleteFile(file);
+        if (fileViewerViewModel!=null) {
+            fileViewerViewModel.deleteFile(file);
+        }else{
+            queueViewerViewModel.deleteFile(file);
+        }
     }
 
     @Override
@@ -398,7 +401,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                 return true;
             case R.id.menu_add_files:
                 //check if file browser or SAF
-                if (Build.VERSION.SDK_INT<21){
+                if (Build.VERSION.SDK_INT<ConstantValues.SAF_SDK){
                     fragmentFileViewer=new FileViewer();
 
                     //we reload the  fragment

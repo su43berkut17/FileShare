@@ -2,6 +2,7 @@ package com.yumesoftworks.fileshare;
 
 import android.app.Application;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
@@ -40,9 +41,7 @@ public class CombinedDataViewModel extends AndroidViewModel {
 
     public void saveFiles(List<Uri> uriList){repository.saveFiles(uriList);}
 
-    public void deleteFile(FileListEntry list){
-        repository.deleteFile(list);
-    }
+    public void deleteFile(FileListEntry list){repository.deleteFile(list);}
 
     public void deleteFileCheckbox(FileListEntry list){
         repository.deleteFileCheckbox(list);
