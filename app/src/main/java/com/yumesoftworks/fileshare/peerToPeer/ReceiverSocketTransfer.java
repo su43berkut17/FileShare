@@ -1,12 +1,20 @@
 package com.yumesoftworks.fileshare.peerToPeer;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
+import android.icu.util.Output;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import androidx.documentfile.provider.DocumentFile;
+
+import com.yumesoftworks.fileshare.ConstantValues;
 import com.yumesoftworks.fileshare.TransferProgressActivity;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
@@ -17,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
@@ -56,6 +65,10 @@ public class ReceiverSocketTransfer {
     private String mCurrentFileSize;
     private String mCurrentFile;
     private String mTotalFiles;
+    private String mCurrentMime;
+
+    //service context if saf
+    private Context mContext;
 
     //interface
     private ReceiverSocketTransferInterface mReceiverInterface;
@@ -64,6 +77,18 @@ public class ReceiverSocketTransfer {
         mPort=port;
         //mReceiverInterface=(ReceiverSocketTransferInterface) context;
         mReceiverInterface=(ReceiverSocketTransferInterface) context;
+
+        //socketHandler=new Handler(Looper.getMainLooper());
+        socketThread=new Thread(new CommunicationThread());
+        socketThread.start();
+    }
+
+    public ReceiverSocketTransfer(Context servContext, TransferFileCoordinatorHelper context, int port){
+        mPort=port;
+        //mReceiverInterface=(ReceiverSocketTransferInterface) context;
+        mReceiverInterface=(ReceiverSocketTransferInterface) context;
+
+        mContext=servContext;
 
         //socketHandler=new Handler(Looper.getMainLooper());
         socketThread=new Thread(new CommunicationThread());
@@ -158,6 +183,7 @@ public class ReceiverSocketTransfer {
                                 mCurrentFile=currentNumbers[0];
                                 mTotalFiles=currentNumbers[1];
                                 mCurrentFileSize=currentNumbers[2];
+                                mCurrentMime=currentNumbers[3];
 
                                 Long currentFileSizeLong=Long.parseLong(mCurrentFileSize);
 
@@ -196,102 +222,198 @@ public class ReceiverSocketTransfer {
                         }
 
                         if (mCurrentAction==ACTION_RECEIVE_FILE){
-                            //we receive the bytes and then save it
-                            //Log.d(TAG,"Starting stream of the file");
-                            //know the final name of the file
-                            String realName=mTextInfoSendObject.getMessageContent();
-                            String finalName;
-                            String finalExtension;
-                            File tempFileName=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + realName);
-                            int fileNumber=0;
-                            boolean doesFileExist=false;
+                            String realName = mTextInfoSendObject.getMessageContent();
 
-                            do {
-                                //final name
-                                //tempFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + realName);
+                            if (Build.VERSION.SDK_INT< ConstantValues.SAF_SDK) {
+                                //we receive the bytes and then save it
+                                //Log.d(TAG,"Starting stream of the file");
+                                //know the final name of the file
 
-                                if (tempFileName.exists()) {
-                                    //we need to create a new file
-                                    fileNumber++;
+                                String finalName;
+                                String finalExtension;
+                                File tempFileName = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + realName);
+                                int fileNumber = 0;
+                                boolean doesFileExist = false;
 
-                                    //separate name and extension so it can be incremented
-                                    finalName=realName.substring(0,realName.lastIndexOf("."));
-                                    finalExtension=realName.substring(realName.lastIndexOf("."));
+                                do {
+                                    //final name
+                                    //tempFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + realName);
 
-                                    tempFileName=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + finalName+"("+fileNumber+")"+finalExtension);
-                                }else{
-                                    finalName=tempFileName.getName();
-                                    doesFileExist=true;
+                                    if (tempFileName.exists()) {
+                                        //we need to create a new file
+                                        fileNumber++;
+
+                                        //separate name and extension so it can be incremented
+                                        finalName = realName.substring(0, realName.lastIndexOf("."));
+                                        finalExtension = realName.substring(realName.lastIndexOf("."));
+
+                                        tempFileName = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + finalName + "(" + fileNumber + ")" + finalExtension);
+                                    } else {
+                                        finalName = tempFileName.getName();
+                                        doesFileExist = true;
+                                    }
+                                } while (!doesFileExist);
+                                //String finalName=new Date().toString()+"-"+realName;
+
+                                //we create the file
+                                byte[] bytes = new byte[16 * 1024];
+                                fileOutputStream = new FileOutputStream(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + finalName);
+
+                                BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
+
+                                //initialize progress message
+                                String additionalInfo = "";
+
+                                //progress message
+                                TextInfoSendObject objectUpdate = new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_DETAILS, realName, additionalInfo);
+
+                                int count;
+                                int byteCounter = 0;
+                                while ((count = fileInputStream.read(bytes)) > 0) {
+                                    bufferedOutputStream.write(bytes, 0, count);
+
+                                    //byteCounter+=bytes.length;
+                                    byteCounter = (int) fileOutputStream.getChannel().size();
+
+                                    //set the message
+                                    //send progress update to UI
+                                    additionalInfo = mCurrentFile + "," +
+                                            mTotalFiles + "," +
+                                            mCurrentFileSize + "," +
+                                            String.valueOf(byteCounter);
+
+                                    objectUpdate.setAdditionalInfo(additionalInfo);
+
+                                    mReceiverInterface.updateReceiveSendUI(objectUpdate);
                                 }
-                            }while(!doesFileExist);
-                            //String finalName=new Date().toString()+"-"+realName;
 
-                            //we create the file
-                            byte[] bytes = new byte[16 * 1024];
-                            fileOutputStream=new FileOutputStream(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/" +finalName);
-                            BufferedOutputStream bufferedOutputStream=new BufferedOutputStream(fileOutputStream);
+                                bufferedOutputStream.flush();
+                                bufferedOutputStream.close();
+                                fileOutputStream.flush();
+                                fileOutputStream.close();
 
-                            //Log.d(TAG,"Receiving bytes");
+                                Log.d(TAG, "File finished transfer");
 
-                            //initialize progress message
-                            String additionalInfo="";
+                                //store the sent file in the database
+                                File tempFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + finalName);
 
-                            //progress message
-                            TextInfoSendObject objectUpdate=new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_DETAILS,realName,additionalInfo);
+                                //get the mime type
+                                //we get the mime type
+                                Uri uri = Uri.fromFile(tempFile);
 
-                            int count;
-                            int byteCounter=0;
-                            while((count=fileInputStream.read(bytes))>0){
-                                bufferedOutputStream.write(bytes,0,count);
+                                String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+                                        .toString());
+                                String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                                        fileExtension.toLowerCase());
 
-                                //byteCounter+=bytes.length;
-                                byteCounter=(int)fileOutputStream.getChannel().size();
+                                FileListEntry tempEntry = new FileListEntry(tempFile.getAbsolutePath(),
+                                        tempFile.getName(),
+                                        0,
+                                        tempFile.getParent(),
+                                        0,
+                                        mimeType,
+                                        tempFile.isDirectory());
 
-                                //set the message
-                                //send progress update to UI
-                                additionalInfo= mCurrentFile + "," +
-                                        mTotalFiles+","+
-                                        mCurrentFileSize+","+
-                                        String.valueOf(byteCounter);
+                                //send it
+                                mReceiverInterface.updateReceiveReceivedFile(tempEntry);
 
-                                objectUpdate.setAdditionalInfo(additionalInfo);
+                                //we store the file
+                                mNextActionDetail = NEXT_ACTION_CONTINUE;
+                                mCurrentAction = ACTION_NEXT_ACTION;
+                            }else{
+                                //media store
+                                String relativeLocation ;
+                                //check the mime type
+                                if (mCurrentMime.contains("image")){
+                                    relativeLocation=Environment.DIRECTORY_PICTURES;
+                                }else if(mCurrentMime.contains("video")){
+                                    relativeLocation=Environment.DIRECTORY_MOVIES;
+                                }else if(mCurrentMime.contains("audio")){
+                                    relativeLocation=Environment.DIRECTORY_MUSIC;
+                                }else{
+                                    relativeLocation=Environment.DIRECTORY_DOWNLOADS;
+                                }
 
-                                mReceiverInterface.updateReceiveSendUI(objectUpdate);
+                                ContentValues  contentValues = new ContentValues();
+                                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, mCurrentFile);
+                                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, mCurrentMime);
+                                contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, relativeLocation);
+
+                                ContentResolver resolver = mContext.getContentResolver();
+
+                                try{
+                                    Uri contentUri;
+                                    if (mCurrentMime.contains("image")){
+                                        contentUri=MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                                    }else if(mCurrentMime.contains("video")){
+                                        contentUri=MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                                    }else if(mCurrentMime.contains("audio")){
+                                        contentUri=MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                                    }else{
+                                        contentUri=MediaStore.Downloads.EXTERNAL_CONTENT_URI;
+                                    }
+
+                                    Uri uri2=resolver.insert(contentUri,contentValues);
+                                    Uri forOpen=resolver.canonicalize(uri2);
+
+                                    //we create the file
+                                    byte[] bytes = new byte[16 * 1024];
+                                    OutputStream fileOutputStream2=resolver.openOutputStream(uri2);
+
+                                    BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream2);
+
+                                    //initialize progress message
+                                    String additionalInfo = "";
+
+                                    //progress message
+                                    TextInfoSendObject objectUpdate = new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_DETAILS, realName, additionalInfo);
+
+                                    int count;
+                                    //int byteCounter = 0;
+                                    Long byteCounter=0L;
+                                    while ((count = fileInputStream.read(bytes)) > 0) {
+                                        bufferedOutputStream.write(bytes, 0, count);
+                                        byteCounter+=bytes.length;
+
+                                        //set the message
+                                        //send progress update to UI
+                                        additionalInfo = mCurrentFile + "," +
+                                                mTotalFiles + "," +
+                                                mCurrentFileSize + "," +
+                                                String.valueOf(byteCounter);
+
+                                        objectUpdate.setAdditionalInfo(additionalInfo);
+
+                                        mReceiverInterface.updateReceiveSendUI(objectUpdate);
+                                    }
+
+                                    bufferedOutputStream.flush();
+                                    bufferedOutputStream.close();
+                                    fileOutputStream2.flush();
+                                    fileOutputStream2.close();
+
+                                    Log.d(TAG, "File finished transfer");
+
+                                    //store the sent file in the database
+                                    FileListEntry tempEntry = new FileListEntry(forOpen.toString(),
+                                            mCurrentFile,
+                                            0,
+                                            "",
+                                            0,
+                                            mCurrentMime,
+                                            false);
+
+                                    //send it
+                                    mReceiverInterface.updateReceiveReceivedFile(tempEntry);
+
+                                    //we store the file
+                                    mNextActionDetail = NEXT_ACTION_CONTINUE;
+                                    mCurrentAction = ACTION_NEXT_ACTION;
+
+                                }catch (Exception e){
+                                    Log.e(TAG,"Error while saving file");
+                                }
                             }
-
-                            bufferedOutputStream.flush();
-                            bufferedOutputStream.close();
-                            fileOutputStream.flush();
-                            fileOutputStream.close();
-
-                            Log.d(TAG,"File finished transfer");
-
-                            //store the sent file in the database
-                            File tempFile=new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+"/" +finalName);
-
-                            //get the mime type
-                            //we get the mime type
-                            Uri uri = Uri.fromFile(tempFile);
-
-                            String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
-                                    .toString());
-                            String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                                    fileExtension.toLowerCase());
-
-                            FileListEntry tempEntry=new FileListEntry(tempFile.getAbsolutePath(),
-                                    tempFile.getName(),
-                                    0,
-                                    tempFile.getParent(),
-                                    0,
-                                    mimeType,
-                                    tempFile.isDirectory());
-
-                            //send it
-                            mReceiverInterface.updateReceiveReceivedFile(tempEntry);
-
-                            //we store the file
-                            mNextActionDetail=NEXT_ACTION_CONTINUE;
-                            mCurrentAction=ACTION_NEXT_ACTION;
                         }
 
                     }while (mCurrentAction!=ACTION_NEXT_ACTION && mCurrentAction!=ACTION_EXCEPTION && !socketThread.isInterrupted() && !mSocket.isClosed() && !mServerSocket.isClosed());

@@ -134,7 +134,8 @@ public class SenderSocketTransfer{
                                 messageToSend = mFileEntry.getFileName();
                                 String additionalInfo = String.valueOf(mCurrentFile) + "," +
                                         String.valueOf(mTotalFiles)+","+
-                                        String.valueOf(new File(mFileEntry.getPath()).length());
+                                        String.valueOf(new File(mFileEntry.getPath()).length())+","+
+                                        mFileEntry.getMimeType();
 
                                 TextInfoSendObject sendObject = new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_DETAILS,
                                         messageToSend,

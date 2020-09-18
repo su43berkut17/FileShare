@@ -100,8 +100,13 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
             //we continue with the transfer
             if (typeOfTransfer == TransferProgressActivity.FILES_RECEIVING) {
                 Log.d(TAG,"Starting a transfer receiving");
-                //create a receiver socket object
-                mReceiverSocketTransfer=new ReceiverSocketTransfer(this, mPort);
+                if (Build.VERSION.SDK_INT< ConstantValues.SAF_SDK) {
+                    //create a receiver socket object
+                    mReceiverSocketTransfer = new ReceiverSocketTransfer(this, mPort);
+                }else{
+                    //sending service context since it is needed for content resolver
+                    mReceiverSocketTransfer = new ReceiverSocketTransfer(mContext,this, mPort);
+                }
             } else {
                 //create a sender socket object
                 Log.d(TAG,"Starting a transfer sending");
