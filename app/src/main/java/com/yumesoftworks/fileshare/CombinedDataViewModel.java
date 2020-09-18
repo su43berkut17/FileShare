@@ -39,7 +39,7 @@ public class CombinedDataViewModel extends AndroidViewModel {
         repository.saveFile(file);
     }
 
-    public void saveFiles(List<Uri> uriList){repository.saveFiles(uriList);}
+    public void saveFiles(List<FileListEntry> uriList){repository.saveFiles(uriList);}
 
     public void deleteFile(FileListEntry list){repository.deleteFile(list);}
 

@@ -153,7 +153,7 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
 
         // remove the item from recycler view
         rvAdapter.removeItem(position);
-        rvAdapter.notifyItemRemoved(position);
+        //rvAdapter.notifyItemRemoved(position);
 
         Boolean isLast;
 

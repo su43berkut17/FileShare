@@ -66,15 +66,9 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
             fileSize = tempFile.length();
         }else{
             Uri realURI=Uri.parse(fileListEntry.getPath());
-            //realURI=realURI.buildUpon().appendEncodedPath(fileListEntry.getPath()).authority(fileListEntry.getFileName()).build();
-            Log.d(TAG,"Uri: "+realURI.toString()+" authority:"+realURI.getAuthority());
-
-            //type
-            fileListEntry.setMimeType(mContext.getContentResolver().getType(realURI));
 
             try{
                 DocumentFile file=DocumentFile.fromSingleUri(mContext,realURI);
-                fileListEntry.setFileName(file.getName());
                 fileSize=file.length();
 
             }catch (Exception e){

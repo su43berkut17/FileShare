@@ -1,5 +1,6 @@
 package com.yumesoftworks.fileshare;
 
+import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -76,9 +77,6 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private String mPath;
     private static final String CURRENT_PATH_TAG="CurrentPathTag";
     private Context thisActivity;
-
-    //uri paths
-    private List<Uri> uriPaths;
 
     //for deletion in the queue viewer
     private boolean mIsNotDeletion=true;
@@ -263,16 +261,6 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                     mIsNotDeletion = true;
                 }
             }
-            /*
-            //check if the uri list has been updated
-            try {
-                if (uriPaths.size() > 0) {
-                    //send the uri path to database repo
-                    queueViewerViewModel.saveFiles(uriPaths);
-                }
-            }catch (Exception e){
-                //nothing happens
-            }*/
         }
     };
 
@@ -437,23 +425,38 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == FILE_PICK_CODE && resultCode == Activity.RESULT_OK) {
-            //check if 1 or multiple files
-            //get result after user action (selecting files) and transform it into array of Uris
-            uriPaths = new ArrayList<>();
-            if (data.getData() != null) { // only one uri was selected by user
-                //thisActivity.getContentResolver().takePersistableUriPermission(receivedFileList,Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                uriPaths.add(data.getData());
-            } else if (data.getClipData() != null) {
-                int selectedCount = data.getClipData().getItemCount();
+        if (Build.VERSION.SDK_INT>ConstantValues.SAF_SDK) {
+            if (requestCode == FILE_PICK_CODE && resultCode == Activity.RESULT_OK) {
+                //check if 1 or multiple files
+                //get result after user action (selecting files) and transform it into array of Uris
+                if (data.getData() != null) { // only one uri was selected by user
+                    //Get file name
+                    //get the file name
+                    DocumentFile file = DocumentFile.fromSingleUri(thisActivity, data.getData());
+                    String name = file.getName();
+                    String mime = file.getType();
 
-                for (int i = 0; i < selectedCount; i++) {
-                    //thisActivity.getContentResolver().takePersistableUriPermission(data.getClipData().getItemAt(i).getUri(),Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    uriPaths.add(data.getClipData().getItemAt(i).getUri());
+                    FileListEntry fileEntry = new FileListEntry(data.getData().toString(), name, 0, "", 0, mime, false);
+                    queueViewerViewModel.saveFile(fileEntry);
+                    thisActivity.getContentResolver().takePersistableUriPermission(data.getData(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                } else if (data.getClipData() != null) {
+                    int selectedCount = data.getClipData().getItemCount();
+                    List<FileListEntry> listEntry = new ArrayList<>();
+
+                    for (int i = 0; i < selectedCount; i++) {
+                        DocumentFile file = DocumentFile.fromSingleUri(thisActivity, data.getClipData().getItemAt(i).getUri());
+                        String name = file.getName();
+                        String mime = file.getType();
+
+                        FileListEntry fileEntry = new FileListEntry(data.getClipData().getItemAt(i).getUri().toString(), name, 0, "", 0, mime, false);
+                        listEntry.add(fileEntry);
+                        thisActivity.getContentResolver().takePersistableUriPermission(data.getClipData().getItemAt(i).getUri(),Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    }
+
+                    queueViewerViewModel.saveFiles(listEntry);
                 }
             }
-
-            queueViewerViewModel.saveFiles(uriPaths);
         }
     }
 
