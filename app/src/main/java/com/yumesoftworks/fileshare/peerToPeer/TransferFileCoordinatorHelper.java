@@ -1,8 +1,10 @@
 package com.yumesoftworks.fileshare.peerToPeer;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
+import com.yumesoftworks.fileshare.ConstantValues;
 import com.yumesoftworks.fileshare.TransferProgressActivity;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
@@ -103,7 +105,12 @@ public class TransferFileCoordinatorHelper implements SenderSocketTransfer.Sende
             } else {
                 //create a sender socket object
                 Log.d(TAG,"Starting a transfer sending");
-                mSenderSocketTransfer=new SenderSocketTransfer(this, mIpAddress, mPort, mFileList.get(mCurrentFile),mCurrentFile,mTotalFiles);
+                if (Build.VERSION.SDK_INT< ConstantValues.SAF_SDK) {
+                    mSenderSocketTransfer = new SenderSocketTransfer(this, mIpAddress, mPort, mFileList.get(mCurrentFile), mCurrentFile, mTotalFiles);
+                }else{
+                    //sending service context since it is needed for content resolver
+                    mSenderSocketTransfer = new SenderSocketTransfer(mContext,this, mIpAddress, mPort, mFileList.get(mCurrentFile), mCurrentFile, mTotalFiles);
+                }
             }
         }else{
             //we finish everything

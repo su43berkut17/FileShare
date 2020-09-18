@@ -1,7 +1,11 @@
 package com.yumesoftworks.fileshare.peerToPeer;
 
+import android.content.Context;
+import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 
+import com.yumesoftworks.fileshare.ConstantValues;
 import com.yumesoftworks.fileshare.TransferProgressActivity;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.TextInfoSendObject;
@@ -52,6 +56,9 @@ public class SenderSocketTransfer{
     private int mCurrentFile;
     private int mTotalFiles;
 
+    //service context if saf
+    private Context mContext;
+
     //interface
     private SenderSocketTransferInterface mSenderInterface;
 
@@ -63,6 +70,21 @@ public class SenderSocketTransfer{
 
         mCurrentFile=recCurrentFile;
         mTotalFiles=recTotalFiles;
+
+        //socketHandler=new Handler(Looper.getMainLooper());
+        socketThread=new Thread(new CommunicationThread());
+        socketThread.start();
+    }
+
+    public SenderSocketTransfer(Context servContext, TransferFileCoordinatorHelper context, String recIpAddress, int recPort, FileListEntry recFile, int recCurrentFile, int recTotalFiles){
+        mIpAddress=recIpAddress;
+        mPort=recPort;
+        mSenderInterface=(SenderSocketTransferInterface)context;
+        mFileEntry =recFile;
+
+        mCurrentFile=recCurrentFile;
+        mTotalFiles=recTotalFiles;
+        mContext=servContext;
 
         //socketHandler=new Handler(Looper.getMainLooper());
         socketThread=new Thread(new CommunicationThread());
@@ -102,6 +124,7 @@ public class SenderSocketTransfer{
                     InputStream fileInputStream;
                     OutputStream fileOutputStream = mSocket.getOutputStream();
 
+
                     do {
                         //we send the 1st file details
                         if (mCurrentAction == ACTION_SEND_DETAIL) {
@@ -136,12 +159,16 @@ public class SenderSocketTransfer{
                         if (mCurrentAction == ACTION_SEND_FILE) {
                             try {
                                 //Log.d(TAG, "we start sending the file");
-                                File file = new File(mFileEntry.getPath());
-
                                 byte[] bytes = new byte[16 * 1024];
-                                fileInputStream = new FileInputStream(file);
-                                //Log.d(TAG, "File: getting the file input stream " + fileInputStream.toString());
-                                //fileOutputStream = mSocket.getOutputStream();
+
+                                //check if it is saf or file access
+                                if (Build.VERSION.SDK_INT<ConstantValues.SAF_SDK){
+                                    File file = new File(mFileEntry.getPath());
+                                    fileInputStream = new FileInputStream(file);
+                                }else{
+                                    Uri realURI=Uri.parse(mFileEntry.getPath());
+                                    fileInputStream=mContext.getContentResolver().openInputStream(realURI);
+                                }
 
                                 //we send the file name
                                 messageToSend = mFileEntry.getFileName();
