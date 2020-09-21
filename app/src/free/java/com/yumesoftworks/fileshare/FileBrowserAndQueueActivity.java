@@ -425,7 +425,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (Build.VERSION.SDK_INT>ConstantValues.SAF_SDK) {
+        if (Build.VERSION.SDK_INT>=ConstantValues.SAF_SDK) {
             if (requestCode == FILE_PICK_CODE && resultCode == Activity.RESULT_OK) {
                 //check if 1 or multiple files
                 //get result after user action (selecting files) and transform it into array of Uris

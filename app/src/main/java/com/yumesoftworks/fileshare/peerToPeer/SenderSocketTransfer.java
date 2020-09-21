@@ -5,6 +5,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.documentfile.provider.DocumentFile;
+
 import com.yumesoftworks.fileshare.ConstantValues;
 import com.yumesoftworks.fileshare.TransferProgressActivity;
 import com.yumesoftworks.fileshare.data.FileListEntry;
@@ -130,11 +132,21 @@ public class SenderSocketTransfer{
                         if (mCurrentAction == ACTION_SEND_DETAIL) {
                             //we send the details of the file
                             try {
+                                //get the size of the file
+                                Long fileSize=0L;
+                                if (Build.VERSION.SDK_INT<ConstantValues.SAF_SDK){
+                                    fileSize=new File(mFileEntry.getPath()).length();
+                                }else{
+                                    Uri realURI=Uri.parse(mFileEntry.getPath());
+                                    DocumentFile file=DocumentFile.fromSingleUri(mContext,realURI);
+                                    fileSize=file.length();
+                                }
+
                                 //we send the file name
                                 messageToSend = mFileEntry.getFileName();
                                 String additionalInfo = String.valueOf(mCurrentFile) + "," +
                                         String.valueOf(mTotalFiles)+","+
-                                        String.valueOf(new File(mFileEntry.getPath()).length())+","+
+                                        String.valueOf(fileSize)+","+
                                         mFileEntry.getMimeType();
 
                                 TextInfoSendObject sendObject = new TextInfoSendObject(TransferProgressActivity.TYPE_FILE_DETAILS,
