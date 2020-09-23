@@ -325,19 +325,32 @@ public class ReceiverSocketTransfer {
                                 String relativeLocation ;
                                 //check the mime type
                                 if (mCurrentMime.contains("image")){
-                                    relativeLocation=Environment.DIRECTORY_PICTURES;
+                                    relativeLocation=Environment.DIRECTORY_PICTURES+File.pathSeparator+"FileShare";
                                 }else if(mCurrentMime.contains("video")){
-                                    relativeLocation=Environment.DIRECTORY_MOVIES;
+                                    relativeLocation=Environment.DIRECTORY_MOVIES+File.pathSeparator+"FileShare";;
                                 }else if(mCurrentMime.contains("audio")){
-                                    relativeLocation=Environment.DIRECTORY_MUSIC;
+                                    relativeLocation=Environment.DIRECTORY_MUSIC+File.pathSeparator+"FileShare";;
                                 }else{
-                                    relativeLocation=Environment.DIRECTORY_DOWNLOADS;
+                                    relativeLocation=Environment.DIRECTORY_DOWNLOADS+File.pathSeparator+"FileShare";;
                                 }
 
+                                //content values depending on type
                                 ContentValues  contentValues = new ContentValues();
-                                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, mCurrentFile);
-                                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, mCurrentMime);
-                                contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, relativeLocation);
+                                if (mCurrentMime.contains("image")||mCurrentMime.contains("video")||mCurrentMime.contains("audio")){
+                                    contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, mCurrentFile);
+                                    contentValues.put(MediaStore.MediaColumns.TITLE,mCurrentFile);
+                                    contentValues.put(MediaStore.MediaColumns.DATE_MODIFIED,System.currentTimeMillis()/1000);
+                                    contentValues.put(MediaStore.MediaColumns.MIME_TYPE, mCurrentMime);
+                                    contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, relativeLocation);
+                                }else{
+                                    contentValues.put(MediaStore.DownloadColumns.DISPLAY_NAME, mCurrentFile);
+                                    contentValues.put(MediaStore.DownloadColumns.TITLE,mCurrentFile);
+                                    contentValues.put(MediaStore.DownloadColumns.DATE_MODIFIED,System.currentTimeMillis()/1000);
+                                    contentValues.put(MediaStore.DownloadColumns.MIME_TYPE, mCurrentMime);
+                                    contentValues.put(MediaStore.DownloadColumns.RELATIVE_PATH, relativeLocation);
+                                }
+
+                                contentValues.put(MediaStore.Downloads.IS_PENDING,1);
 
                                 ContentResolver resolver = mContext.getContentResolver();
 
@@ -353,14 +366,13 @@ public class ReceiverSocketTransfer {
                                         contentUri=MediaStore.Downloads.EXTERNAL_CONTENT_URI;
                                     }
 
-                                    Uri uri2=resolver.insert(contentUri,contentValues);
-                                    Uri forOpen=resolver.canonicalize(uri2);
+                                    Uri savedFileUri=resolver.insert(contentUri,contentValues);
 
                                     //we create the file
                                     byte[] bytes = new byte[16 * 1024];
-                                    OutputStream fileOutputStream2=resolver.openOutputStream(uri2);
+                                    OutputStream fileOutputStreamSAF=resolver.openOutputStream(savedFileUri);
 
-                                    BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream2);
+                                    BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStreamSAF);
 
                                     //initialize progress message
                                     String additionalInfo = "";
@@ -389,13 +401,17 @@ public class ReceiverSocketTransfer {
 
                                     bufferedOutputStream.flush();
                                     bufferedOutputStream.close();
-                                    fileOutputStream2.flush();
-                                    fileOutputStream2.close();
+                                    fileOutputStreamSAF.flush();
+                                    fileOutputStreamSAF.close();
+
+                                    contentValues.clear();
+                                    contentValues.put(MediaStore.Downloads.IS_PENDING,0);
+                                    resolver.update(savedFileUri,contentValues,null,null);
 
                                     Log.d(TAG, "File finished transfer");
 
                                     //store the sent file in the database
-                                    FileListEntry tempEntry = new FileListEntry(forOpen.toString(),
+                                    FileListEntry tempEntry = new FileListEntry(savedFileUri.toString(),
                                             mCurrentFile,
                                             0,
                                             "",

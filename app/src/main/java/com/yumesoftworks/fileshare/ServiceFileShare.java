@@ -521,101 +521,109 @@ public class ServiceFileShare extends Service implements
 
     //general methods
     private void updateGeneralUI(TextInfoSendObject textInfoSendObject){
-        //we process the data received
-        //name of file, current number and total number
-        String fileName=textInfoSendObject.getMessageContent();
-        String stringNumbers=textInfoSendObject.getAdditionalInfo();
-        String[] currentNumbers = stringNumbers.split(",");
-        String finalNotificationText=fileName+" "+currentNumbers[0]+getString(R.string.atp_tv__number_connector)+" "+currentNumbers[1];
+        try {
+            //we process the data received
+            //name of file, current number and total number
+            String fileName = textInfoSendObject.getMessageContent();
+            String stringNumbers = textInfoSendObject.getAdditionalInfo();
+            String[] currentNumbers = stringNumbers.split(",");
+            String finalNotificationText = fileName + " " + currentNumbers[0] + getString(R.string.atp_tv__number_connector) + " " + currentNumbers[1];
 
-        //we change the member variables of the progress
-        int currentFile = Integer.parseInt(currentNumbers[0]);
-        int totalFiles = Integer.parseInt(currentNumbers[1]);
-        int percentage=0;
-        if (totalFiles>0) {
-            percentage = currentFile * 100 / totalFiles;
-        }
-
-        textInfoSendObject.setAdditionalInfo(currentFile+","+totalFiles+",0");
-
-        //if this is the percentage of bytes
-        if (currentNumbers.length > 3) {
-            //percentage based on the bytes sent
-            long totalBytes = Long.parseLong(currentNumbers[2]);
-            long currentBytes = Long.parseLong(currentNumbers[3]);
-            long percentageBytes = currentBytes * 100 / totalBytes;
-            int percentageBytesInt = (int) percentageBytes;
-
-            if (percentageBytesInt >= 100) {
-                percentageBytesInt = 100;
+            //we change the member variables of the progress
+            int currentFile = Integer.parseInt(currentNumbers[0]);
+            int totalFiles = Integer.parseInt(currentNumbers[1]);
+            int percentage = 0;
+            if (totalFiles > 0) {
+                percentage = currentFile * 100 / totalFiles;
             }
 
-            //percentage based on the total
-            int singlePercentage = 100 / totalFiles;
+            textInfoSendObject.setAdditionalInfo(currentFile + "," + totalFiles + ",0");
 
-            //final percentage
-            percentage = percentage + (percentageBytesInt * singlePercentage / 100);
+            //if this is the percentage of bytes
+            if (currentNumbers.length > 3) {
+                //percentage based on the bytes sent
+                long totalBytes = Long.parseLong(currentNumbers[2]);
+                long currentBytes = Long.parseLong(currentNumbers[3]);
+                long percentageBytes = currentBytes * 100 / totalBytes;
+                int percentageBytesInt = (int) percentageBytes;
 
-            textInfoSendObject.setAdditionalInfo(currentFile+","+totalFiles+","+percentage);
-        }else{
-            //check if the total files is not 0
-            if (totalFiles==0){
-                textInfoSendObject.setAdditionalInfo(currentFile+","+totalFiles+","+0);
-            }else{
-                textInfoSendObject.setAdditionalInfo(currentFile+","+totalFiles+","+currentFile*100/totalFiles);
+                if (percentageBytesInt >= 100) {
+                    percentageBytesInt = 100;
+                }
+
+                //percentage based on the total
+                int singlePercentage = 100 / totalFiles;
+
+                //final percentage
+                percentage = percentage + (percentageBytesInt * singlePercentage / 100);
+
+                textInfoSendObject.setAdditionalInfo(currentFile + "," + totalFiles + "," + percentage);
+            } else {
+                //check if the total files is not 0
+                if (totalFiles == 0) {
+                    textInfoSendObject.setAdditionalInfo(currentFile + "," + totalFiles + "," + 0);
+                } else {
+                    textInfoSendObject.setAdditionalInfo(currentFile + "," + totalFiles + "," + currentFile * 100 / totalFiles);
+                }
             }
-        }
 
-        //we change the member variables of the progress
-        mTotalFiles=Integer.parseInt(currentNumbers[1]);
-        mCurrentFile=Integer.parseInt(currentNumbers[0]);
-        mCurrentFileName = fileName;
-
-        //bundle
-        Bundle bundle=new Bundle();
-        bundle.putSerializable(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI_DATA,textInfoSendObject);
-
-        //we update the notification
-        manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name_real)
-                ,finalNotificationText
-                ,true)
-                .setOnlyAlertOnce(true)
-                .setProgress(100,percentage,false)
-                .build());
-
-        //we update the UI
-        Intent intent=new Intent(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI);
-        intent.putExtras(bundle);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-
-        //update the widget
-        //we will set a counter to prevent calling an update on the widget several times
-        if (mCounterTimesWidget>30 || textInfoSendObject.getMessageType()==com.yumesoftworks.fileshare.TransferProgressActivity.TYPE_END) {
-            mCounterTimesWidget=0;
-            try {
-                updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_TRANSFER, fileName, mTotalFiles, mCurrentFile,percentage);
-            }catch (Exception e){
-                Log.e(TAG,"Couldnt update widget "+e.getMessage());
-            }
-        }else{
-            mCounterTimesWidget++;
-        }
-    }
-
-    //activity asked for information
-    public void updateUIOnly(){
-        //only update if service is doing a transfer
-        if (isTransferActive) {
-            TextInfoSendObject textInfoSendObject = new TextInfoSendObject(0, mCurrentFileName,  mCurrentFile + "," + mTotalFiles);
+            //we change the member variables of the progress
+            mTotalFiles = Integer.parseInt(currentNumbers[1]);
+            mCurrentFile = Integer.parseInt(currentNumbers[0]);
+            mCurrentFileName = fileName;
 
             //bundle
             Bundle bundle = new Bundle();
             bundle.putSerializable(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI_DATA, textInfoSendObject);
 
+            //we update the notification
+            manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name_real)
+                    , finalNotificationText
+                    , true)
+                    .setOnlyAlertOnce(true)
+                    .setProgress(100, percentage, false)
+                    .build());
+
             //we update the UI
             Intent intent = new Intent(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI);
             intent.putExtras(bundle);
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
+            //update the widget
+            //we will set a counter to prevent calling an update on the widget several times
+            if (mCounterTimesWidget > 30 || textInfoSendObject.getMessageType() == com.yumesoftworks.fileshare.TransferProgressActivity.TYPE_END) {
+                mCounterTimesWidget = 0;
+                try {
+                    updateWidgetService.startActionUpdateWidget(this, TransferProgressWidget.STATE_TRANSFER, fileName, mTotalFiles, mCurrentFile, percentage);
+                } catch (Exception e) {
+                    Log.e(TAG, "Couldnt update widget " + e.getMessage());
+                }
+            } else {
+                mCounterTimesWidget++;
+            }
+        }catch (Exception e){
+            Log.d(TAG,"Received wrong info in ui update "+e.getMessage());
+        }
+    }
+
+    //activity asked for information
+    public void updateUIOnly(){
+        try {
+            //only update if service is doing a transfer
+            if (isTransferActive) {
+                TextInfoSendObject textInfoSendObject = new TextInfoSendObject(0, mCurrentFileName, mCurrentFile + "," + mTotalFiles);
+
+                //bundle
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI_DATA, textInfoSendObject);
+
+                //we update the UI
+                Intent intent = new Intent(com.yumesoftworks.fileshare.TransferProgressActivity.ACTION_UPDATE_UI);
+                intent.putExtras(bundle);
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+            }
+        }catch (Exception e){
+            //we dont update anything
         }
     }
 
