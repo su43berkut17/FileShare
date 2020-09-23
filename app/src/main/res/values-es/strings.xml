@@ -26,9 +26,10 @@
     <string name="fb_incompatible_file">Aplicación para abrir archivo no disponible</string>
     <string name="fq_tv_title_queue">Archivos a enviar:</string>
     <string name="fq_iv_delete_description">Remover de lista</string>
-    <string name="fq_iv_empty_queue">La lista está  vacía</string>
-    <string name="fq_tv_empty_queue">La lista está  vacía</string>
+    <string name="fq_iv_empty_queue">La lista está vacía</string>
+    <string name="fq_tv_empty_queue">La lista está vacía</string>
     <string name="fb_button_send_files">Enviar Archivos</string>
+    <string name="fq_pick_files">Elegir Archivos</string>
     <string name="pu_avatar_description">Icono de usuario</string>
     <string name="pu_username_description">Usuario</string>
     <string name="pu_instructions">Seleccione recibir en el dispositivo de destino</string>

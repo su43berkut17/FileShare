@@ -179,7 +179,6 @@ public class ReceiverSocketTransfer {
                                 String[] currentNumbers = stringNumbers.split(",");
 
                                 //Log.d(TAG,"receiving details "+stringNumbers);
-
                                 mCurrentFile=currentNumbers[0];
                                 mTotalFiles=currentNumbers[1];
                                 mCurrentFileSize=currentNumbers[2];
@@ -337,36 +336,35 @@ public class ReceiverSocketTransfer {
                                 //content values depending on type
                                 ContentValues  contentValues = new ContentValues();
                                 if (mCurrentMime.contains("image")||mCurrentMime.contains("video")||mCurrentMime.contains("audio")){
-                                    contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, mCurrentFile);
-                                    contentValues.put(MediaStore.MediaColumns.TITLE,mCurrentFile);
+                                    contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, realName);
+                                    contentValues.put(MediaStore.MediaColumns.TITLE,realName);
                                     contentValues.put(MediaStore.MediaColumns.DATE_MODIFIED,System.currentTimeMillis()/1000);
                                     contentValues.put(MediaStore.MediaColumns.MIME_TYPE, mCurrentMime);
                                     contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, relativeLocation);
                                 }else{
-                                    contentValues.put(MediaStore.DownloadColumns.DISPLAY_NAME, mCurrentFile);
-                                    contentValues.put(MediaStore.DownloadColumns.TITLE,mCurrentFile);
+                                    contentValues.put(MediaStore.DownloadColumns.DISPLAY_NAME, realName);
+                                    contentValues.put(MediaStore.DownloadColumns.TITLE,realName);
                                     contentValues.put(MediaStore.DownloadColumns.DATE_MODIFIED,System.currentTimeMillis()/1000);
                                     contentValues.put(MediaStore.DownloadColumns.MIME_TYPE, mCurrentMime);
                                     contentValues.put(MediaStore.DownloadColumns.RELATIVE_PATH, relativeLocation);
                                 }
 
-                                contentValues.put(MediaStore.Downloads.IS_PENDING,1);
-
+                                contentValues.put(MediaStore.MediaColumns.IS_PENDING,1);
                                 ContentResolver resolver = mContext.getContentResolver();
 
                                 try{
-                                    Uri contentUri;
+                                    Uri destinationCollectionUri;
                                     if (mCurrentMime.contains("image")){
-                                        contentUri=MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                                        destinationCollectionUri=MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
                                     }else if(mCurrentMime.contains("video")){
-                                        contentUri=MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                                        destinationCollectionUri=MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
                                     }else if(mCurrentMime.contains("audio")){
-                                        contentUri=MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                                        destinationCollectionUri=MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
                                     }else{
-                                        contentUri=MediaStore.Downloads.EXTERNAL_CONTENT_URI;
+                                        destinationCollectionUri=MediaStore.Downloads.EXTERNAL_CONTENT_URI;
                                     }
 
-                                    Uri savedFileUri=resolver.insert(contentUri,contentValues);
+                                    Uri savedFileUri=resolver.insert(destinationCollectionUri,contentValues);
 
                                     //we create the file
                                     byte[] bytes = new byte[16 * 1024];
@@ -405,7 +403,9 @@ public class ReceiverSocketTransfer {
                                     fileOutputStreamSAF.close();
 
                                     contentValues.clear();
-                                    contentValues.put(MediaStore.Downloads.IS_PENDING,0);
+
+                                    contentValues.put(MediaStore.MediaColumns.IS_PENDING,0);
+
                                     resolver.update(savedFileUri,contentValues,null,null);
 
                                     Log.d(TAG, "File finished transfer");

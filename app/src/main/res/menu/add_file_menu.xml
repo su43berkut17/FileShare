@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_add_files"
-        android:icon="@android:drawable/ic_input_add"
-        android:iconTint="@color/appBarText"
+        android:icon="@drawable/ic_action_add_files"
         app:showAsAction="always"
-        android:title="TODO" />
+        android:title="@string/fq_pick_files"/>
 </menu>
