@@ -439,7 +439,6 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                     FileListEntry fileEntry = new FileListEntry(data.getData().toString(), name, 0, "", 0, mime, false);
                     queueViewerViewModel.saveFile(fileEntry);
                     thisActivity.getContentResolver().takePersistableUriPermission(data.getData(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
                 } else if (data.getClipData() != null) {
                     int selectedCount = data.getClipData().getItemCount();
                     List<FileListEntry> listEntry = new ArrayList<>();
