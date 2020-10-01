@@ -25,8 +25,8 @@ public class UserInfoRepository {
         data=userInfoDao.loadUserInfo();
     }
 
-    //reading transfer status
-    public LiveData<List<UserInfoEntry>> getTransferStatus(){
+    //reading user data
+    public LiveData<List<UserInfoEntry>> getUserData(){
         return data;
     }
 
@@ -43,10 +43,9 @@ public class UserInfoRepository {
                 Log.d(TAG,"The transfer file status activation is: "+transferValue);
             }
         });
-
-        //new updateDatabaseAsyncTask(database).execute(transferValue);
     }
 
+    //switch service type
     public void switchServiceType(final int serviceTypeValue){
         Executor myExecutor=Executors.newSingleThreadExecutor();
         myExecutor.execute(new Runnable() {
@@ -60,6 +59,7 @@ public class UserInfoRepository {
         });
     }
 
+    //set transfer status as inactive
     public void setAsInactive(){
         Executor myExecutor=Executors.newSingleThreadExecutor();
         myExecutor.execute(new Runnable() {
@@ -74,23 +74,19 @@ public class UserInfoRepository {
         });
     }
 
-    /*private static class updateDatabaseAsyncTask extends AsyncTask<Integer,Void,Void> {
-        private AppDatabase database;
-
-        updateDatabaseAsyncTask(AppDatabase recDatabase){
-            database=recDatabase;
-        }
-
-        @Override
-        protected Void doInBackground(final Integer... params) {
-            UserInfoEntry userInfoEntry=database.userInfoDao().loadUserWidget().get(0);
-            userInfoEntry.setIsTransferInProgress(params[0]);
-            database.userInfoDao().updateTask(userInfoEntry);
-            Log.d(TAG,"The transfer file status activation is: "+params[0]);
-
-            return null;
-        }
-    }*/
+    //set android 11 warning as viewed
+    public void switchandroid11SafWarning(boolean safWarningValue){
+        Executor myExecutor=Executors.newSingleThreadExecutor();
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                UserInfoEntry userInfoEntry=database.userInfoDao().loadUserWidget().get(0);
+                userInfoEntry.setAndroid11SafWarning(safWarningValue);
+                database.userInfoDao().updateTask(userInfoEntry);
+                Log.d(TAG,"The SAF dialog viewed value is: "+safWarningValue);
+            }
+        });
+    }
 
     //adding transfer numbers
     public void addSuccessfulTransferCounter(){
@@ -106,27 +102,29 @@ public class UserInfoRepository {
                 Log.d(TAG,"We add a number more to the total transfers: "+currentCount);
             }
         });
-        //new updateDatabaseCounterAsyncTask(database).execute();
     }
 
-    //save transfer
-    /*private static class updateDatabaseCounterAsyncTask extends AsyncTask<Void,Void,Void> {
-        private AppDatabase database;
+    //save data
+    public void saveData(final UserInfoEntry userInfoEntry){
+        Executor myExecutor = Executors.newSingleThreadExecutor();
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                database.userInfoDao().emptyTable();
+                database.userInfoDao().insertTask(userInfoEntry);
+            }
+        });
+    }
 
-        updateDatabaseCounterAsyncTask(AppDatabase recDatabase){
-            database=recDatabase;
-        }
-
-        @Override
-        protected Void doInBackground(final Void... params) {
-            UserInfoEntry userInfoEntry=database.userInfoDao().loadUserWidget().get(0);
-            int currentCount=userInfoEntry.getNumberFilesTransferred();
-            currentCount++;
-            userInfoEntry.setNumberFilesTransferred(currentCount);
-            database.userInfoDao().updateTask(userInfoEntry);
-            Log.d(TAG,"We add a number more to the total transfers: "+currentCount);
-
-            return null;
-        }
-    }*/
+    //reset flags
+    public void resetFlags(final UserInfoEntry userInfoEntry){
+        Executor myExecutor = Executors.newSingleThreadExecutor();
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                database.fileListDao().clearFileList();
+                database.userInfoDao().updateTask(userInfoEntry);
+            }
+        });
+    }
 }

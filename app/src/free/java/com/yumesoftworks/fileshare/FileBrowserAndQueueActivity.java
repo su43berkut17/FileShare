@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -34,9 +35,12 @@ import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.StorageListEntry;
+import com.yumesoftworks.fileshare.data.UserInfoEntry;
+import com.yumesoftworks.fileshare.data.UserInfoRepository;
 import com.yumesoftworks.fileshare.utils.ChangeShownPath;
 import com.yumesoftworks.fileshare.utils.MergeFileListAndDatabase;
 import com.yumesoftworks.fileshare.utils.UserConsent;
@@ -74,6 +78,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     //view model
     private CombinedDataViewModel fileViewerViewModel;
     private CombinedDataViewModel queueViewerViewModel;
+    private WelcomeScreenViewModel userViewmodel;
+    private boolean mAndroid11SafWarning;
     private String mPath;
     private static final String CURRENT_PATH_TAG="CurrentPathTag";
     private Context thisActivity;
@@ -119,6 +125,17 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
         //we check for the permissions
         askForFilePermission();
+
+        //get user data  viewmodel for SAF dialog
+        userViewmodel=ViewModelProviders.of(this).get(WelcomeScreenViewModel.class);
+        userViewmodel.getUserInfo().observe(this,fileInfoObserver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        removeObservers();
     }
 
     @Override
@@ -220,6 +237,14 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
         changeActionBarName("FileShare - Send Files");
     }
+
+    //observer for the user data
+    final Observer<List<UserInfoEntry>> fileInfoObserver=new Observer<List<UserInfoEntry>>() {
+        @Override
+        public void onChanged(List<UserInfoEntry> userInfoEntries) {
+            mAndroid11SafWarning=userInfoEntries.get(0).getAndroid11SafWarning();
+        }
+    };
 
     //observer for the file browser
     final Observer<List<FileListEntry>> fileViewerViewModelObserver=new Observer<List<FileListEntry>>() {
@@ -380,6 +405,21 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
+    //remove observers
+    private void removeObservers(){
+        Log.d(TAG,"removing the observers");
+        //removing observers
+        if (userViewmodel!=null && userViewmodel.getUserInfo().hasObservers()){
+            userViewmodel.getUserInfo().removeObservers(this);
+        }
+        if (queueViewerViewModel!=null && queueViewerViewModel.getData().hasObservers()){
+            queueViewerViewModel.getData().removeObservers(this);
+        }
+        if (fileViewerViewModel!=null && fileViewerViewModel.getData().hasObservers()){
+            fileViewerViewModel.getData().removeObservers(this);
+        }
+    }
+
     //override the back button normal behaviour
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -407,18 +447,51 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                     fileFragmentRequestUpdate();
                 }else{
                     //use SAF
-                    Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                    i.setType("*/*");
-                    i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                    i.addCategory(Intent.CATEGORY_OPENABLE);
-                    i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    startActivityForResult(i, FILE_PICK_CODE);
+                    checkWarningScopedStorageLimitation();
                 }
 
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    //1st time dialog for android 11 and above
+    private void checkWarningScopedStorageLimitation() {
+        if (!mAndroid11SafWarning){
+            //check if dialog has been shown
+            generateSAFLimitationsDialog();
+        }else{
+            openSAFPicker();
+        }
+    }
+
+    private void generateSAFLimitationsDialog(){
+        MaterialAlertDialogBuilder warningDialog = new MaterialAlertDialogBuilder(thisActivity,R.style.MyDialog);
+        warningDialog.setMessage(R.string.fb_dialog_android_11_saf_limitations)
+                .setTitle(R.string.gen_warning_dialog_title)
+                .setNeutralButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                openSAFPicker();
+
+                                //change value to false
+                                userViewmodel.switchandroid11SafWarning(true);
+                            }
+                        });
+
+        warningDialog.create();
+        warningDialog.show();
+    }
+
+    private void openSAFPicker(){
+        Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        i.setType("*/*");
+        i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivityForResult(i, FILE_PICK_CODE);
     }
 
     @Override

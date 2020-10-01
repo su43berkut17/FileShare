@@ -3,8 +3,11 @@
 
     <!-- General purpose -->
     <string name="gen_button_ok">OK</string>
+    <string name="gen_button_yes">YES</string>
+    <string name="gen_button_no">NO</string>
     <string name="gen_button_cancel">Cancel</string>
     <string name="gen_button_finish">Finish</string>
+    <string name="gen_warning_dialog_title">Warning</string>
 
     <!-- Activity Welcome Screen -->
     <string name="aws_pick_avatar">Pick an avatar:</string>
@@ -41,6 +44,7 @@
     <string name="fb_path_description">The filepath</string>
     <string name="fb_path" translatable="false">/</string>
     <string name="fb_incompatible_file">No available apps to open this file</string>
+    <string name="fb_dialog_android_11_saf_limitations">Android 11 limits the number of files you can add to the queue. If you add over 128 files to the queue, only the 1st 128 will be transferred.</string>
 
     <!-- Activity file queue -->
     <string name="fq_tv_title_queue">Files to be sent:</string>
@@ -79,6 +83,7 @@
     <string name="ats_tv_received_files">Files received:</string>
     <string name="ats_tv_error">Files:</string>
     <string name="ats_try_again_dialog">Cannot connect to device. Try again?</string>
+    <string name="ats_cancel_warning">Are you sure you want to cancel?</string>
 
     <!-- Service -->
     <string name="service_notification_text_initialize">Starting transfer...</string>

@@ -5,64 +5,42 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import android.util.Log;
 
-import com.yumesoftworks.fileshare.data.AppDatabase;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
+import com.yumesoftworks.fileshare.data.UserInfoRepository;
 
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 public class WelcomeScreenViewModel extends AndroidViewModel {
     private static final String TAG=WelcomeScreenViewModel.class.getSimpleName();
 
     private LiveData<List<UserInfoEntry>> userInfo;
-    private AppDatabase database;
+    private UserInfoRepository repository;
 
     public WelcomeScreenViewModel(Application application){
         super(application);
-        database=AppDatabase.getInstance(this.getApplication());
+        repository=new UserInfoRepository(this.getApplication());
+        userInfo=repository.getUserData();
         Log.d(TAG,"retrieving tasks from view model");
-        userInfo=database.userInfoDao().loadUserInfo();
     }
 
     public LiveData<List<UserInfoEntry>> getUserInfo(){
+
+        if (userInfo==null){
+            userInfo=repository.getUserData();
+        }
+
         return userInfo;
     }
 
     public void saveData(final UserInfoEntry userInfoEntry){
-        Executor myExecutor = Executors.newSingleThreadExecutor();
-        myExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                database.userInfoDao().emptyTable();
-                database.userInfoDao().insertTask(userInfoEntry);
-            }
-        });
+        repository.saveData(userInfoEntry);
     }
 
     public void resetFlags(final UserInfoEntry userInfoEntry){
-        Executor myExecutor = Executors.newSingleThreadExecutor();
-        myExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                database.fileListDao().clearFileList();
-                database.userInfoDao().updateTask(userInfoEntry);
-            }
-        });
+        repository.resetFlags(userInfoEntry);
     }
 
-    /*private static class saveDatabaseAsyncTask extends AsyncTask<UserInfoEntry,Void,Void>{
-        private AppDatabase database;
-
-        saveDatabaseAsyncTask(AppDatabase recDatabase){
-            database=recDatabase;
-        }
-
-        @Override
-        protected Void doInBackground(final UserInfoEntry... params) {
-            database.userInfoDao().emptyTable();
-            database.userInfoDao().insertTask(params[0]);
-            return null;
-        }
-    }*/
+    public void switchandroid11SafWarning(boolean dialogViewed){
+        repository.switchandroid11SafWarning(dialogViewed);
+    }
 }

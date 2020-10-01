@@ -24,11 +24,11 @@ public class TransferProgressActivityViewModel extends AndroidViewModel {
 
         repository=new UserInfoRepository(this.getApplication());
 
-        data=repository.getTransferStatus();
+        data=repository.getUserData();
     }
 
     public LiveData<List<UserInfoEntry>> getData(){
-        data=repository.getTransferStatus();
+        data=repository.getUserData();
         return data;
     }
 

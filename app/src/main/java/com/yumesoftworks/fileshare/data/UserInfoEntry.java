@@ -20,18 +20,20 @@ public class UserInfoEntry implements Serializable {
     private int assetVersion;
     private int isTransferInProgress;
     private int transferTypeSendOrReceive;
+    private boolean android11SafWarning;
 
     @Ignore
-    public UserInfoEntry(String username, int pickedAvatar, int numberFilesTransferred, int assetVersion, int isTransferInProgress, int transferTypeSendOrReceive){
+    public UserInfoEntry(String username, int pickedAvatar, int numberFilesTransferred, int assetVersion, int isTransferInProgress, int transferTypeSendOrReceive, boolean android11SafWarning){
         this.username=username;
         this.pickedAvatar=pickedAvatar;
         this.numberFilesTransferred=numberFilesTransferred;
         this.assetVersion=assetVersion;
         this.isTransferInProgress=isTransferInProgress;
         this.transferTypeSendOrReceive=transferTypeSendOrReceive;
+        this.android11SafWarning=android11SafWarning;
     }
 
-    public UserInfoEntry(int id, String username, int pickedAvatar, int numberFilesTransferred, int assetVersion, int isTransferInProgress, int transferTypeSendOrReceive){
+    public UserInfoEntry(int id, String username, int pickedAvatar, int numberFilesTransferred, int assetVersion, int isTransferInProgress, int transferTypeSendOrReceive, boolean android11SafWarning){
         this.id=id;
         this.username=username;
         this.pickedAvatar=pickedAvatar;
@@ -39,6 +41,7 @@ public class UserInfoEntry implements Serializable {
         this.assetVersion=assetVersion;
         this.isTransferInProgress=isTransferInProgress;
         this.transferTypeSendOrReceive=transferTypeSendOrReceive;
+        this.android11SafWarning=android11SafWarning;
     }
 
     //getters and setters
@@ -89,5 +92,10 @@ public class UserInfoEntry implements Serializable {
     }
     public void setTransferTypeSendOrReceive(int transferTypeSendOrReceive) {
         this.transferTypeSendOrReceive = transferTypeSendOrReceive;
+    }
+
+    public boolean getAndroid11SafWarning(){return android11SafWarning;}
+    public void setAndroid11SafWarning(boolean android11SafWarning) {
+        this.android11SafWarning = android11SafWarning;
     }
 }

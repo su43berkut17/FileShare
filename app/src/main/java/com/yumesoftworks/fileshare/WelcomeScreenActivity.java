@@ -13,7 +13,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+
+import androidx.multidex.BuildConfig;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.appcompat.widget.Toolbar;
@@ -55,6 +58,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     private int mSelectedAvatar=-1;
     private int mFilesTransferred=0;
     private int mVersion=-1;
+    private boolean mIsAndroid11SafDialogShown=false;
 
     //recycler view
     private RecyclerView rvAvatars;
@@ -197,6 +201,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
                     mFilesTransferred=userInfoEntries.get(0).getNumberFilesTransferred();
                     tvUsername.setText(userInfoEntries.get(0).getUsername());
                     mIsTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
+                    mIsAndroid11SafDialogShown=userInfoEntries.get(0).getAndroid11SafWarning();
 
                     //set the selected avatar
                     mAvatarAdapter.setSelectedAvatar(mSelectedAvatar);
@@ -265,7 +270,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
         }else{
             //we save the data and open the activity
-            UserInfoEntry dataToSave=new UserInfoEntry(tvUsername.getText().toString(),mSelectedAvatar,mFilesTransferred,mVersion,mIsTransferInProgress,TransferProgressActivity.SERVICE_TYPE_INACTIVE);
+            UserInfoEntry dataToSave=new UserInfoEntry(tvUsername.getText().toString(),mSelectedAvatar,mFilesTransferred,mVersion,mIsTransferInProgress,TransferProgressActivity.SERVICE_TYPE_INACTIVE,mIsAndroid11SafDialogShown);
             viewModel.saveData(dataToSave);
 
             //check if it is setup or settings

@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- General purpose -->
     <string name="gen_button_ok">OK</string>
+    <string name="gen_button_yes">SI</string>
+    <string name="gen_button_no">NO</string>
     <string name="gen_button_cancel">Cancelar</string>
     <string name="gen_button_finish">Finalizar</string>
+    <string name="gen_warning_dialog_title">Advertencia</string>
+
+    <!-- Activity Welcome Screen -->
     <string name="aws_pick_avatar">Elija un icono:</string>
     <string name="aws_username">Usuario:</string>
     <string name="aws_input_username_hint">Ingrese un nombre de usuario</string>
@@ -12,24 +18,37 @@
     <string name="aws_button_go">Siguiente</string>
     <string name="aws_button_save">Guardar Cambios</string>
     <string name="aws_keyboard_ime_action">Listo</string>
+
+    <!-- Dialog Activity Welcome Screen -->
     <string name="aws_dialog_title">Advertencia!</string>
     <string name="aws_dialog_username">Ingrese un usuario válido</string>
     <string name="aws_dialog_avatar">Elija un icono</string>
+
+    <!-- Activity Main menu -->
     <string name="mm_send">Enviar archivos</string>
     <string name="mm_receive">Recibir Archivos</string>
     <string name="mm_send_des">Enviar Archivos</string>
     <string name="mm_receive_des">Recibir Archivos</string>
+
+    <!-- Options -->
     <string name="menu_options_title">Opciones</string>
+
+    <!-- Activity file browser -->
     <string name="fb_icon_description">Icono de archivo</string>
     <string name="fb_button_review_queue">Regresar a lista</string>
     <string name="fb_path_description">Ruta de archivo</string>
     <string name="fb_incompatible_file">Aplicación para abrir archivo no disponible</string>
+    <string name="fb_dialog_android_11_saf_limitations">Android 11 limita la cantidad de archivos que puede agregar a la lista. Si agrega más de 128 archivos, solo se transferirán los primeros 128.</string>
+
+    <!-- Activity file queue -->
     <string name="fq_tv_title_queue">Archivos a enviar:</string>
     <string name="fq_iv_delete_description">Remover de lista</string>
     <string name="fq_iv_empty_queue">La lista está vacía</string>
     <string name="fq_tv_empty_queue">La lista está vacía</string>
     <string name="fb_button_send_files">Enviar Archivos</string>
     <string name="fq_pick_files">Elegir Archivos</string>
+
+    <!--Activity pick user to send -->
     <string name="pu_avatar_description">Icono de usuario</string>
     <string name="pu_username_description">Usuario</string>
     <string name="pu_instructions">Seleccione recibir en el dispositivo de destino</string>
@@ -38,6 +57,8 @@
     <string name="pu_message_connection_error">Error: No se puede conectar al socket</string>
     <string name="pu_message_discovery_error">No se puede iniciar el servicio, chequee su conexión e inténtelo nuevamente.</string>
     <string name="pu_wifi_disabled">Active el WiFi e inténtelo nuevamente.</string>
+
+    <!--Activity wait user receive -->
     <string name="ru_message_initializing_connection">Inicializando conexión...</string>
     <string name="ru_avatar_description">Espere a que el remitente se conecte</string>
     <string name="ru_tv_please_wait">Esperando conexión de remitente...</string>
@@ -45,19 +66,26 @@
     <string name="ru_tv_username">Usuario</string>
     <string name="ru_wifi_disabled">Active el WiFi e inténtelo nuevamente.</string>
     <string name="ru_version">Versión</string>
+
+    <!--Activity transfer progress-->
     <string name="atp_tv_filename">Nombre de archivo</string>
     <string name="atp_tv__number_connector">de</string>
     <string name="atp_tv_files_in_queue">Archivos a enviar:</string>
     <string name="ats_tv_sent_files">Archivos enviados</string>
     <string name="ats_tv_received_files">Archivos recibidos:</string>
     <string name="ats_tv_error">Archivos:</string>
-    <string name="ats_try_again_dialog">No se puede conectar al dispositivo. Intentar nuevamente?</string>
+    <string name="ats_try_again_dialog">No se puede conectar al dispositivo. ¿Intentar nuevamente?</string>
+    <string name="ats_cancel_warning">¿Está seguro que desea cancelar?</string>
+
+    <!-- Service -->
     <string name="service_notification_text_initialize">Iniciando transferencia...</string>
     <string name="service_notification_action_stop_service">Cancelar</string>
     <string name="service_finished_transfer">Envío de archivos finalizado.</string>
     <string name="service_socket_error">Error de conexión. Inténtelo nuevamente.</string>
     <string name="service_out_of_space_error">No hay espacio disponible en el dispositivo receptor. No se puede completar la transferencia.</string>
     <string name="service_success">Éxito!</string>
+
+    <!-- Widget -->
     <string name="appwidget_text">EJEMPLO</string>
     <string name="add_widget">Agregar widget</string>
     <string name="widget_tv_lifetime">Transferencias exitosas</string>

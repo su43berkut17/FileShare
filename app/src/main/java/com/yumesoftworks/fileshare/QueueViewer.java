@@ -1,6 +1,9 @@
 package com.yumesoftworks.fileshare;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,11 +12,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.ItemTouchHelper;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.recyclerAdapters.QueueListAdapter;
@@ -26,6 +32,7 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
         ,View.OnClickListener{
 
     private static final String RECYCLER_VIEW_POSITION="rvPosition";
+    private static final String TAG="QueueViewer";
 
     //recycler view
     private RecyclerView rvFileQueue;
@@ -145,6 +152,15 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
 
     @Override
     public void onQueueClickListener(int itemId) {
+        if (Build.VERSION.SDK_INT<ConstantValues.SAF_SDK){
+            Intent myIntent = new Intent(Intent.ACTION_VIEW);
+            myIntent.setDataAndType(Uri.parse(rvAdapter.getFileItem(itemId).getPath()), rvAdapter.getFileItem(itemId).getMimeType());
+            try {
+                this.startActivity(Intent.createChooser(myIntent, "Pick a viewer"));
+            } catch (Exception e) {
+                Toast.makeText(getActivity().getBaseContext(), R.string.fb_incompatible_file, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override
@@ -153,7 +169,6 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
 
         // remove the item from recycler view
         rvAdapter.removeItem(position);
-        //rvAdapter.notifyItemRemoved(position);
 
         Boolean isLast;
 

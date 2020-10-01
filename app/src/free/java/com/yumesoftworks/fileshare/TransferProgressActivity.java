@@ -689,9 +689,9 @@ public class TransferProgressActivity extends AppCompatActivity implements
         if (received.equals("Cancel")) {
             //create the dialog that will ask if yes or no
             MaterialAlertDialogBuilder cancelDialog = new MaterialAlertDialogBuilder(thisActivity,R.style.MyDialog);
-            cancelDialog.setMessage("Are you sure you want to cancel?")
-                    .setNegativeButton("NO", null)
-                    .setPositiveButton("YES",
+            cancelDialog.setMessage(R.string.ats_cancel_warning)
+                    .setNegativeButton(R.string.gen_button_no, null)
+                    .setPositiveButton(R.string.gen_button_yes,
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
