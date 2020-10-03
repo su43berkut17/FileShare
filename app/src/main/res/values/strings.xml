@@ -39,12 +39,13 @@
     <!-- Activity file browser -->
     <string name="fb_file_name_placeholder" translatable="false">testFile.jpg</string>
     <string name="fb_file_size_placeholder" translatable="false">6 MB</string>
+    <string name="fb_path" translatable="false">/</string>
     <string name="fb_icon_description">File icon</string>
     <string name="fb_button_review_queue">Back to Queue</string>
     <string name="fb_path_description">The filepath</string>
-    <string name="fb_path" translatable="false">/</string>
     <string name="fb_incompatible_file">No available apps to open this file</string>
     <string name="fb_dialog_android_11_saf_limitations">Android 11 limits the number of files you can add to the queue. If you add over 128 files to the queue, only the 1st 128 will be transferred.</string>
+    <string name="fb_select_all_text">Select All</string>
 
     <!-- Activity file queue -->
     <string name="fq_tv_title_queue">Files to be sent:</string>

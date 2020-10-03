@@ -14,6 +14,7 @@
         <item name="android:navigationBarDividerColor" tools:ignore="NewApi">?attr/colorControlHighlight</item>
 
         <item name="android:textColor">@color/appBarText</item>
+        <item name="actionMenuTextColor">@color/appBarText</item>
         <item name="android:textColorPrimary">@android:color/white</item>
         <item name="android:textColorSecondary">@android:color/white</item>
 
@@ -40,6 +41,13 @@
         <item name="android:textColor">@color/mainTextDark</item>
         <item name="actionMenuTextColor">@color/mainTextDark</item>
         <item name="android:actionMenuTextColor">@color/mainTextDark</item>
+    </style>
+
+    <!--Action bar file browser menu-->
+    <style name="ToolbarFileBrowserMenu" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:textColor">@color/buttonText</item>
+        <item name="actionMenuTextColor">@color/buttonText</item>
+        <item name="android:actionMenuTextColor">@color/buttonText</item>
     </style>
 
     <!--Buttons-->

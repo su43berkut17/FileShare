@@ -16,7 +16,7 @@
             android:layout_height="?attr/actionBarSize"
             android:elevation="4dp"
             android:theme="@style/ToolbarWhite"
-            app:popupTheme="@style/ToolbarOptionsMenu"/>
+            app:popupTheme="@style/ToolbarFileBrowserMenu"/>
     </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout

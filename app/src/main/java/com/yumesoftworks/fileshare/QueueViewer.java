@@ -134,19 +134,21 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
 
     //update queue viewer
     public void updateQueue(List<FileListEntry> fileListEntry){
-        if (rvAdapter!=null) {
-            fileList = fileListEntry;
-            rvAdapter.setFileList(fileListEntry);
-            rvAdapter.notifyDataSetChanged();
-            mLinearLayoutManager.scrollToPosition(mRvPosition);
+        if (mEmptyList!=null) {
+            if (rvAdapter != null) {
+                fileList = fileListEntry;
+                rvAdapter.setFileList(fileListEntry);
+                rvAdapter.notifyDataSetChanged();
+                mLinearLayoutManager.scrollToPosition(mRvPosition);
 
-            if (rvAdapter.getItemCount()>0){
-                mEmptyList.setVisibility(View.INVISIBLE);
-            }else{
+                if (rvAdapter.getItemCount() > 0) {
+                    mEmptyList.setVisibility(View.INVISIBLE);
+                } else {
+                    mEmptyList.setVisibility(View.VISIBLE);
+                }
+            } else {
                 mEmptyList.setVisibility(View.VISIBLE);
             }
-        }else{
-            mEmptyList.setVisibility(View.VISIBLE);
         }
     }
 

@@ -6,4 +6,9 @@
         android:icon="@drawable/ic_action_add_files"
         app:showAsAction="always"
         android:title="@string/fq_pick_files"/>
+    <item
+        android:id="@+id/menu_select_all"
+        android:title="@string/fb_select_all_text"
+        app:showAsAction="always"
+        android:visible="false"/>
 </menu>

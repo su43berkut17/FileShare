@@ -74,6 +74,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private FileViewer fragmentFileViewer;
     private QueueViewer fragmentQueueViewer;
     private FragmentManager fragmentManager;
+    private Menu mActionBarMenu;
 
     //view model
     private CombinedDataViewModel fileViewerViewModel;
@@ -141,7 +142,11 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater=getMenuInflater();
+        mActionBarMenu=menu;
         inflater.inflate(R.menu.add_file_menu,menu);
+        if (mCurrentFragment!=0) {
+            changeActionBarMenu(mCurrentFragment);
+        }
         return true;
     }
 
@@ -160,8 +165,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         fragmentManager=getSupportFragmentManager();
 
         //we need to check which fragment we will restore the instance of
-        Log.d(TAG, "1 panel, we decide which one to load an which one to create");
-
+        Log.d(TAG, "1 panel, we decide which one to load an which one to create, current fragment is file 1000 queue 1001 "+mCurrentFragment);
+        //TODO: Fix rotation crash here, also in queue, update queue
         if (mCurrentFragment==FILE_FRAGMENT) {
             //for the file one
             Fragment fragmentFileViewerTemp = fragmentManager.findFragmentById(R.id.frag_afv_main);
@@ -227,6 +232,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             fragmentManager.beginTransaction()
                  .replace(R.id.frag_afv_main, fragmentQueueViewer)
                     .commit();
+
+            mCurrentFragment=QUEUE_FRAGMENT;
         }
 
         //we attach the observers to the activity
@@ -236,6 +243,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
 
         changeActionBarName("FileShare - Send Files");
+        changeActionBarMenu(mCurrentFragment);
     }
 
     //observer for the user data
@@ -362,6 +370,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     public void onButtonQueueInteraction() {
         //backstack
         fragmentManager.popBackStack();
+        changeActionBarMenu(QUEUE_FRAGMENT);
     }
 
     @Override
@@ -445,10 +454,16 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
                     //we update the data and path
                     fileFragmentRequestUpdate();
+                    changeActionBarMenu(FILE_FRAGMENT);
                 }else{
                     //use SAF
                     checkWarningScopedStorageLimitation();
                 }
+
+                return true;
+
+            case R.id.menu_select_all:
+                //todo: select all files in the current folder
 
                 return true;
             default:
@@ -516,6 +531,11 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                     int selectedCount = data.getClipData().getItemCount();
                     List<FileListEntry> listEntry = new ArrayList<>();
 
+                    //limit selected count to 128
+                    if (selectedCount>128){
+                        selectedCount=128;
+                    }
+
                     for (int i = 0; i < selectedCount; i++) {
                         DocumentFile file = DocumentFile.fromSingleUri(thisActivity, data.getClipData().getItemAt(i).getUri());
                         String name = file.getName();
@@ -540,6 +560,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             if (mFileHistory.size()<=1) {
                 //go back to the queue
                 fragmentManager.popBackStack();
+                mCurrentFragment=QUEUE_FRAGMENT;
+                changeActionBarMenu(QUEUE_FRAGMENT);
             }else {
                 //we browse to the upper level
                 mFileHistory.remove(mFileHistory.size()-1);
@@ -556,6 +578,17 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     public void changeActionBarName(String newTitle) {
         ActionBar titleUp=getSupportActionBar();
         titleUp.setTitle(newTitle);
+    }
+    private void changeActionBarMenu(int currentFragment){
+        if (mActionBarMenu != null) {
+            if (currentFragment == FILE_FRAGMENT) {
+                mActionBarMenu.findItem(R.id.menu_select_all).setVisible(true);
+                mActionBarMenu.findItem(R.id.menu_add_files).setVisible(false);
+            } else {
+                mActionBarMenu.findItem(R.id.menu_select_all).setVisible(false);
+                mActionBarMenu.findItem(R.id.menu_add_files).setVisible(true);
+            }
+        }
     }
 
     @Override
