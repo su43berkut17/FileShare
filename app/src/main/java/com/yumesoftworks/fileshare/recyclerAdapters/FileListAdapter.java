@@ -173,7 +173,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
     }
 
     //public method to return data in adapter
-    public List<FileListEntry> getAvatarList(){
+    public List<FileListEntry> getFileList(){
         return mFileList;
     }
 

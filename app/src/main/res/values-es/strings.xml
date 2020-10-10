@@ -40,6 +40,7 @@
     <string name="fb_incompatible_file">Aplicación para abrir archivo no disponible</string>
     <string name="fb_dialog_android_11_saf_limitations">Android 11 limita la cantidad de archivos que puede agregar a la lista. Si agrega más de 128 archivos, solo se transferirán los primeros 128.</string>
     <string name="fb_select_all_text">Seleccionar Todos</string>
+    <string name="fb_deselect_all_text">Deseleccionar Todos</string>
 
     <!-- Activity file queue -->
     <string name="fq_tv_title_queue">Archivos a enviar:</string>

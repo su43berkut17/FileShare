@@ -11,4 +11,9 @@
         android:title="@string/fb_select_all_text"
         app:showAsAction="always"
         android:visible="false"/>
+    <item
+        android:id="@+id/menu_deselect_all"
+        android:title="@string/fb_deselect_all_text"
+        app:showAsAction="always"
+        android:visible="false"/>
 </menu>

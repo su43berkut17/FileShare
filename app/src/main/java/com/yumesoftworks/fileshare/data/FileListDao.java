@@ -15,14 +15,14 @@ public interface FileListDao {
     @Query("SELECT * FROM FileList"+" ORDER BY LOWER(path)")
     LiveData<List<FileListEntry>> loadFileList();
 
-    @Query("SELECT * FROM FileList"+" ORDER BY id")
+    @Query("SELECT * FROM FileList"+" ORDER BY path")
     //no live data
     List<FileListEntry> loadFileListDirect();
 
     @Query(("SELECT * FROM FileList WHERE parentFolder= :pathToRead")+" ORDER BY path")
     LiveData<List<FileListEntry>> loadFileListPath(String pathToRead);
 
-    @Insert
+    @Insert (onConflict = OnConflictStrategy.IGNORE)
     void insertFile(FileListEntry fileListEntry);
 
     @Update (onConflict = OnConflictStrategy.REPLACE)

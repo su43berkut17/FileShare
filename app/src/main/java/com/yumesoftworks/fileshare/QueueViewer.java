@@ -32,7 +32,7 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
         ,View.OnClickListener{
 
     private static final String RECYCLER_VIEW_POSITION="rvPosition";
-    private static final String TAG="QueueViewer";
+    private static final String TAG="QueueViewerFrag";
 
     //recycler view
     private RecyclerView rvFileQueue;
@@ -97,6 +97,7 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         //we check which view to inflate
+        Log.d(TAG,"Creating queue");
         View queueView = inflater.inflate(R.layout.fragment_queue_viewer, container, false);
 
         btnSendFiles=queueView.findViewById(R.id.bt_fqv_send_files);
@@ -104,21 +105,20 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
         mLinearLayoutManager=new LinearLayoutManager(getContext());
         rvFileQueue.setLayoutManager(mLinearLayoutManager);
         mEmptyList=queueView.findViewById(R.id.ll_fqv_empty);
+        Log.e(TAG,"mepty list is "+mEmptyList.toString());
 
-        //if (fileList != null) {
-            rvAdapter = new QueueListAdapter(getContext(),this);
+        rvAdapter = new QueueListAdapter(getContext(),this);
 
-            //we set the adapter
-            rvFileQueue.setAdapter(rvAdapter);
-            rvAdapter.notifyDataSetChanged();
+        //we set the adapter
+        rvFileQueue.setAdapter(rvAdapter);
+        rvAdapter.notifyDataSetChanged();
 
-            //request an update
-            mQueueClickListener.queueFragmentRequestUpdate();
+        //request an update
+        //mQueueClickListener.queueFragmentRequestUpdate();
 
-            //we set the recycler view ite touch helper
-            ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new QueueListRecyclerViewItemHelper(0, ItemTouchHelper.RIGHT, this);
-            new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(rvFileQueue);
-        //}
+        //we set the recycler view ite touch helper
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new QueueListRecyclerViewItemHelper(0, ItemTouchHelper.RIGHT, this);
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(rvFileQueue);
 
         btnSendFiles.setOnClickListener(this);
 
@@ -134,22 +134,42 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
 
     //update queue viewer
     public void updateQueue(List<FileListEntry> fileListEntry){
-        if (mEmptyList!=null) {
-            if (rvAdapter != null) {
-                fileList = fileListEntry;
-                rvAdapter.setFileList(fileListEntry);
-                rvAdapter.notifyDataSetChanged();
-                mLinearLayoutManager.scrollToPosition(mRvPosition);
+        if (rvAdapter != null) {
+            Log.d(TAG,"it exists");
+            fileList = fileListEntry;
+            rvAdapter.setFileList(fileListEntry);
+            rvAdapter.notifyDataSetChanged();
+            mLinearLayoutManager.scrollToPosition(mRvPosition);
 
+            try {
                 if (rvAdapter.getItemCount() > 0) {
                     mEmptyList.setVisibility(View.INVISIBLE);
                 } else {
                     mEmptyList.setVisibility(View.VISIBLE);
                 }
-            } else {
+            }catch (Exception e){
+                Log.d(TAG,"mEmpty issue "+e.getMessage());
+            }
+        } else {
+            Log.d(TAG,"it doesnt exist");
+            try {
                 mEmptyList.setVisibility(View.VISIBLE);
+            }catch (Exception e){
+                Log.d(TAG,"mEmpty issue "+e.getMessage());
             }
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        mQueueClickListener.queueFragmentRequestUpdate();
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
     }
 
     @Override

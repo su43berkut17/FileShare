@@ -15,10 +15,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -93,9 +91,13 @@ public class FileViewer extends Fragment implements
         super.onSaveInstanceState(outState);
 
         //mRvPosition=rvFileList.getLayoutManager().onSaveInstanceState();
-        mRvPosition=mLinearLayoutManager.findFirstVisibleItemPosition();
-        Log.d(TAG,"on save instance state, saving rv "+mRvPosition);
-        outState.putInt(RECYCLER_VIEW_POSITION, mRvPosition);
+        try {
+            mRvPosition = mLinearLayoutManager.findFirstVisibleItemPosition();
+            Log.d(TAG, "on save instance state, saving rv " + mRvPosition);
+            outState.putInt(RECYCLER_VIEW_POSITION, mRvPosition);
+        }catch (Exception e){
+            outState.putInt(RECYCLER_VIEW_POSITION,0);
+        }
         outState.putString(STORAGE_POSITION,mSelectedStorage);
     }
 
@@ -214,6 +216,11 @@ public class FileViewer extends Fragment implements
         }
     }
 
+    //retrieve all the files in the adapter
+    public List<FileListEntry> getFiles(){
+        return rvAdapter.getFileList();
+    }
+
     //update the path
     public void updatePath(String path,String realPath){
         if (textPath!=null) {
@@ -263,7 +270,7 @@ public class FileViewer extends Fragment implements
         switch (v.getId()){
             case R.id.bt_ffv_review_queue:
                 //we go to see the queue via the interface to the main activity
-                mQueueButton.onButtonQueueInteraction();
+                mQueueButton.onButtonGoToQueueInteraction();
                 break;
             default:
                 break;
@@ -306,6 +313,6 @@ public class FileViewer extends Fragment implements
     }
 
     public interface OnButtonGoToQueueInterface{
-        void onButtonQueueInteraction();
+        void onButtonGoToQueueInteraction();
     }
 }

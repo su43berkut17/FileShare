@@ -43,6 +43,8 @@ public class CombinedDataViewModel extends AndroidViewModel {
 
     public void deleteFile(FileListEntry list){repository.deleteFile(list);}
 
+    public void deleteFiles(List<FileListEntry> uriList){repository.deleteFiles(uriList);}
+
     public void deleteFileCheckbox(FileListEntry list){
         repository.deleteFileCheckbox(list);
     }

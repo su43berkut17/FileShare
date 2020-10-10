@@ -53,7 +53,9 @@ public class FileListRepository {
             @Override
             public void run() {
                 for (FileListEntry uri:listEntries) {
-                    database.fileListDao().insertFile(uri);
+                    if (!uri.getDirectory()) {
+                        database.fileListDao().insertFile(uri);
+                    }
                 }
             }
         });
@@ -97,6 +99,22 @@ public class FileListRepository {
                 Log.d(TAG,"Deleting "+fileListEntry.getFileName()+" is selected "+fileListEntry.getIsSelected());
                 int retInt=database.fileListDao().deleteFileNotSameId(fileListEntry.getPath());
                 Log.d(TAG,"retInt is "+retInt);
+            }
+        });
+    }
+
+    //delete a list of files
+    public void deleteFiles(final List<FileListEntry> listEntries){
+        Executor myExecutor=Executors.newSingleThreadExecutor();
+
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                for (FileListEntry uri:listEntries) {
+                    if (!uri.getDirectory()) {
+                        database.fileListDao().deleteFile(uri);
+                    }
+                }
             }
         });
     }

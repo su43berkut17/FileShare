@@ -1,5 +1,6 @@
 package com.yumesoftworks.fileshare.data;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
@@ -7,8 +8,8 @@ import androidx.room.PrimaryKey;
 @Entity (tableName = "FileList")
 public class FileListEntry implements Comparable<FileListEntry>{
 
-    @PrimaryKey(autoGenerate = true)
-    private int id;
+    @PrimaryKey
+    @NonNull
     private String path;
     private String fileName;
     private int isTransferred;
@@ -29,8 +30,7 @@ public class FileListEntry implements Comparable<FileListEntry>{
         this.isDirectory=isDirectory;
     }
 
-    public FileListEntry(int id, String path, String fileName, int isTransferred, String parentFolder, int isSelected, String mimeType){
-        this.id=id;
+    public FileListEntry(String path, String fileName, int isTransferred, String parentFolder, int isSelected, String mimeType){
         this.path=path;
         this.fileName=fileName;
         this.isTransferred=isTransferred;
@@ -41,13 +41,6 @@ public class FileListEntry implements Comparable<FileListEntry>{
     }
 
     //getters and setters
-    public void setId(int id) {
-        this.id = id;
-    }
-    public int getId() {
-        return id;
-    }
-
     public void setPath(String path) {
         this.path = path;
     }
