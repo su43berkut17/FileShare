@@ -1,8 +1,12 @@
 package com.yumesoftworks.fileshare;
 
+import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -18,11 +22,14 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.os.Environment;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.StorageListEntry;
+import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.utils.ChangeShownPath;
 import com.yumesoftworks.fileshare.utils.MergeFileListAndDatabase;
 
@@ -41,24 +48,26 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private static final int LIVEDATA_UPDATE=2000;
     private static final int FILETREE_UPDATE=2001;
 
-    //2 panel
-    private boolean mTwoPanel;
+    private static final int FILE_PICK_CODE=5001;
+
+    //fragment
     private int mCurrentFragment;
     private static final String CURRENT_FRAGMENT_TAG="currentFragmentTag";
-
-    //analytics and admob
-    private FirebaseAnalytics mFireAnalytics;
 
     //fragment parts
     private FileViewer fragmentFileViewer;
     private QueueViewer fragmentQueueViewer;
     private FragmentManager fragmentManager;
+    private Menu mActionBarMenu;
 
     //view model
     private CombinedDataViewModel fileViewerViewModel;
     private CombinedDataViewModel queueViewerViewModel;
+    private WelcomeScreenViewModel userViewmodel;
+    private boolean mAndroid11SafWarning;
     private String mPath;
     private static final String CURRENT_PATH_TAG="CurrentPathTag";
+    private Context thisActivity;
 
     //for deletion in the queue viewer
     private boolean mIsNotDeletion=true;
@@ -75,8 +84,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_browser_and_queue);
 
-        //analytics
-        mFireAnalytics=FirebaseAnalytics.getInstance(this);
+        thisActivity=this;
 
         if(savedInstanceState!=null){
             mCurrentFragment=savedInstanceState.getInt(CURRENT_FRAGMENT_TAG);
@@ -84,16 +92,9 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             mFileHistory=savedInstanceState.getStringArrayList(HISTORY_TAG);
             Log.d(TAG,"Restoring the path: "+mPath);
         }else{
-            mCurrentFragment=FILE_FRAGMENT;
+            mCurrentFragment=QUEUE_FRAGMENT;
             mPath=new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "").getAbsolutePath();
             mFileHistory.add(mPath);
-        }
-
-        //we check if it is 1 or 2 panels
-        if (findViewById(R.id.frag_afv_queue) != null) {
-            mTwoPanel = true;
-        } else {
-            mTwoPanel = false;
         }
 
         //toolbar
@@ -105,6 +106,28 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
         //we check for the permissions
         askForFilePermission();
+
+        //get user data  viewmodel for SAF dialog
+        userViewmodel=ViewModelProviders.of(this).get(WelcomeScreenViewModel.class);
+        userViewmodel.getUserInfo().observe(this,fileInfoObserver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        removeObservers();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater=getMenuInflater();
+        mActionBarMenu=menu;
+        inflater.inflate(R.menu.add_file_menu,menu);
+        if (mCurrentFragment!=0) {
+            changeActionBarMenu(mCurrentFragment);
+        }
+        return true;
     }
 
     @Override
@@ -118,131 +141,87 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
     private void initializeVariables(){
         Log.d(TAG,"initializing variables");
+        changeActionBarName("FileShare - Send Files");
+        changeActionBarMenu(mCurrentFragment);
+
         //we check if we have old versions of the fragments
         fragmentManager=getSupportFragmentManager();
 
-        int mainId=R.id.frag_afv_main;
-        int queueId=R.id.frag_afv_queue;
-
-        //we set the id vars
-        if (mTwoPanel){
-            //2 panels so we do different ids
-            Log.d(TAG,"2 panel");
-        }else{
-            //reset the id for the queue
-            queueId=R.id.frag_afv_main;
-        }
-
-        if (mTwoPanel) {
-            //2 panels
-            //we need to check which fragment we will restore the instance of
-            Log.d(TAG, "2 panels");
-
-            //for the file one
-            Fragment fragmentFileViewerTemp = fragmentManager.findFragmentById(mainId);
-
-            if (fragmentFileViewerTemp == null) {
-                Log.d(TAG, "file fragment is null we create a new instance");
-                fragmentFileViewer = new FileViewer();
-            } else {
-                Log.d(TAG, "fragment exists we take from fragment manager");
-                fragmentFileViewer = (FileViewer) fragmentManager.findFragmentById(mainId);
-            }
-
-            //hide the file viewer button
-            fragmentFileViewer.hideButton();
-
-            //queue one
-            Fragment fragmentQueueViewerTemp = fragmentManager.findFragmentById(queueId);
-
-            if (fragmentQueueViewerTemp == null) {
-                Log.d(TAG, "queue fragment is null we create a new instance");
-                fragmentQueueViewer = new QueueViewer();
-            } else {
-                Log.d(TAG, "queue fragment is null we create a new instance");
-                fragmentQueueViewer = (QueueViewer) fragmentManager.findFragmentById(queueId);
-            }
-        }else{
-            //1 panel, check which fragment is active to be reloaded from the saved instance state
-            //we need to check which fragment we will restore the instance of
-            Log.d(TAG, "1 panel, we decide which one to load an which one to create");
-
-            if (mCurrentFragment==FILE_FRAGMENT) {
-                //for the file one
-                Fragment fragmentFileViewerTemp = fragmentManager.findFragmentById(mainId);
-
-                if (fragmentFileViewerTemp == null) {
-                    Log.d(TAG, "file fragment is null we create a new instance");
-                    fragmentFileViewer = new FileViewer();
-                } else {
-                    Log.d(TAG, "fragment exists we take from fragment manager");
-                    fragmentFileViewer = (FileViewer) fragmentManager.findFragmentById(mainId);
-                }
-
-                //we create the queue one from scratch
-                fragmentQueueViewer=new QueueViewer();
-            }
-
-            if (mCurrentFragment==QUEUE_FRAGMENT) {
-                //queue one
-                Fragment fragmentQueueViewerTemp = fragmentManager.findFragmentById(mainId);
-
-                if (fragmentQueueViewerTemp == null) {
-                    Log.d(TAG, "queue fragment is null we create a new instance");
-                    fragmentQueueViewer = new QueueViewer();
-                } else {
-                    Log.d(TAG, "queue fragment is null we create a new instance");
-                    fragmentQueueViewer = (QueueViewer) fragmentManager.findFragmentById(mainId);
-                }
-
-                //we create the file one from scratch
-                fragmentFileViewer = new FileViewer();
-            }
-        }
-
-        //we load the files
-        loadFragments();
+        generateFragment();
     }
 
-    private void loadFragments(){
-        Log.d(TAG,"Load fragments");
+    private void generateFragment(){
+        //we need to check which fragment we will restore the instance of
+        Log.d(TAG, "1 panel, we decide which one to load an which one to create, current fragment is file:1000 queue:1001 = "+mCurrentFragment);
+        Fragment tempFragment=fragmentManager.findFragmentById(R.id.frag_afv_main);
+
+        if (tempFragment!=null) {
+            if (mCurrentFragment == FILE_FRAGMENT) {
+                try {
+                    fragmentFileViewer = (FileViewer) fragmentManager.findFragmentById(R.id.frag_afv_main);
+                } catch (Exception e) {
+                    fragmentFileViewer = new FileViewer();
+                }
+            } else {
+                try {
+                    fragmentQueueViewer = (QueueViewer) fragmentManager.findFragmentById(R.id.frag_afv_main);
+                } catch (Exception e) {
+                    fragmentQueueViewer = new QueueViewer();
+                }
+            }
+        }else{
+            if (mCurrentFragment == FILE_FRAGMENT) {
+                fragmentFileViewer = new FileViewer();
+            } else {
+                fragmentQueueViewer = new QueueViewer();
+            }
+        }
+
+        initViewmodelAndFragmentTransaction();
+    }
+
+    private void initViewmodelAndFragmentTransaction(){
+        Log.d(TAG,"init viewmodel and fragment transaction");
         //we create the viewmodel observers if they are null
-        if (fileViewerViewModel==null){
-            fileViewerViewModel = ViewModelProviders.of(this).get(CombinedDataViewModel.class);
+        if (Build.VERSION.SDK_INT<ConstantValues.SAF_SDK) {
+            if (fileViewerViewModel == null) {
+                fileViewerViewModel = ViewModelProviders.of(this).get(CombinedDataViewModel.class);
+            }
         }
         if (queueViewerViewModel==null) {
             queueViewerViewModel = ViewModelProviders.of(this).get(CombinedDataViewModel.class);
         }
 
         //we check which fragment to load depending on the current fragment
-        if (mCurrentFragment==0 || mCurrentFragment==FILE_FRAGMENT) {
+        if (mCurrentFragment == FILE_FRAGMENT) {
             fragmentManager.beginTransaction()
+                    .setCustomAnimations(R.anim.anim_enter_right, R.anim.anim_exit_left,R.anim.anim_enter_left,R.anim.anim_exit_right)
                     .replace(R.id.frag_afv_main, fragmentFileViewer)
                     .commit();
 
-            //we set the current fragment
-            mCurrentFragment=FILE_FRAGMENT;
+            fileViewerViewModel.getData().observe(this, fileViewerViewModelObserver);
         }
 
         //queue
-        if (mCurrentFragment==QUEUE_FRAGMENT || mTwoPanel){
-            if (mTwoPanel){
-                fragmentManager.beginTransaction()
-                        .replace(R.id.frag_afv_queue, fragmentQueueViewer)
-                        .commit();
-            }else {
-                fragmentManager.beginTransaction()
-                        .replace(R.id.frag_afv_main, fragmentQueueViewer)
-                        .commit();
-            }
+        if (mCurrentFragment == QUEUE_FRAGMENT) {
+            fragmentManager.beginTransaction()
+                    .setCustomAnimations(R.anim.anim_enter_left, R.anim.anim_exit_right,R.anim.anim_enter_right,R.anim.anim_exit_left)
+                    .replace(R.id.frag_afv_main, fragmentQueueViewer)
+                    .commit();
+
+            queueViewerViewModel.getData().observe(this, queueViewerViewModelObserver);
         }
 
-        //we attach the observers to the activiy
-        fileViewerViewModel.getData().observe(this,fileViewerViewModelObserver);
-        queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
-
-        changeActionBarName("FileShare - Send Files");
+        changeActionBarMenu(mCurrentFragment);
     }
+
+    //observer for the user data
+    final Observer<List<UserInfoEntry>> fileInfoObserver=new Observer<List<UserInfoEntry>>() {
+        @Override
+        public void onChanged(List<UserInfoEntry> userInfoEntries) {
+            mAndroid11SafWarning=userInfoEntries.get(0).getAndroid11SafWarning();
+        }
+    };
 
     //observer for the file browser
     final Observer<List<FileListEntry>> fileViewerViewModelObserver=new Observer<List<FileListEntry>>() {
@@ -289,7 +268,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
     private void askForFilePermission(){
         //we ask for permission before continuing
-        if (Build.VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= ConstantValues.STORAGE_PERMISSION_SDK) {
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
                 //we create the fragments
@@ -303,6 +282,14 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
             //we create the fragments
             initializeVariables();
         }
+    }
+
+    private void goBackToQueue(){
+        removeObservers();
+        //generate fragment again
+        mCurrentFragment=QUEUE_FRAGMENT;
+        changeActionBarMenu(QUEUE_FRAGMENT);
+        generateFragment();
     }
 
     @Override
@@ -337,6 +324,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
             mAllowLivedataUpdate=true;
             mergeFileAndData(fileViewerViewModel.getData().getValue(),FILETREE_UPDATE);
+            switchSelecteAllButton(false);
         }else{
             Log.d(TAG,"saving changes");
             //we check if it has been selected or not
@@ -357,30 +345,8 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onButtonQueueInteraction() {
-        //we open the queue if it is single panel
-        if (mTwoPanel!=true) {
-            Log.d(TAG,"it is the queue button so we create a new instance of the queue");
-            //we get or generate the queue
-            //it is the queue one
-            fragmentQueueViewer=new QueueViewer();
-
-            fragmentManager.beginTransaction()
-                    .setCustomAnimations(R.anim.anim_enter_right,R.anim.anim_exit_left)
-                    .replace(R.id.frag_afv_main, fragmentQueueViewer)
-                    .commit();
-
-            //it should load automatically from the lifecycle
-            //queueViewerViewModel.getData().observe(this,queueViewerViewModelObserver);
-
-            //we set the current fragment as the 1st one
-            mCurrentFragment=QUEUE_FRAGMENT;
-
-            changeActionBarName("FileShare - Queue");
-        }
-
-        //we reset the deletion
-        mIsNotDeletion=true;
+    public void onButtonGoToQueueInteraction() {
+        goBackToQueue();
     }
 
     @Override
@@ -410,11 +376,10 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     public void onItemSwiped(FileListEntry file, Boolean isLastSwipe) {
         //we delete it from the database
         mIsNotDeletion = isLastSwipe;
-
-        fileViewerViewModel.deleteFile(file);
-        if (mTwoPanel) {
-            file.setIsSelected(0);
-            fragmentFileViewer.updateCheckbox(file);
+        if (fileViewerViewModel!=null) {
+            fileViewerViewModel.deleteFile(file);
+        }else{
+            queueViewerViewModel.deleteFile(file);
         }
     }
 
@@ -425,64 +390,182 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
+    //remove observers
+    private void removeObservers(){
+        Log.d(TAG,"removing the observers");
+        //removing observers
+        if (userViewmodel!=null && userViewmodel.getUserInfo().hasObservers()){
+            userViewmodel.getUserInfo().removeObservers(this);
+        }
+        if (queueViewerViewModel!=null && queueViewerViewModel.getData().hasObservers()){
+            queueViewerViewModel.getData().removeObservers(this);
+        }
+        if (fileViewerViewModel!=null && fileViewerViewModel.getData().hasObservers()){
+            fileViewerViewModel.getData().removeObservers(this);
+        }
+    }
+
     //override the back button normal behaviour
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        //return super.onOptionsItemSelected(item);
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
+                return true;
+            case R.id.menu_add_files:
+                //check if file browser or SAF
+                if (Build.VERSION.SDK_INT<ConstantValues.SAF_SDK){
+                    mCurrentFragment=FILE_FRAGMENT;
+                    mAllowLivedataUpdate=true;
+                    generateFragment();
+                    fileFragmentRequestUpdate();
+                }else{
+                    //use SAF
+                    checkWarningScopedStorageLimitation();
+                }
+
+                return true;
+
+            case R.id.menu_select_all:
+                fileViewerViewModel.saveFiles(fragmentFileViewer.getFiles());
+                switchSelecteAllButton(true);
+
+                return true;
+            case R.id.menu_deselect_all:
+                fileViewerViewModel.deleteFiles(fragmentFileViewer.getFiles());
+                switchSelecteAllButton(false);
+
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    //1st time dialog for android 11 and above
+    private void checkWarningScopedStorageLimitation() {
+        if (!mAndroid11SafWarning){
+            //check if dialog has been shown
+            generateSAFLimitationsDialog();
+        }else{
+            openSAFPicker();
+        }
+    }
+
+    private void generateSAFLimitationsDialog(){
+        MaterialAlertDialogBuilder warningDialog = new MaterialAlertDialogBuilder(thisActivity,R.style.MyDialog);
+        warningDialog.setMessage(R.string.fb_dialog_android_11_saf_limitations)
+                .setTitle(R.string.gen_warning_dialog_title)
+                .setNeutralButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                openSAFPicker();
+
+                                //change value to false
+                                userViewmodel.switchandroid11SafWarning(true);
+                            }
+                        });
+
+        warningDialog.create();
+        warningDialog.show();
+    }
+
+    private void openSAFPicker(){
+        Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        i.setType("*/*");
+        i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivityForResult(i, FILE_PICK_CODE);
+    }
+
     @Override
-    public void onBackPressed() {
-        //if we are in 1 or 2 panel mode
-        if (mTwoPanel) {
-            //we go back
-            super.onBackPressed();
-        } else {
-            //we check the current fragment
-            if (mCurrentFragment == QUEUE_FRAGMENT) {
-                Log.d(TAG, "current is queue fragment so we reload the file fragment");
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-                //we reload the  fragment
-                fragmentManager.beginTransaction()
-                        .setCustomAnimations(R.anim.anim_enter_left, R.anim.anim_exit_right)
-                        .replace(R.id.frag_afv_main, fragmentFileViewer)
-                        .commit();
+        if (Build.VERSION.SDK_INT>=ConstantValues.SAF_SDK) {
+            if (requestCode == FILE_PICK_CODE && resultCode == Activity.RESULT_OK) {
+                //check if 1 or multiple files
+                //get result after user action (selecting files) and transform it into array of Uris
+                if (data.getData() != null) { // only one uri was selected by user
+                    //Get file name
+                    DocumentFile file = DocumentFile.fromSingleUri(thisActivity, data.getData());
+                    String name = file.getName();
+                    String mime = file.getType();
 
-                mAllowLivedataUpdate = true;
+                    FileListEntry fileEntry = new FileListEntry(data.getData().toString(), name, 0, "", 0, mime, false);
+                    queueViewerViewModel.saveFile(fileEntry);
+                    thisActivity.getContentResolver().takePersistableUriPermission(data.getData(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                } else if (data.getClipData() != null) {
+                    int selectedCount = data.getClipData().getItemCount();
+                    List<FileListEntry> listEntry = new ArrayList<>();
 
-                //we update the data and path
-                fileFragmentRequestUpdate();
+                    //limit selected count to 128
+                    if (selectedCount>128){
+                        selectedCount=128;
+                    }
 
-                //we set the current fragment
-                mCurrentFragment = FILE_FRAGMENT;
-                changeActionBarName("FileShare - Send Files");
-            } else {
-                //we are on the 1st fragment so we can go back
-                Log.d(TAG,"The file history size is: "+mFileHistory.size());
-                if (mFileHistory.size()<=1) {
-                    super.onBackPressed();
-                }else {
-                    //we browse to the upper level
-                    mFileHistory.remove(mFileHistory.size()-1);
-                    mPath=mFileHistory.get(mFileHistory.size()-1);
-                    mAllowLivedataUpdate=true;
-                    mergeFileAndData(fileViewerViewModel.getData().getValue(),FILETREE_UPDATE);
+                    for (int i = 0; i < selectedCount; i++) {
+                        DocumentFile file = DocumentFile.fromSingleUri(thisActivity, data.getClipData().getItemAt(i).getUri());
+                        String name = file.getName();
+                        String mime = file.getType();
+
+                        FileListEntry fileEntry = new FileListEntry(data.getClipData().getItemAt(i).getUri().toString(), name, 0, "", 0, mime, false);
+                        listEntry.add(fileEntry);
+                        thisActivity.getContentResolver().takePersistableUriPermission(data.getClipData().getItemAt(i).getUri(),Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    }
+
+                    queueViewerViewModel.saveFiles(listEntry);
                 }
             }
         }
+    }
 
+    @Override
+    public void onBackPressed() {
+        //we check the current fragment
+        if (mCurrentFragment==FILE_FRAGMENT){
+            //we are in browser
+            if (mFileHistory.size()<=1) {
+                //go back to the queue
+                goBackToQueue();
+            }else {
+                //we browse to the upper level
+                mFileHistory.remove(mFileHistory.size()-1);
+                mPath=mFileHistory.get(mFileHistory.size()-1);
+                mAllowLivedataUpdate=true;
+                mergeFileAndData(fileViewerViewModel.getData().getValue(),FILETREE_UPDATE);
+                switchSelecteAllButton(false);
+            }
+        }else{
+            super.onBackPressed();
+        }
     }
 
     //action bar
     public void changeActionBarName(String newTitle) {
         ActionBar titleUp=getSupportActionBar();
         titleUp.setTitle(newTitle);
+    }
+    private void changeActionBarMenu(int currentFragment){
+        if (mActionBarMenu != null) {
+            if (currentFragment == FILE_FRAGMENT) {
+                mActionBarMenu.findItem(R.id.menu_select_all).setVisible(true);
+                mActionBarMenu.findItem(R.id.menu_deselect_all).setVisible(false);
+                mActionBarMenu.findItem(R.id.menu_add_files).setVisible(false);
+            } else {
+                mActionBarMenu.findItem(R.id.menu_select_all).setVisible(false);
+                mActionBarMenu.findItem(R.id.menu_deselect_all).setVisible(false);
+                mActionBarMenu.findItem(R.id.menu_add_files).setVisible(true);
+            }
+        }
+    }
+    private void switchSelecteAllButton(boolean isItSelected){
+        try {
+            mActionBarMenu.findItem(R.id.menu_select_all).setVisible(!isItSelected);
+            mActionBarMenu.findItem(R.id.menu_deselect_all).setVisible(isItSelected);
+        }catch (Exception e){
+            Log.d(TAG,"Not ready");
+        }
     }
 }

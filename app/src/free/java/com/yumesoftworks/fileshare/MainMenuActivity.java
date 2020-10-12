@@ -114,7 +114,7 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
 
                 if (userInfoEntries.isEmpty()){
                     //we open the setup
-                    Intent settingsActivityIntent=new Intent(getApplicationContext(), WelcomeScreenActivity.class);
+                    Intent settingsActivityIntent=new Intent(thisActivity, WelcomeScreenActivity.class);
                     //clear backstack
                     settingsActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 
@@ -175,7 +175,7 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         switch (item.getItemId()){
             case R.id.menu_options:
                 //we call the settings option
-                Intent settingsActivityIntent=new Intent(getApplicationContext(), WelcomeScreenActivity.class);
+                Intent settingsActivityIntent=new Intent(thisActivity, WelcomeScreenActivity.class);
                 settingsActivityIntent.putExtra(WelcomeScreenActivity.EXTRA_SETTINGS_NAME,true);
 
                 startActivity(settingsActivityIntent);

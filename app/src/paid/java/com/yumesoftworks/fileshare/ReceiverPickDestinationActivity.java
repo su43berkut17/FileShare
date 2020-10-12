@@ -127,7 +127,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     private void askForFilePermission(){
         //we ask for permission before continuing
-        if (Build.VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= ConstantValues.STORAGE_PERMISSION_SDK) {
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
                 //initialize values

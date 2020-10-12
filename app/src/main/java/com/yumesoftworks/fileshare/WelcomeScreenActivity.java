@@ -211,7 +211,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     }
 
     private void goMainActivity(){
-        Intent mainMenuActivity=new Intent(getApplicationContext(), com.yumesoftworks.fileshare.MainMenuActivity.class);
+        Intent mainMenuActivity=new Intent(this, com.yumesoftworks.fileshare.MainMenuActivity.class);
 
         //delete the backstack
         mainMenuActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
