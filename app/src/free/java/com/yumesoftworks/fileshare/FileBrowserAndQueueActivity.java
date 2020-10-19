@@ -5,6 +5,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,6 +22,7 @@ import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,6 +42,7 @@ import com.yumesoftworks.fileshare.utils.MergeFileListAndDatabase;
 import com.yumesoftworks.fileshare.utils.UserConsent;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,6 +81,9 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     private String mPath;
     private static final String CURRENT_PATH_TAG="CurrentPathTag";
     private Context thisActivity;
+
+    //Received intent from sharing
+    private Intent mReceivedIntent;
 
     //for deletion in the queue viewer
     private boolean mIsNotDeletion=true;
@@ -124,6 +130,34 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         //get user data  viewmodel for SAF dialog
         userViewmodel=ViewModelProviders.of(this).get(WelcomeScreenViewModel.class);
         userViewmodel.getUserInfo().observe(this,fileInfoObserver);
+    }
+
+    private void handleOneFile(Intent recIntent){
+        Log.d(TAG, recIntent.getClipData().getItemAt(0).getUri().toString());
+        DocumentFile file = DocumentFile.fromSingleUri(thisActivity, recIntent.getClipData().getItemAt(0).getUri());
+        String name = file.getName();
+        String mime = file.getType();
+
+        FileListEntry fileEntry = new FileListEntry(recIntent.getClipData().getItemAt(0).getUri().toString(), name, 0, "", 0, mime, false,true);
+        queueViewerViewModel.saveFile(fileEntry);
+    }
+
+    private void handleMultipleFiles(Intent recIntent){
+        int numberItems=recIntent.getClipData().getItemCount();
+        Log.d(TAG,"Multiple files "+numberItems);
+        List<FileListEntry> fileArray=new ArrayList<>();
+
+        for (int i=0;i<numberItems;i++){
+            Log.d(TAG, recIntent.getClipData().getItemAt(i).getUri().toString());
+            DocumentFile file = DocumentFile.fromSingleUri(thisActivity, recIntent.getClipData().getItemAt(i).getUri());
+            String name = file.getName();
+            String mime = file.getType();
+
+            FileListEntry fileEntry = new FileListEntry(recIntent.getClipData().getItemAt(i).getUri().toString(), name, 0, "", 0, mime, false,true);
+            fileArray.add(fileEntry);
+        }
+
+        queueViewerViewModel.saveFiles(fileArray);
     }
 
     @Override
@@ -227,6 +261,19 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         }
 
         changeActionBarMenu(mCurrentFragment);
+
+        //check if there is any intents to handle
+        mReceivedIntent=getIntent();
+        String action=mReceivedIntent.getAction();
+        String type=mReceivedIntent.getType();
+
+        if (Intent.ACTION_SEND.equals(action) && type!=null){
+            //handle 1 file
+            handleOneFile(mReceivedIntent);
+        }else if(Intent.ACTION_SEND_MULTIPLE.equals(action) && type!=null){
+            //handle multiple files
+            handleMultipleFiles(mReceivedIntent);
+        }
     }
 
     //observer for the user data
@@ -400,8 +447,29 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
     @Override
     public void onButtonSendClicked() {
         //we go to the send activity
-        Intent intent=new Intent(this, com.yumesoftworks.fileshare.SenderPickDestinationActivity.class);
+        /*Intent intent=new Intent(this, com.yumesoftworks.fileshare.SenderPickDestinationActivity.class);
+        startActivity(intent);*/
+
+        //for debuggin purposes
+        //we call the activity that will start the service with the info
+        Intent intent = new Intent(this, TransferProgressActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        //data to send on the intent
+        Bundle bundleSend = new Bundle();
+
+        //local ip and port
+        bundleSend.putInt(TransferProgressActivity.EXTRA_TYPE_TRANSFER, TransferProgressActivity.FILES_SENDING);
+        bundleSend.putString(TransferProgressActivity.LOCAL_IP, "");
+        bundleSend.putInt(TransferProgressActivity.LOCAL_PORT, 10);
+        bundleSend.putString(TransferProgressActivity.REMOTE_IP, "");
+        bundleSend.putInt(TransferProgressActivity.REMOTE_PORT, 10);
+
+        //open the activity
+        Log.d(TAG, "Opening new activity with socket");
+        intent.putExtras(bundleSend);
         startActivity(intent);
+        finish();
     }
 
     //remove observers
@@ -507,7 +575,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                     String name = file.getName();
                     String mime = file.getType();
 
-                    FileListEntry fileEntry = new FileListEntry(data.getData().toString(), name, 0, "", 0, mime, false);
+                    FileListEntry fileEntry = new FileListEntry(data.getData().toString(), name, 0, "", 0, mime, false,true);
                     queueViewerViewModel.saveFile(fileEntry);
                     thisActivity.getContentResolver().takePersistableUriPermission(data.getData(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 } else if (data.getClipData() != null) {
@@ -524,7 +592,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                         String name = file.getName();
                         String mime = file.getType();
 
-                        FileListEntry fileEntry = new FileListEntry(data.getClipData().getItemAt(i).getUri().toString(), name, 0, "", 0, mime, false);
+                        FileListEntry fileEntry = new FileListEntry(data.getClipData().getItemAt(i).getUri().toString(), name, 0, "", 0, mime, false,true);
                         listEntry.add(fileEntry);
                         thisActivity.getContentResolver().takePersistableUriPermission(data.getClipData().getItemAt(i).getUri(),Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     }

@@ -16,11 +16,12 @@ public class FileListEntry implements Comparable<FileListEntry>{
     private String parentFolder;
     private int isSelected;
     private String mimeType;
+    private Boolean isUri;
     @Ignore
     private Boolean isDirectory;
 
     @Ignore
-    public FileListEntry(String path, String fileName, int isTransferred, String parentFolder, int isSelected, String mimeType, Boolean isDirectory){
+    public FileListEntry(String path, String fileName, int isTransferred, String parentFolder, int isSelected, String mimeType, Boolean isDirectory, Boolean isUri){
         this.path=path;
         this.fileName=fileName;
         this.isTransferred=isTransferred;
@@ -28,15 +29,17 @@ public class FileListEntry implements Comparable<FileListEntry>{
         this.isSelected=isSelected;
         this.mimeType=mimeType;
         this.isDirectory=isDirectory;
+        this.isUri=isUri;
     }
 
-    public FileListEntry(String path, String fileName, int isTransferred, String parentFolder, int isSelected, String mimeType){
+    public FileListEntry(String path, String fileName, int isTransferred, String parentFolder, int isSelected, String mimeType, Boolean isUri){
         this.path=path;
         this.fileName=fileName;
         this.isTransferred=isTransferred;
         this.parentFolder=parentFolder;
         this.isSelected=isSelected;
         this.mimeType=mimeType;
+        this.isUri=isUri;
         //this.isDirectory=isDirectory;
     }
 
@@ -88,6 +91,14 @@ public class FileListEntry implements Comparable<FileListEntry>{
     }
     public Boolean getDirectory() {
         return isDirectory;
+    }
+
+    public void setIsUri(Boolean uri) {
+        isUri = uri;
+    }
+
+    public Boolean getIsUri() {
+        return isUri;
     }
 
     //comparator

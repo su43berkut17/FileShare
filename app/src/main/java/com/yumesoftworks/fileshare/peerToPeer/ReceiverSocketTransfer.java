@@ -311,7 +311,8 @@ public class ReceiverSocketTransfer {
                                         tempFile.getParent(),
                                         0,
                                         mimeType,
-                                        tempFile.isDirectory());
+                                        tempFile.isDirectory(),
+                                        false);
 
                                 //send it
                                 mReceiverInterface.updateReceiveReceivedFile(tempEntry);
@@ -417,7 +418,8 @@ public class ReceiverSocketTransfer {
                                             "",
                                             0,
                                             mCurrentMime,
-                                            false);
+                                            false,
+                                            true);
 
                                     //send it
                                     mReceiverInterface.updateReceiveReceivedFile(tempEntry);

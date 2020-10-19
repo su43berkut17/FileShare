@@ -134,7 +134,7 @@ public class SenderSocketTransfer{
                             try {
                                 //get the size of the file
                                 Long fileSize=0L;
-                                if (Build.VERSION.SDK_INT<ConstantValues.SAF_SDK){
+                                if (!mFileEntry.getIsUri()){
                                     fileSize=new File(mFileEntry.getPath()).length();
                                 }else{
                                     Uri realURI=Uri.parse(mFileEntry.getPath());
@@ -175,7 +175,7 @@ public class SenderSocketTransfer{
                                 byte[] bytes = new byte[16 * 1024];
 
                                 //check if it is saf or file access
-                                if (Build.VERSION.SDK_INT<ConstantValues.SAF_SDK){
+                                if (!mFileEntry.getIsUri()){
                                     File file = new File(mFileEntry.getPath());
                                     fileInputStream = new FileInputStream(file);
                                 }else{

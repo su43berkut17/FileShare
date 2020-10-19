@@ -58,8 +58,8 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
         FileListEntry fileListEntry=mFileList.get(i);
         Long fileSize=0L;
 
-        //check if it is via saf or file
-        if (Build.VERSION.SDK_INT< ConstantValues.SAF_SDK) {
+        //check if it is uri or file
+        if (!fileListEntry.getIsUri()) {
             File tempFile = new File(fileListEntry.getPath());
 
             //size
@@ -70,7 +70,6 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
             try{
                 DocumentFile file=DocumentFile.fromSingleUri(mContext,realURI);
                 fileSize=file.length();
-
             }catch (Exception e){
                 Log.e(TAG,e.getMessage());
             }
@@ -109,7 +108,7 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
             Uri uri;
 
             //get uri
-            if (Build.VERSION.SDK_INT<ConstantValues.SAF_SDK) {
+            if (!fileListEntry.getIsUri()) {
                 uri = Uri.fromFile(new File(fileListEntry.getPath()));
             }else{
                 uri = Uri.parse(fileListEntry.getPath());

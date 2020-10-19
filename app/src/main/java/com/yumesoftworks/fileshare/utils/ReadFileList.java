@@ -48,7 +48,8 @@ public class ReadFileList {
                         upperLevel.getParent(),
                         0,
                         null,
-                        true);
+                        true,
+                        false);
 
                 fileList.add(parentEntry);
             }
@@ -68,7 +69,7 @@ public class ReadFileList {
                 String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
                         fileExtension.toLowerCase());
 
-                FileListEntry fileEntry = new FileListEntry(absPath, name, 0, parentPath, 0, mimeType, isDirectory);
+                FileListEntry fileEntry = new FileListEntry(absPath, name, 0, parentPath, 0, mimeType, isDirectory,false);
 
                 if (isDirectory) {
                     fileList.add(fileEntry);
