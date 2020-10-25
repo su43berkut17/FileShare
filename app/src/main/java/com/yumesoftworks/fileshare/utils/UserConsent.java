@@ -87,8 +87,7 @@ public class UserConsent {
         //initialize consent dialog
         URL privacyUrl = null;
         try {
-            // TODO: Replace with your app's privacy policy URL.
-            privacyUrl = new URL("https://www.yumesoftworks.com/");
+            privacyUrl = new URL("http://www.yumesoftworks.com/fileshareapp/fileshare-privacy-policy/");
         } catch (MalformedURLException e) {
             e.printStackTrace();
 

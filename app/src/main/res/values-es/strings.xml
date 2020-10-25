@@ -15,6 +15,7 @@
     <string name="aws_gdrp">Mostrar anuncios personalizados</string>
     <string name="aws_unlock_ads">Desactivar anuncios</string>
     <string name="aws_button_help">Ayuda</string>
+    <string name="aws_button_privacy">Política de Privacidad</string>
     <string name="aws_button_go">Siguiente</string>
     <string name="aws_button_save">Guardar Cambios</string>
     <string name="aws_keyboard_ime_action">Listo</string>

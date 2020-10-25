@@ -125,6 +125,15 @@
                         android:theme="@style/MyButtonsOutline"/>
 
                     <Button
+                        android:id="@+id/button_privacy_policy"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/aws_button_privacy"
+                        android:text="@string/aws_button_privacy"
+                        android:theme="@style/MyButtonsOutline"/>
+
+                    <Button
                         android:id="@+id/button_unlock_ads"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:theme="@style/MyButtonsOutline"

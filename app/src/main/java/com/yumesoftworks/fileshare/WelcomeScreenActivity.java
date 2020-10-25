@@ -69,6 +69,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     private Button buttonGo;
     private Button buttonCancel;
     private Button buttonHelp;
+    private Button buttonPrivacy;
     private Button buttonUnlockAds;
     private LinearLayout lineaLayoutGDRP;
     private Switch switchGDRP;
@@ -135,6 +136,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         buttonCancel=findViewById(R.id.button_cancel);
         buttonUnlockAds=findViewById(R.id.button_unlock_ads);
         buttonHelp=findViewById(R.id.button_help);
+        buttonPrivacy=findViewById(R.id.button_privacy_policy);
         tvUsername=findViewById(R.id.tv_aws_input_username);
 
         tvUsername.setOnEditorActionListener((v, actionId, event) -> {
@@ -149,6 +151,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         buttonGo.setOnClickListener(this);
         buttonCancel.setOnClickListener(this);
         buttonHelp.setOnClickListener(this);
+        buttonPrivacy.setOnClickListener(this);
 
         if (BuildConfig.FLAVOR.equals("free")){
             buttonUnlockAds.setOnClickListener(this);
@@ -245,6 +248,9 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
             case R.id.button_help:
                 openHelp();
                 break;
+            case R.id.button_privacy_policy:
+                openPrivacyPolicy();
+                break;
         }
     }
 
@@ -295,7 +301,15 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     private void openHelp(){
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(
-                "https://www.yumesoftworks.com/"));
+                "http://www.yumesoftworks.com/fileshareapp/filesharehelp/"));
+        startActivity(intent);
+    }
+
+    //open privacy plicy
+    private void openPrivacyPolicy(){
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(
+                "http://www.yumesoftworks.com/fileshareapp/fileshare-privacy-policy/"));
         startActivity(intent);
     }
 

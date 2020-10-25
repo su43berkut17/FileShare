@@ -324,13 +324,13 @@ public class ReceiverSocketTransfer {
                                 String relativeLocation ;
                                 //check the mime type
                                 if (mCurrentMime.contains("image")){
-                                    relativeLocation=Environment.DIRECTORY_PICTURES+File.separator+"FileShare";
+                                    relativeLocation=Environment.DIRECTORY_PICTURES+File.separator+"File Share";
                                 }else if(mCurrentMime.contains("video")){
-                                    relativeLocation=Environment.DIRECTORY_MOVIES+File.separator+"FileShare";;
+                                    relativeLocation=Environment.DIRECTORY_MOVIES+File.separator+"File Share";;
                                 }else if(mCurrentMime.contains("audio")){
-                                    relativeLocation=Environment.DIRECTORY_MUSIC+File.separator+"FileShare";;
+                                    relativeLocation=Environment.DIRECTORY_MUSIC+File.separator+"File Share";;
                                 }else{
-                                    relativeLocation=Environment.DIRECTORY_DOWNLOADS+File.separator+"FileShare";;
+                                    relativeLocation=Environment.DIRECTORY_DOWNLOADS+File.separator+"File Share";;
                                 }
 
                                 //content values depending on type

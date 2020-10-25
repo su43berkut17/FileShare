@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name_real" translatable="false">FileShare</string>
+    <string name="app_name_real" translatable="false">File Share</string>
 
     <!-- General purpose -->
     <string name="gen_button_ok">OK</string>
@@ -17,6 +17,7 @@
     <string name="aws_gdrp">Show personalized ads</string>
     <string name="aws_unlock_ads">Hide Ads</string>
     <string name="aws_button_help">Help</string>
+    <string name="aws_button_privacy">Privacy Policy</string>
     <string name="aws_button_go">Go</string>
     <string name="aws_button_save">Save Changes</string>
     <string name="aws_keyboard_ime_action">Done</string>
@@ -98,7 +99,7 @@
     <!-- Widget -->
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
-    <string name="widget_tv_title" translatable="false">FileShare</string>
+    <string name="widget_tv_title" translatable="false">File Share</string>
     <string name="widget_tv_lifetime">Lifetime transfers</string>
     <string name="widget_tv_number" translatable="false">0</string>
     <string name="widget_tv_of">1 of 1</string>
