@@ -185,6 +185,10 @@ public class QueueViewer extends Fragment implements QueueListAdapter.QueueClick
         }
     }
 
+    public int getItemCount(){
+        return rvAdapter.getItemCount();
+    }
+
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
         FileListEntry entryToDelete = rvAdapter.getFileItem(position);

@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.yumesoftworks.fileshare.data.FileListEntry;
@@ -141,7 +142,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
     private void initializeVariables(){
         Log.d(TAG,"initializing variables");
-        changeActionBarName("FileShare - Send Files");
+        changeActionBarName("File Share - Send Files");
         changeActionBarMenu(mCurrentFragment);
 
         //we check if we have old versions of the fragments
@@ -385,9 +386,14 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
     @Override
     public void onButtonSendClicked() {
-        //we go to the send activity
-        Intent intent=new Intent(this, com.yumesoftworks.fileshare.SenderPickDestinationActivity.class);
-        startActivity(intent);
+        //check if queue is empty
+        if (fragmentQueueViewer.getItemCount()>0){
+            //we go to the send activity
+            Intent intent=new Intent(this, com.yumesoftworks.fileshare.SenderPickDestinationActivity.class);
+            startActivity(intent);
+        }else{
+            Toast.makeText(thisActivity,R.string.fq_tv_empty_queue, Toast.LENGTH_SHORT).show();
+        }
     }
 
     //remove observers
