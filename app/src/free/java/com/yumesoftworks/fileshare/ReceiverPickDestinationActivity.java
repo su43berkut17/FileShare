@@ -33,6 +33,8 @@ import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.yumesoftworks.fileshare.data.AvatarDefaultImages;
 import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
@@ -355,8 +357,11 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     @Override
     public void initAd(Boolean isTracking) {
-        MobileAds.initialize(mContext,
-                "ca-app-pub-3940256099942544/6300978111");
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+            }
+        });
 
         mAdView = findViewById(R.id.ad_view_receiver_pick_destination);
         AdRequest adRequest;

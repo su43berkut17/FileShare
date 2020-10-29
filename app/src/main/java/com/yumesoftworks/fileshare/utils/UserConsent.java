@@ -9,6 +9,7 @@ import com.google.ads.consent.ConsentInfoUpdateListener;
 import com.google.ads.consent.ConsentInformation;
 import com.google.ads.consent.ConsentStatus;
 import com.google.ads.consent.DebugGeography;
+import com.yumesoftworks.fileshare.ConstantValues;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -43,8 +44,8 @@ public class UserConsent {
     public void checkConsent(){
         Log.d(TAG,"Checking the user consent");
         //consent
-        consentInformation.setDebugGeography(DebugGeography.DEBUG_GEOGRAPHY_EEA);
-        String[] publisherIds = {"pub-1123123"};
+        //consentInformation.setDebugGeography(DebugGeography.DEBUG_GEOGRAPHY_EEA);
+        String[] publisherIds = {ConstantValues.admob_pub_id};
         consentInformation.requestConsentInfoUpdate(publisherIds, new ConsentInfoUpdateListener() {
             @Override
             public void onConsentInfoUpdated(ConsentStatus consentStatus) {
