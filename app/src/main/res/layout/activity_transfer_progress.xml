@@ -49,13 +49,14 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <com.google.android.gms.ads.AdView
+                    xmlns:ads="http://schemas.android.com/apk/res-auto"
                     android:id="@+id/ad_view_transfer_progress"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_weight=".1"
-                    app:adSize="BANNER"
-                    app:adUnitId="ca-app-pub-3940256099942544/6300978111"
+                    ads:adSize="BANNER"
+                    ads:adUnitId="@string/admob_unit"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.5"

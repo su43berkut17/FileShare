@@ -26,6 +26,8 @@ import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 
@@ -206,8 +208,11 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void initAd(Boolean isTracking) {
-        MobileAds.initialize(thisActivity,
-                "ca-app-pub-3940256099942544/6300978111");
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+            }
+        });
 
         mAdView = findViewById(R.id.ad_view_main_menu);
         AdRequest adRequest;
