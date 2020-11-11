@@ -522,9 +522,9 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                     int selectedCount = data.getClipData().getItemCount();
                     List<FileListEntry> listEntry = new ArrayList<>();
 
-                    //limit selected count to 128
-                    if (selectedCount>128){
-                        selectedCount=128;
+                    //limit selected count to 512
+                    if (selectedCount>512){
+                        selectedCount=512;
                     }
 
                     for (int i = 0; i < selectedCount; i++) {

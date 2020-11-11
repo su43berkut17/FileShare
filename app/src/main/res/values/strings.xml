@@ -45,7 +45,7 @@
     <string name="fb_button_review_queue">Back to Queue</string>
     <string name="fb_path_description">The filepath</string>
     <string name="fb_incompatible_file">No available apps to open this file</string>
-    <string name="fb_dialog_android_11_saf_limitations">Android 11 limits the number of files you can add to the queue. If you add over 128 files to the queue, only the 1st 128 will be transferred.</string>
+    <string name="fb_dialog_android_11_saf_limitations">Android 11 limits the number of files you can add to the queue. If you add over 512 files to the queue, only the 1st 128 will be transferred.</string>
     <string name="fb_select_all_text">Select All</string>
     <string name="fb_deselect_all_text">Deselect All</string>
 
