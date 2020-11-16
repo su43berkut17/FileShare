@@ -2,7 +2,7 @@ package com.yumesoftworks.fileshare;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -327,7 +327,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
                 .commit();
 
         //we get the view model for the user transfer info
-        transferProgressActivityViewModel=ViewModelProviders.of(this).get(TransferProgressActivityViewModel.class);
+        transferProgressActivityViewModel= new ViewModelProvider(this).get(TransferProgressActivityViewModel.class);
         transferProgressActivityViewModel.getData().observe(this,transferProgressActivityViewModelObserver);
     }
 
@@ -335,46 +335,9 @@ public class TransferProgressActivity extends AppCompatActivity implements
     final Observer<List<FileListEntry>> fileTransferViewModelObserver=new Observer<List<FileListEntry>>() {
         @Override
         public void onChanged(@Nullable List<FileListEntry> fileListEntries) {
-            sortFilesBySendOrReceive(fileListEntries);
+            fragmentFileTransferProgress.updateRV(fileListEntries);
         }
     };
-
-    //file observer sorting
-    private void sortFilesBySendOrReceive(List<FileListEntry> fileListEntries){
-        //check if the type of service has been initialized
-        try{
-            if (mTypeServiceOrRelaunch==0){
-                mTypeServiceOrRelaunch=mService.typeOfService();
-            }
-        }catch (Exception e){
-            Log.d(TAG,"Unable to get the type of service yet");
-        }
-
-        try {
-            //we create a list for the not transferred and one for the transferred
-            List<FileListEntry> tempSent = new ArrayList<>();
-            List<FileListEntry> tempNotSent = new ArrayList<>();
-
-            for (int i = 0; i < fileListEntries.size(); i++) {
-                //files sent always will be added
-                tempSent.add(fileListEntries.get(i));
-
-                if (fileListEntries.get(i).getIsTransferred() == 0) {
-                    tempNotSent.add(fileListEntries.get(i));
-                }
-            }
-            Log.d(TAG, "Number of files to be sent: " + tempNotSent.size());
-            Log.d(TAG, "Number of files sent: " + tempSent.size());
-            Log.d(TAG, "Type of service: " + mTypeServiceOrRelaunch + " sending=2001 receiving =2002");
-            if (mTypeServiceOrRelaunch == FILES_SENDING) {
-                fragmentFileTransferProgress.updateRV(tempNotSent);
-            } else if (mTypeServiceOrRelaunch == FILES_RECEIVING) {
-                fragmentFileTransferProgress.updateRV(fileListEntries);
-            }
-        }catch (Exception e){
-            Log.e(TAG,"failed to sort files by send or receive"+ e.getMessage());
-        }
-    }
 
     //user info observer
     final Observer<List<UserInfoEntry>> transferProgressActivityViewModelObserver=new Observer<List<UserInfoEntry>>() {
@@ -682,7 +645,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
     //bind the service
     void activateFileListObserver(){
         //we get the file model to get user data and transfer status
-        fileTransferViewModel=ViewModelProviders.of(this).get(FileTransferViewModel.class);
+        fileTransferViewModel= new ViewModelProvider(this, new FileTransferViewModelFactory(this.getApplication())).get(FileTransferViewModel.class);
         fileTransferViewModel.getFileListInfo().observe(this,fileTransferViewModelObserver);
     }
 

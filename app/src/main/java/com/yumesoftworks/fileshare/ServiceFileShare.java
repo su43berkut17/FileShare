@@ -51,7 +51,6 @@ public class ServiceFileShare extends Service implements
     //database access
     private FileListRepository repositoryFile;
     private UserInfoRepository repositoryUser;
-    //private int mCurrentStatus;
 
     //threading
     private Thread readDataThread;

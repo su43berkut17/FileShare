@@ -15,6 +15,9 @@ public interface FileListDao {
     @Query("SELECT * FROM FileList"+" ORDER BY LOWER(path)")
     LiveData<List<FileListEntry>> loadFileList();
 
+    @Query("SELECT * FROM FileList WHERE isTransferred= :sentValue"+" ORDER BY LOWER(path)")
+    LiveData<List<FileListEntry>> loadFileBySentStatus(int sentValue);
+
     @Query("SELECT * FROM FileList"+" ORDER BY path")
     //no live data
     List<FileListEntry> loadFileListDirect();
