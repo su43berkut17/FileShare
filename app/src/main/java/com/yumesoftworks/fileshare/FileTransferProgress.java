@@ -67,6 +67,7 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
 
         rvFileList=fileProgressView.findViewById(R.id.rv_file_progress_queue);
         rvFileList.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvFileList.setHasFixedSize(true);
 
         rvAdapter=new QueueListAdapter(getContext(),this);
 
@@ -120,8 +121,7 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
 
     //updating recycler view
     public void updateRV(List<FileListEntry> receivedFileList){
-        rvAdapter.setFileList(receivedFileList);
-        rvAdapter.notifyDataSetChanged();
+        rvAdapter.setFileListTransfer(receivedFileList);
     }
 
     public void changeButton(){

@@ -643,7 +643,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
     //before setting up the file list observer we need to know what kind of transfer it is
     // (sending or receiving) we can get that info from the service so we call this after we
     //bind the service
-    void activateFileListObserver(){
+    private void activateFileListObserver(){
         //we get the file model to get user data and transfer status
         fileTransferViewModel= new ViewModelProvider(this, new FileTransferViewModelFactory(this.getApplication())).get(FileTransferViewModel.class);
         fileTransferViewModel.getFileListInfo().observe(this,fileTransferViewModelObserver);

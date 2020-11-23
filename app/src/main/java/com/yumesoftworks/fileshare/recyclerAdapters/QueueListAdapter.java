@@ -1,19 +1,15 @@
 package com.yumesoftworks.fileshare.recyclerAdapters;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Build;
-import android.os.ParcelFileDescriptor;
-import android.provider.MediaStore;
-import android.provider.OpenableColumns;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,9 +22,12 @@ import com.bumptech.glide.request.RequestOptions;
 import com.yumesoftworks.fileshare.ConstantValues;
 import com.yumesoftworks.fileshare.R;
 import com.yumesoftworks.fileshare.data.FileListEntry;
+import com.yumesoftworks.fileshare.utils.DiffUtilTransferRecyclerView;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 
 public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.QueueListViewHolder> {
@@ -36,6 +35,7 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
     final private QueueClickListener mQueueClickListener;
 
     private List<FileListEntry> mFileList;
+    private Deque<List<FileListEntry>> pendingUpdates = new ArrayDeque<>();
     private Context mContext;
 
     public QueueListAdapter (Context context, QueueClickListener listener){
@@ -57,6 +57,15 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
     public void onBindViewHolder(@NonNull QueueListViewHolder queueListViewHolder, int i) {
         FileListEntry fileListEntry=mFileList.get(i);
         Long fileSize=0L;
+
+        //check if it has been changed
+        if (fileListEntry.getIsTransferred()==1){
+            //it is transferred, show the icon
+            queueListViewHolder.iv_transferred_icon.setVisibility(View.VISIBLE);
+        }else{
+            //hide the icon
+            queueListViewHolder.iv_transferred_icon.setVisibility(View.GONE);
+        }
 
         //check if it is via saf or file
         if (Build.VERSION.SDK_INT< ConstantValues.SAF_SDK) {
@@ -159,16 +168,57 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
         return mFileList.size();
     }
 
-    //public method to return data in adapter
-    public List<FileListEntry> getAvatarList(){
-        return mFileList;
-    }
-
     //public method to update adapter
     public void setFileList(List<FileListEntry> FileListData){
         Log.d(TAG,"settling new file list on the adapter");
         mFileList=FileListData;
         notifyDataSetChanged();
+    }
+
+    public void setFileListTransfer(List<FileListEntry> fileListData){
+        pendingUpdates.push(fileListData);
+        if (pendingUpdates.size()>1){
+            return;
+        }
+        updateItemsTransfer(fileListData);
+    }
+
+    void updateItemsTransfer(final List<FileListEntry> newItems) {
+        final List<FileListEntry> oldItems = new ArrayList<>(this.mFileList);
+        final Handler handler = new Handler();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final DiffUtil.DiffResult diffResult =
+                        DiffUtil.calculateDiff(new DiffUtilTransferRecyclerView(newItems,oldItems),false);
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        applyDiffResult(newItems, diffResult);
+                    }
+                });
+            }
+        }).start();
+    }
+
+    // This method is called when the background work is done
+    protected void applyDiffResult(List<FileListEntry> newItems,
+                                   DiffUtil.DiffResult diffResult) {
+        pendingUpdates.remove(newItems);
+        dispatchUpdates(newItems, diffResult);
+        if (pendingUpdates.size()>0){
+            List<FileListEntry> latest = pendingUpdates.pop();
+            pendingUpdates.clear();
+            updateItemsTransfer(latest);
+        }
+    }
+
+    //Finally notify adapter
+    protected void dispatchUpdates(List<FileListEntry> newItems,
+                                   DiffUtil.DiffResult diffResult) {
+        diffResult.dispatchUpdatesTo(this);
+        mFileList.clear();
+        mFileList.addAll(newItems);
     }
 
     //public method to get adapter item
@@ -191,6 +241,7 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
     //ViewHolder
     class QueueListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView iv_icon;
+        ImageView iv_transferred_icon;
         TextView tv_fileName;
         TextView tv_size;
         ConstraintLayout view_foreground;
@@ -200,6 +251,7 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
             super(itemView);
 
             iv_icon=itemView.findViewById(R.id.iv_item_file_queue);
+            iv_transferred_icon=itemView.findViewById(R.id.iv_item_transferred);
             tv_fileName=itemView.findViewById(R.id.tv_item_file_name_queue);
             view_foreground=itemView.findViewById(R.id.v_item_file_queue_foreground);
             tv_size=itemView.findViewById(R.id.tv_item_file_size_queue);

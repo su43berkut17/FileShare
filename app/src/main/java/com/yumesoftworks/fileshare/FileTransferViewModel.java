@@ -23,10 +23,7 @@ public class FileTransferViewModel extends AndroidViewModel {
         //we load the database
         database=AppDatabase.getInstance(this.getApplication());
 
-        //Always sending 0 because while sending we want to display only unsent files and while
-        //receiving we want to display all files nevertheless. Value is only modified
-        //when we sent the files to successfully transferred
-        data=database.fileListDao().loadFileBySentStatus(0);
+        data=database.fileListDao().loadFileList();
     }
 
     public LiveData<List<FileListEntry>> getFileListInfo(){
