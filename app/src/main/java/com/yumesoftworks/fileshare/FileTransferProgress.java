@@ -67,7 +67,6 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
 
         rvFileList=fileProgressView.findViewById(R.id.rv_file_progress_queue);
         rvFileList.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvFileList.setHasFixedSize(true);
 
         rvAdapter=new QueueListAdapter(getContext(),this);
 
@@ -94,10 +93,13 @@ public class FileTransferProgress extends Fragment implements QueueListAdapter.Q
     public void transferType(int typeOfTransfer){
         if (typeOfTransfer == com.yumesoftworks.fileshare.TransferProgressActivity.FILES_RECEIVING){
             mTitleQueue.setText(R.string.ats_tv_received_files);
+            rvFileList.setHasFixedSize(false);
         }else if (typeOfTransfer == com.yumesoftworks.fileshare.TransferProgressActivity.FILES_SENDING){
             mTitleQueue.setText(R.string.atp_tv_files_in_queue);
+            rvFileList.setHasFixedSize(true);
         }else{
             mTitleQueue.setText(R.string.ats_tv_error);
+            rvFileList.setHasFixedSize(false);
         }
     }
 

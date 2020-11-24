@@ -176,11 +176,17 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
     }
 
     public void setFileListTransfer(List<FileListEntry> fileListData){
-        pendingUpdates.push(fileListData);
-        if (pendingUpdates.size()>1){
-            return;
+        //check if the mFileList is empty
+        if (mFileList==null){
+            mFileList=fileListData;
+            notifyDataSetChanged();
+        }else{
+            pendingUpdates.push(fileListData);
+            if (pendingUpdates.size()>1){
+                return;
+            }
+            updateItemsTransfer(fileListData);
         }
-        updateItemsTransfer(fileListData);
     }
 
     void updateItemsTransfer(final List<FileListEntry> newItems) {
