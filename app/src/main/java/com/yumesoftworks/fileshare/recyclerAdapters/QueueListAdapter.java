@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -156,6 +157,23 @@ public class QueueListAdapter extends RecyclerView.Adapter<QueueListAdapter.Queu
                         .apply(smallSize)
                         .placeholder(placeholderUri)
                         .into(queueListViewHolder.iv_icon);
+            }
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull QueueListViewHolder holder, int position, @NonNull List<Object> payloads) {
+        if (payloads.isEmpty()){
+            super.onBindViewHolder(holder, position, payloads);
+        }else{
+            Bundle bundle=(Bundle) payloads.get(0);
+            if (bundle.getBoolean(DiffUtilTransferRecyclerView.DIFF_TRANSFER_STATUS)){
+                holder.iv_transferred_icon.setAlpha(0f);
+                holder.iv_transferred_icon.setVisibility(View.VISIBLE);
+                holder.iv_transferred_icon.animate()
+                        .alpha(1f)
+                        .setDuration(300)
+                        .setListener(null);
             }
         }
     }
