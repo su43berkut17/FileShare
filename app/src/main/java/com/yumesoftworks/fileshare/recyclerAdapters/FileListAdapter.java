@@ -66,7 +66,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.FileLi
 
         //placeholder uri
         int placeholderUri = mContext.getResources().getIdentifier("icon_file_128","drawable",mContext.getPackageName());
-        RequestOptions smallSize=new RequestOptions().override(200,200);
+        RequestOptions smallSize=new RequestOptions().override(128,128);
 
         //we check if it is a directory
         if (fileListEntry.getDirectory()!=null && fileListEntry.getDirectory()==true){

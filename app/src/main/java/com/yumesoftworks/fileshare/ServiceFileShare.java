@@ -526,7 +526,7 @@ public class ServiceFileShare extends Service implements
             String fileName = textInfoSendObject.getMessageContent();
             String stringNumbers = textInfoSendObject.getAdditionalInfo();
             String[] currentNumbers = stringNumbers.split(",");
-            String finalNotificationText = fileName + " " + currentNumbers[0] + getString(R.string.atp_tv__number_connector) + " " + currentNumbers[1];
+            String finalNotificationText = fileName + " " + currentNumbers[0] + " " + getString(R.string.atp_tv__number_connector) + " " + currentNumbers[1];
 
             //we change the member variables of the progress
             int currentFile = Integer.parseInt(currentNumbers[0]);
