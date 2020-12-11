@@ -1,5 +1,6 @@
 package com.yumesoftworks.fileshare;
 
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -134,6 +135,7 @@ public class TransferProgressActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_transfer_progress);
 
         thisActivity=this;
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         Log.d(TAG,"onCreate called");
 
         //we get the instance of the indeterminate progress bar

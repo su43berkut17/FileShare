@@ -1,5 +1,6 @@
 package com.yumesoftworks.fileshare;
 
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -98,6 +99,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_file_browser_and_queue);
 
         thisActivity=this;
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
         //check the user consent
         UserConsent userConsent=new UserConsent(thisActivity);
