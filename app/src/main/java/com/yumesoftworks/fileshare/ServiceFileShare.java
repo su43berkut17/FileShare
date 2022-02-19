@@ -334,12 +334,22 @@ public class ServiceFileShare extends Service implements
         //intent to open the activity
         Intent intentApp=new Intent(getApplicationContext(),TransferProgressActivity.class);
         intentApp.putExtras(extras);
-        PendingIntent pendingIntentApp=PendingIntent.getActivity(this,0,intentApp,PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntentApp;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            pendingIntentApp = PendingIntent.getActivity(this, 0, intentApp, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+        }else{
+            pendingIntentApp = PendingIntent.getActivity(this, 0, intentApp, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
 
         //intent to stop the transfer
         Intent intentStop=new Intent(this,ServiceFileShare.class);
         intentStop.setAction(ACTION_STOP_SERVICE);
-        PendingIntent pendingIntentStopService=PendingIntent.getService(this,0,intentStop,PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntentStopService;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            pendingIntentStopService = PendingIntent.getService(this, 0, intentStop, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+        }else{
+            pendingIntentStopService = PendingIntent.getService(this, 0, intentStop, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
 
         //we set the notification
         return new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL)

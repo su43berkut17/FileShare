@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -104,7 +105,12 @@ public class TransferProgressWidget extends AppWidgetProvider {
                 intentTransfer.putExtras(extras);
 
                 //PendingIntent pendingIntentTransfer = PendingIntent.getActivity(context, 0, intentTransfer, 0);
-                PendingIntent pendingIntentTransfer=PendingIntent.getActivity(context,0,intentTransfer,PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent pendingIntentTransfer;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    pendingIntentTransfer = PendingIntent.getActivity(context, 0, intentTransfer, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+                }else{
+                    pendingIntentTransfer = PendingIntent.getActivity(context, 0, intentTransfer, PendingIntent.FLAG_UPDATE_CURRENT);
+                }
 
                 //we set the pending intent for the widget
                 views.setOnClickPendingIntent(R.id.widget_transfer_state, pendingIntentTransfer);
@@ -120,7 +126,12 @@ public class TransferProgressWidget extends AppWidgetProvider {
 
                 //we set the pending intent to launch the main app when the widget is in its default mode
                 Intent intent = new Intent(context, MainMenuActivity.class);
-                PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+                PendingIntent pendingIntent;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+                }else{
+                    pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+                }
 
                 //we set the pending intent for the widget
                 views.setOnClickPendingIntent(R.id.widget_default_state, pendingIntent);
