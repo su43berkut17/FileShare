@@ -42,13 +42,13 @@ android {
         free {
             dimension "tier"
             applicationId 'com.yumesoftworks.fileshare.free'
-            resValue "string", "app_name", "File Share Free"
+            resValue "string", "app_name", "File Share"
         }
 
         paid {
             dimension "tier"
             applicationId 'com.yumesoftworks.fileshare.paid'
-            resValue "string", "app_name", "File Share"
+            resValue "string", "app_name", "File Share Pro"
         }
     }
 
