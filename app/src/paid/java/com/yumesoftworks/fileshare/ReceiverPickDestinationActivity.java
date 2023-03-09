@@ -1,17 +1,26 @@
 package com.yumesoftworks.fileshare;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.UriPermission;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -31,6 +40,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.yumesoftworks.fileshare.data.AvatarDefaultImages;
 import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
+import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
 import com.yumesoftworks.fileshare.peerToPeer.ReceiverPickSocket;
@@ -66,6 +76,9 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     //prevent double launch app
     private boolean mLaunchNewActivity=false;
+
+    //activity result
+    private ActivityResultLauncher<Intent> folderDestinationResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +119,31 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
         //we set the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        // You can do the assignment inside onAttach or onCreate, i.e, before the activity is displayed
+        folderDestinationResult = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getResultCode() == Activity.RESULT_OK) {
+                            // There are no request codes
+                            Intent data = result.getData();
+
+                            Uri uri = null;
+                            if (data != null) {
+                                uri = data.getData();
+                            }
+
+                            Log.e(TAG,"The Folder selected is "+uri.getPath());
+                            //persist the access
+                            DocumentFile file = DocumentFile.fromSingleUri(mContext, data.getData());
+                            mContext.getContentResolver().takePersistableUriPermission(file.getUri(), Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+                            initialize();
+                        }
+                    }
+                });
     }
 
     private void checkWifi(){
@@ -127,25 +165,55 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     private void askForFilePermission(){
         //we ask for permission before continuing
-        if (Build.VERSION.SDK_INT >= ConstantValues.STORAGE_PERMISSION_SDK) {
-            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    == PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT>=ConstantValues.STORAGE_FOLDER_PERMISSION){
+            //we need to make sure the receiver will set up a destination folder
+            List<UriPermission> permissionList = mContext.getContentResolver().getPersistedUriPermissions();
+            Log.d(TAG,"Persisted permissions: "+permissionList.size());
+            Boolean doWeCallSAF=true;
+
+            //check if there is a write permission for the chosen folder
+            for (UriPermission permission:permissionList
+            ) {
+                Log.d(TAG,"Persisted uri:"+permission.getUri().toString());
+                if (permission.isWritePermission()){
+                    //no need to pick a new folder
+                    doWeCallSAF=false;
+                }
+            }
+
+            //call
+            if (doWeCallSAF) {
+                Log.d(TAG,"call SAF");
+                // Choose a directory using the system's file picker.
+                Toast.makeText(mContext, R.string.ru_toast_pick_destination, Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+                folderDestinationResult.launch(intent);
+            }else{
+                Log.d(TAG,"we will initialize");
+                initialize();
+            }
+        }else{
+            //ask for permission
+            if (Build.VERSION.SDK_INT >= ConstantValues.STORAGE_PERMISSION_SDK) {
+                if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    //initialize values
+                    initialize();
+                } else {
+                    //we ask for permission
+                    ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                }
+            } else {
+                //permission is automatically granted on sdk<23 upon installation
                 //initialize values
                 initialize();
-            } else {
-                //we ask for permission
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
             }
-        } else {
-            //permission is automatically granted on sdk<23 upon installation
-            //initialize values
-            initialize();
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        //super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0]==PackageManager.PERMISSION_GRANTED){
             //initialize values
             initialize();

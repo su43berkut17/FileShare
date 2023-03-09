@@ -11,14 +11,14 @@ def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
     defaultConfig {
         applicationId "com.yumesoftworks.fileshare"
         minSdkVersion 19
-        targetSdkVersion 31
+        targetSdkVersion 33
         multiDexEnabled true
-        versionCode 8
-        versionName "1.0.6"
+        versionCode 9
+        versionName "1.0.7"
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -67,30 +67,31 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    namespace 'com.yumesoftworks.fileshare'
 
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.appcompat:appcompat:1.5.1'
 
     implementation 'androidx.vectordrawable:vectordrawable-animated:1.1.0'
-    implementation 'androidx.exifinterface:exifinterface:1.3.3'
+    implementation 'androidx.exifinterface:exifinterface:1.3.5'
     implementation 'androidx.browser:browser:1.4.0'
-    implementation 'androidx.media:media:1.5.0'
+    implementation 'androidx.media:media:1.6.0'
 
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
-    implementation 'androidx.recyclerview:recyclerview:1.3.0-alpha01'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.recyclerview:recyclerview:1.3.0-rc01'
     implementation 'com.google.android.material:material:1.5.0'
 
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test:rules:1.4.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test:core:1.4.0'
+    androidTestImplementation 'androidx.test:core:1.5.0'
 
     def fragment_version = '1.2.0'
     debugImplementation 'androidx.fragment:fragment-testing:1.4.1'
-    debugImplementation 'androidx.test:core:1.4.0'
+    debugImplementation 'androidx.test:core:1.5.0'
 
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.4.0'
@@ -103,25 +104,31 @@ dependencies {
 
     //room
     def room_version = '2.2.0-alpha02'
-    implementation 'androidx.room:room-runtime:2.4.1'
-    annotationProcessor 'androidx.room:room-compiler:2.4.1'
+    implementation 'androidx.room:room-runtime:2.4.3'
+    annotationProcessor 'androidx.room:room-compiler:2.4.3'
 
     //View model and lifecycle
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    annotationProcessor 'androidx.lifecycle:lifecycle-compiler:2.5.0-alpha02'
+    annotationProcessor 'androidx.lifecycle:lifecycle-compiler:2.6.0-alpha03'
+    implementation "androidx.lifecycle:lifecycle-viewmodel:2.5.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
 
     //multidex
     implementation 'androidx.multidex:multidex:2.0.1'
 
     //firebase analytics and admob
-    freeImplementation 'com.google.android.gms:play-services-ads:20.5.0'
-    implementation 'com.google.firebase:firebase-core:20.1.0'
+    freeImplementation 'com.google.android.gms:play-services-ads:21.4.0'
+    implementation platform('com.google.firebase:firebase-bom:31.1.1')
+
+    //implementation 'com.google.firebase:firebase-core:20.1.0'
 
     // Recommended: Add the Firebase SDK for Google Analytics.
-    implementation 'com.google.firebase:firebase-analytics:20.1.0'
+    //implementation 'com.google.firebase:firebase-analytics:20.1.0'
+    implementation 'com.google.firebase:firebase-analytics'
 
     // Add the Firebase Crashlytics SDK.
-    implementation 'com.google.firebase:firebase-crashlytics:18.2.8'
+    //implementation 'com.google.firebase:firebase-crashlytics:18.2.8'
+    implementation 'com.google.firebase:firebase-crashlytics'
 
     //consent for gdrp
     implementation 'com.google.android.ads.consent:consent-library:1.0.8'

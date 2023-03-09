@@ -278,7 +278,9 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
                 initializeVariables();
             } else {
                 //we ask for permission
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                //TODO
+                //ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                initializeVariables();
             }
         } else {
             //permission is automatically granted on sdk<23 upon installation
@@ -297,7 +299,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        //super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0]==PackageManager.PERMISSION_GRANTED){
             //we create the fragment
             initializeVariables();

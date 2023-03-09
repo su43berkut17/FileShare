@@ -146,7 +146,9 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         for (UriPermission permission:permissionList
         ) {
             Log.d(TAG,"Persisted uri:"+permission.getUri().toString());
-            thisActivity.getContentResolver().releasePersistableUriPermission(permission.getUri(),Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (!permission.isWritePermission()) {
+                thisActivity.getContentResolver().releasePersistableUriPermission(permission.getUri(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
         }
     }
 

@@ -69,6 +69,7 @@
     <string name="ru_tv_username">Usuario</string>
     <string name="ru_wifi_disabled">Active el WiFi e inténtelo nuevamente.</string>
     <string name="ru_version">Versión</string>
+    <string name="ru_toast_pick_destination">Elija una carpeta de destino para sus archivos</string>
 
     <!--Activity transfer progress-->
     <string name="atp_tv_filename">Nombre de archivo</string>
