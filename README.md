@@ -4,7 +4,7 @@ Open Source File Sharing app for android devices.
 I share files between devices constantly without cables but: 
  - Most of the available solutions won't work on my old devices.
  - They had many features that I didn't need, it was a bloated experience.
- - Too many instrusive ads.
+ - Too many intrusive ads.
 
 ## Features
  - No internet connection required, it uses the current WiFi connection.
