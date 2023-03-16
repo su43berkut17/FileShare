@@ -17,6 +17,7 @@
     <string name="aws_button_help">Ayuda</string>
     <string name="aws_button_privacy">Política de Privacidad</string>
     <string name="aws_button_go">Siguiente</string>
+    <string name="aws_button_request_notification_permission">Permitir notificaciones</string>
     <string name="aws_button_save">Guardar Cambios</string>
     <string name="aws_keyboard_ime_action">Listo</string>
 
@@ -42,6 +43,8 @@
     <string name="fb_dialog_android_11_saf_limitations">Android 11 limita la cantidad de archivos que puede agregar a la lista. Si agrega más de 512 archivos, solo se transferirán los primeros 512.</string>
     <string name="fb_select_all_text">Seleccionar Todos</string>
     <string name="fb_deselect_all_text">Deseleccionar Todos</string>
+    <string name="fb_notification_permission">Accesso a notificationes es necesario para iniciar la transferencia de archivos.</string>
+    <string name="fb_notification_permission_warning">Permiso de notificaciones denegado repetidamente. Remediar acceso en menu de privacidad de Android. </string>
 
     <!-- Activity file queue -->
     <string name="fq_tv_title_queue">Archivos a enviar:</string>

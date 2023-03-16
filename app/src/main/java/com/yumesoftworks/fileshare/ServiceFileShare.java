@@ -285,7 +285,7 @@ public class ServiceFileShare extends Service implements
         Log.d(TAG,"the action is "+mAction);
 
         //we check if the intent is to send or to receive
-        if (mAction== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_SENDING){
+        if (mAction== TransferProgressActivity.FILES_SENDING){
             //we are sending files
             //change to send or receive
             switchServiceType(TransferProgressActivity.SERVICE_TYPE_SENDING);
@@ -296,8 +296,8 @@ public class ServiceFileShare extends Service implements
             //we start the socket for communication
             try{
                 mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,
-                        receivedBundle.getString(com.yumesoftworks.fileshare.TransferProgressActivity.REMOTE_IP),
-                        receivedBundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.REMOTE_PORT),
+                        receivedBundle.getString(TransferProgressActivity.REMOTE_IP),
+                        receivedBundle.getInt(TransferProgressActivity.REMOTE_PORT),
                         mFileListEntry,mAction);
 
             }catch (Exception e){
@@ -305,13 +305,13 @@ public class ServiceFileShare extends Service implements
                 e.printStackTrace();
                 connectionError();
             }
-        }else if (mAction== com.yumesoftworks.fileshare.TransferProgressActivity.FILES_RECEIVING){
+        }else if (mAction== TransferProgressActivity.FILES_RECEIVING){
             //we are receiving files
             //change to send or receive
             switchServiceType(TransferProgressActivity.SERVICE_TYPE_RECEIVING);
             try{
                 //create the server socket
-                mPort=receivedBundle.getInt(com.yumesoftworks.fileshare.TransferProgressActivity.LOCAL_PORT);
+                mPort=receivedBundle.getInt(TransferProgressActivity.LOCAL_PORT);
 
                 mTransferFileCoordinatorHelper=new TransferFileCoordinatorHelper(this,mPort,mAction);
             }catch (Exception e){
