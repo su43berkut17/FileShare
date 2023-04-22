@@ -1,13 +1,16 @@
 package com.yumesoftworks.fileshare.peerToPeer;
 
+import android.app.usage.StorageStatsManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.UriPermission;
 import android.icu.util.Output;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
+import android.os.storage.StorageManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -29,6 +32,7 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ReceiverSocketTransfer {
@@ -172,33 +176,38 @@ public class ReceiverSocketTransfer {
                             try {
                                 //messageIn = new ObjectInputStream(mSocket.getInputStream());
                                 TextInfoSendObject message = (TextInfoSendObject) messageIn.readObject();
-                                mTextInfoSendObject=message;
+                                mTextInfoSendObject = message;
 
                                 //extract the size of the file and set again
-                                String stringNumbers=mTextInfoSendObject.getAdditionalInfo();
+                                String stringNumbers = mTextInfoSendObject.getAdditionalInfo();
                                 String[] currentNumbers = stringNumbers.split(",");
 
                                 //Log.d(TAG,"receiving details "+stringNumbers);
-                                mCurrentFile=currentNumbers[0];
-                                mTotalFiles=currentNumbers[1];
-                                mCurrentFileSize=currentNumbers[2];
-                                mCurrentMime=currentNumbers[3];
+                                mCurrentFile = currentNumbers[0];
+                                mTotalFiles = currentNumbers[1];
+                                mCurrentFileSize = currentNumbers[2];
+                                mCurrentMime = currentNumbers[3];
 
-                                Long currentFileSizeLong=Long.parseLong(mCurrentFileSize);
+                                Long currentFileSizeLong = Long.parseLong(mCurrentFileSize);
 
                                 //fix the initial message
-                                message.setAdditionalInfo(currentNumbers[0]+","+currentNumbers[1]);
+                                message.setAdditionalInfo(currentNumbers[0] + "," + currentNumbers[1]);
 
                                 //update the ui
                                 mReceiverInterface.updateReceiveSendUI(message);
 
                                 //check if we have enough space available
-                                StatFs statfs=new StatFs(Environment.getExternalStorageDirectory().getAbsolutePath());
+                                StatFs statFs;
                                 Long spaceAvailable;
-                                if (Build.VERSION.SDK_INT>=18) {
-                                    spaceAvailable=statfs.getAvailableBytes();
-                                }else{
-                                    spaceAvailable=statfs.getAvailableBlocks()*(long)statfs.getBlockSize();
+                                if (Build.VERSION.SDK_INT >= 31) {
+                                    StorageManager manager= (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
+                                    spaceAvailable = manager.getAllocatableBytes(manager.getPrimaryStorageVolume().getStorageUuid());
+                                } else if (Build.VERSION.SDK_INT >= 18) {
+                                    statFs=new StatFs(Environment.getExternalStorageDirectory().getAbsolutePath());
+                                    spaceAvailable = statFs.getAvailableBytes();
+                                } else {
+                                    statFs=new StatFs(Environment.getExternalStorageDirectory().getAbsolutePath());
+                                    spaceAvailable = statFs.getAvailableBlocks() * (long) statFs.getBlockSize();
                                 }
 
                                 Log.d(TAG,"Comparing the filesize to the available storage, space available: "+

@@ -164,37 +164,8 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
     }
 
     private void askForFilePermission(){
-        //we ask for permission before continuing
-        if (Build.VERSION.SDK_INT>=ConstantValues.STORAGE_FOLDER_PERMISSION){
-            //we need to make sure the receiver will set up a destination folder
-            List<UriPermission> permissionList = mContext.getContentResolver().getPersistedUriPermissions();
-            Log.d(TAG,"Persisted permissions: "+permissionList.size());
-            Boolean doWeCallSAF=true;
-
-            //check if there is a write permission for the chosen folder
-            for (UriPermission permission:permissionList
-            ) {
-                Log.d(TAG,"Persisted uri:"+permission.getUri().toString());
-                if (permission.isWritePermission()){
-                    //no need to pick a new folder
-                    doWeCallSAF=false;
-                }
-            }
-
-            //call
-            if (doWeCallSAF) {
-                Log.d(TAG,"call SAF");
-                // Choose a directory using the system's file picker.
-                Toast.makeText(mContext, R.string.ru_toast_pick_destination, Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                folderDestinationResult.launch(intent);
-            }else{
-                Log.d(TAG,"we will initialize");
-                initialize();
-            }
-        }else{
-            //ask for permission
-            if (Build.VERSION.SDK_INT >= ConstantValues.STORAGE_PERMISSION_SDK) {
+        //ask for permission
+            if (Build.VERSION.SDK_INT >= ConstantValues.STORAGE_PERMISSION_SDK && Build.VERSION.SDK_INT < ConstantValues.STORAGE_FOLDER_PERMISSION) {
                 if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         == PackageManager.PERMISSION_GRANTED) {
                     //initialize values
@@ -208,7 +179,6 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
                 //initialize values
                 initialize();
             }
-        }
     }
 
     @Override
