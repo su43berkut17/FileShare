@@ -1,8 +1,13 @@
 package com.yumesoftworks.fileshare;
 
+import static com.yumesoftworks.fileshare.ConstantValues.NOTIFICATION_PERMISSION_SDK;
+
+import android.Manifest;
 import android.app.ActivityOptions;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -12,6 +17,7 @@ import android.content.Intent;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,6 +37,7 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -77,6 +84,11 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
 
     private Context mContext;
 
+    //permissions
+    private static final int NOTIFICATION_REQUEST_CODE=6001;
+    private int mNotifPermissionCount = 0;
+    private final String mNotifPermissionCountName = "NOTIFICATION_PERMISSION_COUNT";
+
     //database
     private WelcomeScreenViewModel viewModel;
     private int mIsTransferInProgress=TransferProgressActivity.STATUS_TRANSFER_INACTIVE;
@@ -118,6 +130,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
             //we load it from the previous state
             mSelectedAvatar=savedInstanceState.getInt(NAME_ROTATION_AVATAR_STATE);
             mIsThisSettings = savedInstanceState.getBoolean(EXTRA_SETTINGS_NAME);
+            mNotifPermissionCount=savedInstanceState.getInt(mNotifPermissionCountName);
         }
 
         //initialize rv
@@ -142,7 +155,17 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         tvUsername.setOnEditorActionListener((v, actionId, event) -> {
             boolean handled = false;
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId==EditorInfo.IME_ACTION_UNSPECIFIED) {
-                saveChanges();
+                //check if permission has been added
+                if (Build.VERSION.SDK_INT>=NOTIFICATION_PERMISSION_SDK){
+                    if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_DENIED) {
+                        Toast.makeText(mContext, R.string.fb_notification_permission, Toast.LENGTH_LONG).show();
+                    }else{
+                        saveChanges();
+                    }
+                }else{
+                    saveChanges();
+                }
+
                 handled = true;
             }
             return handled;
@@ -175,6 +198,53 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         }
     }
 
+    private void changeButtonToPermission(){
+        buttonGo.setText(R.string.aws_button_request_notification_permission);
+    }
+
+    private void changeButtonToGo(){
+        buttonGo.setText(R.string.aws_button_go);
+    }
+
+    private void changeButtonToSave(){
+        buttonGo.setText(R.string.aws_button_save);
+    }
+
+    private void requestNotificationsPermission(){
+        //notification permission
+        if (Build.VERSION.SDK_INT>=NOTIFICATION_PERMISSION_SDK){
+            //check if we have notification permissions
+            if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.POST_NOTIFICATIONS)== PackageManager.PERMISSION_DENIED) {
+                //No permission granted, request
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        NOTIFICATION_REQUEST_CODE);
+            }
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode==NOTIFICATION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                mNotifPermissionCount=0;
+                if (mIsThisSettings){
+                    changeButtonToSave();
+                }else {
+                    changeButtonToGo();
+                }
+            } else {
+                if (mNotifPermissionCount<1) {
+                    Toast.makeText(mContext, R.string.fb_notification_permission, Toast.LENGTH_LONG).show();
+                }else{
+                    Toast.makeText(mContext, R.string.fb_notification_permission_warning, Toast.LENGTH_LONG).show();
+                }
+                mNotifPermissionCount++;
+            }
+        }
+    }
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -182,6 +252,7 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         //we save the data to restore on rotation
         outState.putInt(NAME_ROTATION_AVATAR_STATE,mSelectedAvatar);
         outState.putBoolean(EXTRA_SETTINGS_NAME,mIsThisSettings);
+        outState.putInt(mNotifPermissionCountName,mNotifPermissionCount);
     }
 
     //view model
@@ -192,11 +263,32 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
             if (userInfoEntries.isEmpty()){
                 //we hide the cancel button and the loading screen
                 buttonCancel.setVisibility(View.GONE);
+
+                //check permissions
+                if (Build.VERSION.SDK_INT>=NOTIFICATION_PERMISSION_SDK){
+                    if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.POST_NOTIFICATIONS)== PackageManager.PERMISSION_DENIED) {
+                        //change button to request permission
+                        changeButtonToPermission();
+                    }else{
+                        changeButtonToGo();
+                    }
+                }else{
+                    changeButtonToGo();
+                }
             }else{
                 //for settings
                 if (mIsThisSettings){
                     //we change the go button text to save changes
-                    buttonGo.setText(R.string.aws_button_save);
+                    if (Build.VERSION.SDK_INT>=NOTIFICATION_PERMISSION_SDK){
+                        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.POST_NOTIFICATIONS)== PackageManager.PERMISSION_DENIED) {
+                            //change button to request permission
+                            changeButtonToPermission();
+                        }else{
+                            changeButtonToSave();
+                        }
+                    }else{
+                        changeButtonToSave();
+                    }
 
                     //we set the loaded data to the ui
                     mSelectedAvatar=userInfoEntries.get(0).getPickedAvatar();
@@ -234,7 +326,11 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
     public void onClick(View view){
         switch (view.getId()){
             case R.id.button_go:
-               saveChanges();
+                if ((buttonGo.getText()==getString(R.string.aws_button_go))||(buttonGo.getText()==getString(R.string.aws_button_save))) {
+                    saveChanges();
+                }else{
+                    requestNotificationsPermission();
+                }
                 break;
 
             case R.id.button_cancel:

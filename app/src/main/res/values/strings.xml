@@ -19,6 +19,7 @@
     <string name="aws_button_help">Help</string>
     <string name="aws_button_privacy">Privacy Policy</string>
     <string name="aws_button_go">Go</string>
+    <string name="aws_button_request_notification_permission">Allow notifications</string>
     <string name="aws_button_save">Save Changes</string>
     <string name="aws_keyboard_ime_action">Done</string>
     <string name="aws_username_digits" translatable="false">ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789</string>
@@ -48,6 +49,8 @@
     <string name="fb_dialog_android_11_saf_limitations">Android 11 limits the number of files you can add to the queue. If you add over 512 files to the queue, only the 1st 512 will be transferred.</string>
     <string name="fb_select_all_text">Select All</string>
     <string name="fb_deselect_all_text">Deselect All</string>
+    <string name="fb_notification_permission">Notification access needed to begin file transfer.</string>
+    <string name="fb_notification_permission_warning">Notification access denied multiple times. Remediate via Android privacy settings.</string>
 
     <!-- Activity file queue -->
     <string name="fq_tv_title_queue">Files to be sent:</string>
@@ -75,6 +78,7 @@
     <string name="ru_tv_username">Username</string>
     <string name="ru_wifi_disabled">"Activate WiFi and try again."</string>
     <string name="ru_version">Version</string>
+    <string name="ru_toast_pick_destination">Pick a destination folder for your files</string>
 
     <!--Activity transfer progress-->
     <string name="atp_tv_filename">Filename</string>
