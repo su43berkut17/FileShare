@@ -153,7 +153,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
             //get file write access
             askForFilePermission();
         }else{
-            Toast.makeText(this,getText(R.string.ru_wifi_disabled),Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext,getText(R.string.ru_wifi_disabled),Toast.LENGTH_LONG).show();
             finish();
         }
     }

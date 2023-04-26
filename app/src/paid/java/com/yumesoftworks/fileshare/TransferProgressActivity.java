@@ -26,6 +26,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -336,9 +337,8 @@ public class TransferProgressActivity extends AppCompatActivity implements
             //if the app is relaunched and the transfer has finished and hasnt captured the broadcast events
             switch (isTransferInProgress){
                 case STATUS_TRANSFER_FINISHED:
-                    //transfer is over, show dialog and change button
-                    //we show dialog that transfer is done
-                    createDialog(R.string.service_finished_transfer);
+                    //we show Toast that transfer is done
+                    createToast(R.string.service_finished_transfer);
 
                     //change button to ok
                     fragmentFileTransferProgress.changeButton();
@@ -354,8 +354,8 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     break;
 
                 case STATUS_TRANSFER_OUT_OF_SPACE_ERROR:
-                    //we show dialog we ran out of space and return to the main menu
-                    createDialog(R.string.service_out_of_space_error);
+                    //we show toast we ran out of space and return to the main menu
+                    createToast(R.string.service_out_of_space_error);
 
                     //change button to ok
                     fragmentFileTransferProgress.changeButton();
@@ -370,8 +370,8 @@ public class TransferProgressActivity extends AppCompatActivity implements
                     break;
 
                 case STATUS_TRANSFER_SOCKET_ERROR:
-                    //we show dialog that there was an error and return to the main menu
-                    createDialog(R.string.service_socket_error);
+                    //we show toast that there was an error and return to the main menu
+                    createToast(R.string.service_socket_error);
 
                     //change button to ok
                     fragmentFileTransferProgress.changeButton();
@@ -498,38 +498,9 @@ public class TransferProgressActivity extends AppCompatActivity implements
         }
     }
 
-    //create OK dialog
-    private void createDialog(int dialogText){
-        //we show dialog that transfer is done
-        if (mGeneralDialog!=null) {
-            if (!mGeneralDialog.isShowing()) {
-                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(thisActivity,R.style.MyDialog);
-                builder.setMessage(dialogText)
-                        .setCancelable(true)
-                        .setNeutralButton(R.string.gen_button_ok,
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                    }
-                                });
-                mGeneralDialog = builder.create();
-            }
-        }else{
-            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(thisActivity,R.style.MyDialog);
-            builder.setMessage(dialogText)
-                    .setCancelable(true)
-                    .setNeutralButton(R.string.gen_button_ok,
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                }
-                            });
-            mGeneralDialog = builder.create();
-        }
-
-        try {
-            mGeneralDialog.show();
-        }catch (Exception e){
-            Log.e(TAG,"Couldn't show dialog");
-        }
+    //create toast
+    private void createToast(int toastText){
+        Toast.makeText(thisActivity,getText(toastText),Toast.LENGTH_SHORT).show();
     }
 
     //broadcast receiving

@@ -1,7 +1,6 @@
 package com.yumesoftworks.fileshare;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiManager;
@@ -15,7 +14,6 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.yumesoftworks.fileshare.data.SocketListEntry;
 import com.yumesoftworks.fileshare.data.UserSendEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
@@ -112,7 +110,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
             isFirstExecution=true;
         }else{
-            Toast.makeText(this,getText(R.string.pu_wifi_disabled),Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext,getText(R.string.pu_wifi_disabled),Toast.LENGTH_LONG).show();
             finish();
         }
     }
@@ -292,22 +290,13 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     @Override
     public void showErrorDialog() {
         Log.d(TAG, "Couldn't connect to the socket, we show dialog with error ");
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this,R.style.MyDialog);
-        builder.setMessage(R.string.pu_error_connect_dialog)
-                .setCancelable(true)
-                .setNeutralButton(R.string.gen_button_ok,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-        builder.show();
+        Toast.makeText(mContext,getText(R.string.pu_error_connect_dialog),Toast.LENGTH_SHORT).show();
     }
 
     //From Sender Pick Socket
     @Override
     public void showConnectionError(){
-        Toast.makeText(this,getText(R.string.pu_message_connection_error),Toast.LENGTH_SHORT).show();
+        Toast.makeText(mContext,getText(R.string.pu_message_connection_error),Toast.LENGTH_SHORT).show();
         finish();
     }
 

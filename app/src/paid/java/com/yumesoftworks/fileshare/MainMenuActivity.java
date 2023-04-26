@@ -109,6 +109,7 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
                     finish();
                 }else{
                     //we check if a transfer is in progress
+                    mLoadingScreen.setVisibility(View.GONE);
                     mIsTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
                     if (mIsTransferInProgress!=TransferProgressActivity.STATUS_TRANSFER_INACTIVE){
                         //we reset the values
@@ -130,6 +131,7 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
                         removePersistentFilePermissions();
                     }
 
+                    Log.d(TAG,"Hiding the loading screen");
                     mLoadingScreen.setVisibility(View.GONE);
                 }
             }
