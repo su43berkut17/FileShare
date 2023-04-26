@@ -356,20 +356,12 @@ public class WelcomeScreenActivity extends AppCompatActivity implements AvatarAd
         //we verify if there is data to save
         String username=tvUsername.getText().toString();
         if ((username.isEmpty()||(mSelectedAvatar==-1))){
-            //we show the dialog
-            MaterialAlertDialogBuilder alertDialogBuilder = new MaterialAlertDialogBuilder(this,R.style.MyDialog);
-
-            alertDialogBuilder.setCancelable(false);
+            //we show the Toast
             if (mSelectedAvatar==-1) {
-                alertDialogBuilder.setMessage(R.string.aws_dialog_avatar);
+                Toast.makeText(mContext,getText(R.string.aws_dialog_avatar),Toast.LENGTH_SHORT).show();
             }else{
-                alertDialogBuilder.setMessage(R.string.aws_dialog_username);
+                Toast.makeText(mContext,getText(R.string.aws_dialog_username),Toast.LENGTH_SHORT).show();
             }
-            alertDialogBuilder.setTitle(R.string.aws_dialog_title);
-            alertDialogBuilder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
-
-            alertDialogBuilder.show();
-
         }else{
             //we save the data and open the activity
             UserInfoEntry dataToSave=new UserInfoEntry(tvUsername.getText().toString(),mSelectedAvatar,mFilesTransferred,mVersion,mIsTransferInProgress,TransferProgressActivity.SERVICE_TYPE_INACTIVE,mIsAndroid11SafDialogShown);
