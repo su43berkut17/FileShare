@@ -1,10 +1,16 @@
 package com.yumesoftworks.fileshare;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.Nullable;
@@ -12,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -49,12 +56,9 @@ import java.util.List;
 
 public class ReceiverPickDestinationActivity extends AppCompatActivity implements ReceiverPickSocket.SocketReceiverConnectionInterface,
         NsdHelper.ChangedServicesListener,
-        UserConsent.UserConsentInterface {
+        UserConsent.UserConsentInterface{
 
     private static final String TAG="ReceiverDesActivity";
-
-    //admob
-    private AdView mAdView;
 
     //nds vars
     private NsdHelper mNsdHelper;
@@ -78,6 +82,12 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     //prevent double launch app
     private boolean mLaunchNewActivity=false;
+
+    //activity result
+    private ActivityResultLauncher<Intent> folderDestinationResult;
+
+    //admob
+    private AdView mAdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +132,31 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
         //we set the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        // You can do the assignment inside onAttach or onCreate, i.e, before the activity is displayed
+        folderDestinationResult = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getResultCode() == Activity.RESULT_OK) {
+                            // There are no request codes
+                            Intent data = result.getData();
+
+                            Uri uri = null;
+                            if (data != null) {
+                                uri = data.getData();
+                            }
+
+                            Log.e(TAG,"The Folder selected is "+uri.getPath());
+                            //persist the access
+                            DocumentFile file = DocumentFile.fromSingleUri(mContext, data.getData());
+                            mContext.getContentResolver().takePersistableUriPermission(file.getUri(), Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+                            initialize();
+                        }
+                    }
+                });
     }
 
     private void checkWifi(){
@@ -131,7 +166,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
             //get file write access
             askForFilePermission();
         }else{
-            Toast.makeText(this,getText(R.string.ru_wifi_disabled),Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext,getText(R.string.ru_wifi_disabled),Toast.LENGTH_LONG).show();
             finish();
         }
     }
@@ -142,8 +177,8 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
     }
 
     private void askForFilePermission(){
-        //we ask for permission before continuing
-        if (Build.VERSION.SDK_INT >= ConstantValues.STORAGE_PERMISSION_SDK) {
+        //ask for permission
+        if (Build.VERSION.SDK_INT >= ConstantValues.STORAGE_PERMISSION_SDK && Build.VERSION.SDK_INT < ConstantValues.STORAGE_FOLDER_PERMISSION) {
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
                 //initialize values
@@ -161,7 +196,7 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        //super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0]==PackageManager.PERMISSION_GRANTED){
             //initialize values
             initialize();
