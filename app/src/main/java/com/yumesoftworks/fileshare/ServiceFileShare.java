@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.graphics.Color;
 import android.os.Binder;
 import android.os.Build;
@@ -91,14 +92,24 @@ public class ServiceFileShare extends Service implements
                     .setContentTitle(getString(R.string.app_name_real))
                     .setContentText(getString(R.string.service_notification_text_initialize))
                     .setSmallIcon(R.drawable.icon_notification)
+                    .setOngoing(true)
                     .build();
 
             try {
-                startForeground(NOTIFICATION_ID, notification);
+                if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    //above API 34
+                    Log.e(TAG,"Trying with api 34");
+                    startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+                }else {
+                    //below API 34
+                    startForeground(NOTIFICATION_ID, notification);
+                }
+
             }catch (Exception e){
-                Log.e(TAG,"Couldn't start foreground notification");
+                Log.e(TAG,"Couldn't start foreground notification--"+e.getMessage());
                 connectionError();
             }
+
         } else {
             manager.notify(NOTIFICATION_ID, notificationBuilder(getString(R.string.app_name_real)
                     , getString(R.string.app_name_real)
