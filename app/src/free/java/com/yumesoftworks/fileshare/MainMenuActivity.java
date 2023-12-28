@@ -30,12 +30,11 @@ import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
+import com.yumesoftworks.fileshare.utils.UserConsent;
 
 import java.util.List;
 
-import com.yumesoftworks.fileshare.utils.UserConsent;
-
-public class MainMenuActivity extends AppCompatActivity implements View.OnClickListener, UserConsent.UserConsentInterface {
+public class MainMenuActivity extends AppCompatActivity implements View.OnClickListener, UserConsent.UserConsentInterface{
     //buttons
     ConstraintLayout sendFilesButton;
     ConstraintLayout receiveFilesButton;
@@ -44,9 +43,6 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
 
     //view model
     private CombinedDataViewModel fileViewerViewModel;
-
-    //admob
-    private AdView mAdView;
 
     //loading for 1st run
     private LinearLayout mLoadingScreen;
@@ -57,6 +53,9 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
 
     //context
     private Context thisActivity;
+
+    //admob
+    private AdView mAdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,7 +91,7 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         //empty the file list
         fileViewerViewModel.deleteTable();
 
-        //check the user consent
+//check the user consent
         UserConsent userConsent=new UserConsent(thisActivity);
         userConsent.checkConsent();
     }
@@ -124,6 +123,7 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
                     finish();
                 }else{
                     //we check if a transfer is in progress
+                    mLoadingScreen.setVisibility(View.GONE);
                     mIsTransferInProgress=userInfoEntries.get(0).getIsTransferInProgress();
                     if (mIsTransferInProgress!=TransferProgressActivity.STATUS_TRANSFER_INACTIVE){
                         //we reset the values
@@ -145,6 +145,7 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
                         removePersistentFilePermissions();
                     }
 
+                    Log.d(TAG,"Hiding the loading screen");
                     mLoadingScreen.setVisibility(View.GONE);
                 }
             }
@@ -161,7 +162,9 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         for (UriPermission permission:permissionList
         ) {
             Log.d(TAG,"Persisted uri:"+permission.getUri().toString());
-            thisActivity.getContentResolver().releasePersistableUriPermission(permission.getUri(),Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (!permission.isWritePermission()) {
+                thisActivity.getContentResolver().releasePersistableUriPermission(permission.getUri(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
         }
     }
 

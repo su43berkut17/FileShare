@@ -1,7 +1,6 @@
 package com.yumesoftworks.fileshare;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiManager;
@@ -18,11 +17,9 @@ import android.widget.Toast;
 import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
-
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.yumesoftworks.fileshare.data.SocketListEntry;
 import com.yumesoftworks.fileshare.data.UserSendEntry;
@@ -45,8 +42,6 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     private final static String TAG="SendPickActivity";
     public final static String MESSAGE_OPEN_ACTIVITY="pleaseOpenANewActivity";
 
-    //analytics and admob
-    private AdView mAdView;
     private Context mContext;
 
     //nds vars
@@ -69,6 +64,9 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
     //for client socket
     private String localIp;
+
+    //analytics and admob
+    private AdView mAdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,7 +125,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
             isFirstExecution=true;
         }else{
-            Toast.makeText(this,getText(R.string.pu_wifi_disabled),Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext,getText(R.string.pu_wifi_disabled),Toast.LENGTH_LONG).show();
             finish();
         }
     }
@@ -286,7 +284,7 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     @Override
     public void onItemClickListener(final int itemId) {
         //we send the message
-         mSocketList.get(itemId).getSenderSocket().sendMessage(MESSAGE_OPEN_ACTIVITY);
+        mSocketList.get(itemId).getSenderSocket().sendMessage(MESSAGE_OPEN_ACTIVITY);
     }
 
     //From Sender Pick Socket
@@ -307,22 +305,13 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
     @Override
     public void showErrorDialog() {
         Log.d(TAG, "Couldn't connect to the socket, we show dialog with error ");
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this,R.style.MyDialog);
-        builder.setMessage(R.string.pu_error_connect_dialog)
-                .setCancelable(true)
-                .setNeutralButton(R.string.gen_button_ok,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-        builder.show();
+        Toast.makeText(mContext,getText(R.string.pu_error_connect_dialog),Toast.LENGTH_SHORT).show();
     }
 
     //From Sender Pick Socket
     @Override
     public void showConnectionError(){
-        Toast.makeText(this,getText(R.string.pu_message_connection_error),Toast.LENGTH_SHORT).show();
+        Toast.makeText(mContext,getText(R.string.pu_message_connection_error),Toast.LENGTH_SHORT).show();
         finish();
     }
 
