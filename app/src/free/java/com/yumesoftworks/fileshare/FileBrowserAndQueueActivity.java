@@ -47,12 +47,6 @@ import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.yumesoftworks.fileshare.CombinedDataViewModel;
-import com.yumesoftworks.fileshare.ConstantValues;
-import com.yumesoftworks.fileshare.FileViewer;
-import com.yumesoftworks.fileshare.QueueViewer;
-import com.yumesoftworks.fileshare.R;
-import com.yumesoftworks.fileshare.WelcomeScreenViewModel;
 import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.StorageListEntry;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
@@ -69,7 +63,7 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         FileViewer.OnFragmentFileInteractionListener,
         FileViewer.OnButtonGoToQueueInterface,
         QueueViewer.QueueFragmentClickListener,
-        UserConsent.UserConsentInterface {
+        UserConsent.UserConsentInterface  {
     private static final String TAG = "FileBaQActivity";
     private static final int FILE_FRAGMENT = 1000;
     private static final int QUEUE_FRAGMENT = 1001;
@@ -118,10 +112,6 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
         thisActivity = this;
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
-        //check the user consent
-        UserConsent userConsent=new UserConsent(thisActivity);
-        userConsent.checkConsent();
-
         if (savedInstanceState != null) {
             mCurrentFragment = savedInstanceState.getInt(CURRENT_FRAGMENT_TAG);
             mPath = savedInstanceState.getString(CURRENT_PATH_TAG);
@@ -139,6 +129,10 @@ public class FileBrowserAndQueueActivity extends AppCompatActivity implements
 
         //we set the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        //check the user consent
+        UserConsent userConsent=new UserConsent(thisActivity);
+        userConsent.checkConsent();
 
         //we check for the permissions
         askForFilePermission();

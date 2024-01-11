@@ -47,7 +47,7 @@ import java.util.List;
 
 public class TransferProgressActivity extends AppCompatActivity implements
         FileTransferProgress.OnFragmentInteractionListener,
-        UserConsent.UserConsentInterface {
+        UserConsent.UserConsentInterface  {
 
     private static final String TAG="TransferProgressAct";
 
@@ -141,7 +141,6 @@ public class TransferProgressActivity extends AppCompatActivity implements
 
     //Ads
     private AdView mAdView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -151,14 +150,14 @@ public class TransferProgressActivity extends AppCompatActivity implements
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         Log.d(TAG,"onCreate called");
 
-        //check the user consent
-        UserConsent userConsent=new UserConsent(this);
-        userConsent.checkConsent();
-
         //we get the instance of the indeterminate progress bar
         mWaitingScreen =findViewById(R.id.pb_atp_waitingForConnection);
 
         mAreWeClosing=false;//reset the closing flag
+
+        //check the user consent
+        UserConsent userConsent=new UserConsent(thisActivity);
+        userConsent.checkConsent();
 
         //initialize the service
         Intent serviceIntent=new Intent(thisActivity,ServiceFileShare.class);

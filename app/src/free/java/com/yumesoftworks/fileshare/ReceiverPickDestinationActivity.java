@@ -11,11 +11,13 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.UriPermission;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -45,6 +47,7 @@ import com.google.android.gms.ads.initialization.OnInitializationCompleteListene
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.yumesoftworks.fileshare.data.AvatarDefaultImages;
 import com.yumesoftworks.fileshare.data.AvatarStaticEntry;
+import com.yumesoftworks.fileshare.data.FileListEntry;
 import com.yumesoftworks.fileshare.data.UserInfoEntry;
 import com.yumesoftworks.fileshare.peerToPeer.NsdHelper;
 import com.yumesoftworks.fileshare.peerToPeer.ReceiverPickSocket;
@@ -88,17 +91,12 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
     //admob
     private AdView mAdView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receiver_pick_destination);
 
         mContext=this;
-
-        //check the user consent
-        UserConsent userConsent=new UserConsent(this);
-        userConsent.checkConsent();
 
         //assign views
         mUserName=(TextView)findViewById(R.id.tv_receive_username);
@@ -132,6 +130,10 @@ public class ReceiverPickDestinationActivity extends AppCompatActivity implement
 
         //we set the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        //check the user consent
+        UserConsent userConsent=new UserConsent(mContext);
+        userConsent.checkConsent();
 
         // You can do the assignment inside onAttach or onCreate, i.e, before the activity is displayed
         folderDestinationResult = registerForActivityResult(

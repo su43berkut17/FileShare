@@ -37,11 +37,12 @@ import java.util.List;
 public class SenderPickDestinationActivity extends AppCompatActivity implements NsdHelper.ChangedServicesListener,
         SendFileUserListAdapter.ItemClickListener,
         SenderPickSocket.SocketSenderConnectionInterface,
-        UserConsent.UserConsentInterface {
+        UserConsent.UserConsentInterface{
 
     private final static String TAG="SendPickActivity";
     public final static String MESSAGE_OPEN_ACTIVITY="pleaseOpenANewActivity";
 
+    //analytics and admob
     private Context mContext;
 
     //nds vars
@@ -75,10 +76,6 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
 
         mContext=this;
 
-        //check the user consent
-        UserConsent userConsent=new UserConsent(this);
-        userConsent.checkConsent();
-
         //toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.spd_toolbar);
         setSupportActionBar(myToolbar);
@@ -87,6 +84,10 @@ public class SenderPickDestinationActivity extends AppCompatActivity implements 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mConnectionStatus=findViewById(R.id.spd_status);
+
+        //check the user consent
+        UserConsent userConsent=new UserConsent(mContext);
+        userConsent.checkConsent();
 
         //Check wifi status
         WifiManager wm = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);

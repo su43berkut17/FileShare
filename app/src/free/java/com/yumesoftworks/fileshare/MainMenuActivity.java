@@ -91,7 +91,7 @@ public class MainMenuActivity extends AppCompatActivity implements View.OnClickL
         //empty the file list
         fileViewerViewModel.deleteTable();
 
-//check the user consent
+        //check the user consent
         UserConsent userConsent=new UserConsent(thisActivity);
         userConsent.checkConsent();
     }
