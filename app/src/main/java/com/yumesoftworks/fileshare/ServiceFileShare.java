@@ -98,8 +98,8 @@ public class ServiceFileShare extends Service implements
             try {
                 if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                     //above API 34
-                    Log.e(TAG,"Trying with api 34");
-                    startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+                    Log.d(TAG,"Trying with api 34");
+                    startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE);
                 }else {
                     //below API 34
                     startForeground(NOTIFICATION_ID, notification);
